@@ -1,0 +1,7 @@
+c:\users\michael kokorev\documents\visual studio 2010\Projects\BeamOn 2K\BeamOn 2K\bin\Debug\BeamOn 2K.exe
+c:\users\michael kokorev\documents\visual studio 2010\Projects\BeamOn 2K\BeamOn 2K\bin\Debug\BeamOn 2K.pdb
+c:\users\michael kokorev\documents\visual studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn_2K.FormMain.resources
+c:\users\michael kokorev\documents\visual studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn_2K.Properties.Resources.resources
+c:\users\michael kokorev\documents\visual studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn 2K.csproj.GenerateResource.Cache
+c:\users\michael kokorev\documents\visual studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn 2K.exe
+c:\users\michael kokorev\documents\visual studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn 2K.pdb
