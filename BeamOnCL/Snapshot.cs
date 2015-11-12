@@ -1,0 +1,77 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Drawing;
+
+namespace BeamOnCL
+{
+    class Snapshot<T> : SnapshotBase
+    {
+        public T[] m_tMatrixArray = null;
+        byte[] rgbValues = null;
+
+        public Snapshot(Rectangle rArea, Color[] color = null)
+            : base(rArea, color)
+        {
+            m_tMatrixArray = new T[(int)m_rArea.Width * (int)m_rArea.Height];
+
+            rgbValues = new byte[m_tMatrixArray.Length * 3];
+        }
+
+        public override void SetData(IntPtr Data)
+        {
+            if (typeof(T) == typeof(byte))
+                Marshal.Copy(m_tMatrixArray as byte[], 0, Data, m_tMatrixArray.Length);
+            else
+            {
+                if (m_colorArray != null)
+                {
+                    for (int i = 0; i < m_tMatrixArray.Length; i++)
+                    {
+                        object d = m_tMatrixArray[i];
+
+                        rgbValues[i * 3] = m_colorArray[(UInt16)d].B;
+                        rgbValues[i * 3 + 1] = m_colorArray[(UInt16)d].G;
+                        rgbValues[i * 3 + 2] = m_colorArray[(UInt16)d].R;
+                    }
+
+                    // Copy the RGB values back to the bitmap
+                    Marshal.Copy(rgbValues, 0, Data, rgbValues.Length);
+                }
+            }
+        }
+
+        public override UInt16 GetPixelColor(Int32 Adress)
+        {
+            if (Adress >= m_tMatrixArray.Length) return (UInt16)0;
+
+            if (typeof(T) == typeof(byte))
+                return (Byte)(object)m_tMatrixArray[Adress];
+            else
+                return (UInt16)(object)m_tMatrixArray[Adress];
+        }
+
+        public override UInt16 GetPixelColor(Point point)
+        {
+            if ((point.X + point.Y * (int)m_rArea.Width) >= m_tMatrixArray.Length) return (UInt16)0;
+
+            if (typeof(T) == typeof(byte))
+                return (Byte)(object)m_tMatrixArray[point.X + point.Y * (int)m_rArea.Width];
+            else
+                return (UInt16)(object)m_tMatrixArray[point.X + point.Y * (int)m_rArea.Width];
+        }
+
+        public override unsafe void GetData(byte[] bData)
+        {
+            fixed (byte* pb = bData)
+            {
+                if (typeof(T) == typeof(byte))
+                    Marshal.Copy((IntPtr)pb, m_tMatrixArray as byte[], 0, m_tMatrixArray.Length);
+                else
+                    Marshal.Copy((IntPtr)pb, m_tMatrixArray as short[], 0, m_tMatrixArray.Length);
+            }
+        }
+    }
+}

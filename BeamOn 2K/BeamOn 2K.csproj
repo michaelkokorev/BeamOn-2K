@@ -34,6 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Basler.Pylon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=e389355f398382ab, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -75,6 +76,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BeamOnCL\BeamOnCL.csproj">
+      <Project>{1CFF4952-DBC7-4C41-B34D-D99DB9429EBA}</Project>
+      <Name>BeamOnCL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PaletteImage\PaletteImage.csproj">
+      <Project>{550D144B-6BDE-4EF9-988A-0E816E9DC005}</Project>
+      <Name>PaletteImage</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

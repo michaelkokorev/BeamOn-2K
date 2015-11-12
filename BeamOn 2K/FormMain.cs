@@ -6,27 +6,49 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing.Imaging;
+using System.Diagnostics;
 
 namespace BeamOn_2K
 {
     public partial class FormMain : Form
     {
-        Bitmap m_bmp = null;
+        private delegate void AsyncChangePalette(ColorPalette cpValue, PixelFormat pixelFormat, Color[] color);
+        private delegate void AsyncTimeStamp(Int64 iValue);
+
         Object m_lLockBMP = new Object();
+
+        Stopwatch m_sw = null;
+
+        private BeamOnCL.BeamOnCL bm = null;
 
         public FormMain()
         {
             InitializeComponent();
+
+            bm = new BeamOnCL.BeamOnCL();
+            bm.OnImageReceved += new BeamOnCL.BeamOnCL.ImageReceved(bm_OnImageReceved);
+        }
+
+        void bm_OnImageReceved(object sender, BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e)
+        {
+            bm.CreateImage();
+
+            m_sw.Stop();
+
+            AsyncTimeStamp asyncTimeStamp = new AsyncTimeStamp(UpdateVisibleAsync);
+            asyncTimeStamp.BeginInvoke(m_sw.ElapsedMilliseconds, null, null);
+
+            m_sw = Stopwatch.StartNew();
+            m_sw.Start();
+
+            this.Invalidate();
+            pictureBoxImage.Invalidate();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void trackBarBinning_Scroll(object sender, EventArgs e)
-        {
-
         }
 
         private void propertyBoxToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
@@ -52,12 +74,13 @@ namespace BeamOn_2K
         private void pictureBoxImage_Paint(object sender, PaintEventArgs e)
         {
             Graphics grfx = e.Graphics;
+            Bitmap bmp = bm.Image;
 
-            if (m_bmp != null)
+            if (bmp != null)
             {
                 try
                 {
-                    lock (m_lLockBMP) grfx.DrawImage(m_bmp, 0, 0, m_bmp.Width, m_bmp.Height);
+                    lock (m_lLockBMP) grfx.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);
                 }
                 catch
                 {
@@ -180,16 +203,49 @@ namespace BeamOn_2K
             {
                 this.Invoke((MethodInvoker)delegate
                 {
-                    //lock (this)
-                    //{
-                    //    toolStripStatusLabelTimeStamp.Text = (1000f / (double)Timestamp).ToString("#.000") + " fps";
-                    //}
+                    toolStripStatusLabelTimeStamp.Text = (1000f / (double)Timestamp).ToString("#.000") + " fps";
                 });
 
             }
             catch
             {
             }
+        }
+
+        private void picturePaletteImage_OnChangePalette(object sender, PaletteImage.PaletteImage.ChangePaletteEventArgs e)
+        {
+            AsyncChangePalette asyncChangePalette = new AsyncChangePalette(UpdateChangePalette);
+            asyncChangePalette.BeginInvoke(e.Palette, e.Format, e.colorArray, null, null);
+        }
+
+        private void UpdateChangePalette(ColorPalette Palette, PixelFormat pixelFormat, Color[] color)
+        {
+            try
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    lock (m_lLockBMP)
+                    {
+                        bm.ChangePixelFormat(Palette, pixelFormat, color);
+                    }
+                });
+            }
+            catch
+            {
+            }
+        }
+
+        private void FormMain_Load(object sender, EventArgs e)
+        {
+            bm.Start(PixelFormat.Format8bppIndexed);
+
+            pictureBoxImage.Size = new System.Drawing.Size(bm.ImageRectangle.Width, bm.ImageRectangle.Height);
+            m_sw = Stopwatch.StartNew();
+        }
+
+        private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            bm.Stop();
         }
     }
 }
