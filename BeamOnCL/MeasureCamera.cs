@@ -10,8 +10,6 @@ namespace BeamOnCL
 {
     public class MeasureCamera
     {
-        Color[] m_colorArray = null;
-
         Camera m_camera = null;
         List<ICameraInfo> cameraList = null;
 
@@ -125,26 +123,9 @@ namespace BeamOnCL
             }
         }
 
-        public void SetData(IntPtr Data)
+        public void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
         {
-            if (m_snapshot != null) m_snapshot.SetData(Data);
-        }
-
-        public Color[] Color
-        {
-            get { return m_colorArray; }
-
-            set
-            {
-                if (value != null)
-                {
-                    if (m_colorArray == null) m_colorArray = new System.Drawing.Color[value.Length];
-
-                    Array.Copy(value, m_colorArray, value.Length);
-
-                    if (m_snapshot != null) m_snapshot.Color = value;
-                }
-            }
+            if (m_snapshot != null) m_snapshot.SetImageDataArray(Data, colorArray);
         }
 
         public Rectangle ImageRectangle
@@ -159,7 +140,36 @@ namespace BeamOnCL
             if (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8)
                 m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
             else
-                m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()), m_colorArray);
+                m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+        }
+
+        public int MaxBinning
+        {
+            get { return (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMaximum(); }
+        }
+
+        public int MinBinning
+        {
+            get { return (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum(); }
+        }
+
+        public int Binning
+        {
+            get { return (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetValue(); }
+
+            set
+            {
+                if ((value >= (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum()) && (value <= (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMaximum()))
+                {
+                    m_camera.Parameters[PLCamera.BinningHorizontal].SetValue(value);
+                    m_camera.Parameters[PLCamera.BinningVertical].SetValue(value);
+
+                    if (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8)
+                        m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+                    else
+                        m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+                }
+            }
         }
     }
 }

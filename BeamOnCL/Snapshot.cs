@@ -12,29 +12,29 @@ namespace BeamOnCL
         public T[] m_tMatrixArray = null;
         byte[] rgbValues = null;
 
-        public Snapshot(Rectangle rArea, Color[] color = null)
-            : base(rArea, color)
+        public Snapshot(Rectangle rArea)
+            : base(rArea)
         {
             m_tMatrixArray = new T[(int)m_rArea.Width * (int)m_rArea.Height];
 
             rgbValues = new byte[m_tMatrixArray.Length * 3];
         }
 
-        public override void SetData(IntPtr Data)
+        public override void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
         {
             if (typeof(T) == typeof(byte))
                 Marshal.Copy(m_tMatrixArray as byte[], 0, Data, m_tMatrixArray.Length);
             else
             {
-                if (m_colorArray != null)
+                if (colorArray != null)
                 {
                     for (int i = 0; i < m_tMatrixArray.Length; i++)
                     {
                         object d = m_tMatrixArray[i];
 
-                        rgbValues[i * 3] = m_colorArray[(UInt16)d].B;
-                        rgbValues[i * 3 + 1] = m_colorArray[(UInt16)d].G;
-                        rgbValues[i * 3 + 2] = m_colorArray[(UInt16)d].R;
+                        rgbValues[i * 3] = colorArray[(UInt16)d].B;
+                        rgbValues[i * 3 + 1] = colorArray[(UInt16)d].G;
+                        rgbValues[i * 3 + 2] = colorArray[(UInt16)d].R;
                     }
 
                     // Copy the RGB values back to the bitmap

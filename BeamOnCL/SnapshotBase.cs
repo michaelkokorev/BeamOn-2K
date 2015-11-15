@@ -9,7 +9,6 @@ namespace BeamOnCL
     public class SnapshotBase
     {
         protected Rectangle m_rArea;
-        protected Color[] m_colorArray = null;
 
         public UInt16 Width
         {
@@ -29,10 +28,9 @@ namespace BeamOnCL
         {
         }
 
-        public SnapshotBase(Rectangle rArea, Color[] color = null)
+        public SnapshotBase(Rectangle rArea)
         {
             m_rArea = rArea;
-            Color = color;
         }
 
         public Rectangle ImageRectangle
@@ -50,19 +48,8 @@ namespace BeamOnCL
             return (UInt16)0;
         }
 
-        public Color[] Color
+        public virtual void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
         {
-            get { return m_colorArray; }
-
-            set
-            {
-                if (value != null)
-                {
-                    if (m_colorArray == null) m_colorArray = new System.Drawing.Color[value.Length];
-
-                    Array.Copy(value, m_colorArray, value.Length);
-                }
-            }
         }
     }
 }

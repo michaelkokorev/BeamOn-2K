@@ -17,6 +17,8 @@ namespace BeamOn_2K
         private delegate void AsyncTimeStamp(Int64 iValue);
 
         Object m_lLockBMP = new Object();
+        Bitmap m_bmp = null;
+        Color[] m_colorArray = null;
 
         Stopwatch m_sw = null;
 
@@ -32,7 +34,27 @@ namespace BeamOn_2K
 
         void bm_OnImageReceved(object sender, BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e)
         {
-            bm.CreateImage();
+            BitmapData bmpData = null;
+
+            if (m_bmp != null)
+            {
+                lock (m_lLockBMP)
+                {
+                    try
+                    {
+                        bmpData = m_bmp.LockBits(
+                                                 bm.ImageRectangle,
+                                                 System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                                 m_bmp.PixelFormat
+                                                 );
+
+                        bm.SetImageDataArray(bmpData.Scan0, m_colorArray);
+
+                        m_bmp.UnlockBits(bmpData);
+                    }
+                    catch { }
+                }
+            }
 
             m_sw.Stop();
 
@@ -74,13 +96,12 @@ namespace BeamOn_2K
         private void pictureBoxImage_Paint(object sender, PaintEventArgs e)
         {
             Graphics grfx = e.Graphics;
-            Bitmap bmp = bm.Image;
 
-            if (bmp != null)
+            if (m_bmp != null)
             {
                 try
                 {
-                    lock (m_lLockBMP) grfx.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);
+                    lock (m_lLockBMP) grfx.DrawImage(m_bmp, 0, 0, m_bmp.Width, m_bmp.Height);
                 }
                 catch
                 {
@@ -218,16 +239,35 @@ namespace BeamOn_2K
             asyncChangePalette.BeginInvoke(e.Palette, e.Format, e.colorArray, null, null);
         }
 
+        public Color[] Color
+        {
+            get { return m_colorArray; }
+
+            set
+            {
+                if (value != null)
+                {
+                    if (m_colorArray == null) m_colorArray = new System.Drawing.Color[value.Length];
+
+                    Array.Copy(value, m_colorArray, value.Length);
+                }
+            }
+        }
+
         private void UpdateChangePalette(ColorPalette Palette, PixelFormat pixelFormat, Color[] color)
         {
             try
             {
                 this.Invoke((MethodInvoker)delegate
                 {
-                    lock (m_lLockBMP)
-                    {
-                        bm.ChangePixelFormat(Palette, pixelFormat, color);
-                    }
+                    if (m_bmp.PixelFormat != pixelFormat) m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, pixelFormat);
+
+                    if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed)
+                        m_bmp.Palette = Palette;
+                    else
+                        Color = color;
+
+                    bm.ChangePixelFormat(pixelFormat);
                 });
             }
             catch
@@ -239,13 +279,66 @@ namespace BeamOn_2K
         {
             bm.Start(PixelFormat.Format8bppIndexed);
 
-            pictureBoxImage.Size = new System.Drawing.Size(bm.ImageRectangle.Width, bm.ImageRectangle.Height);
             m_sw = Stopwatch.StartNew();
+
+            picturePaletteImage.Format = PixelFormat.Format8bppIndexed;
+
+            pictureBoxImage.Size = new System.Drawing.Size(bm.ImageRectangle.Width, bm.ImageRectangle.Height);
+
+            m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, picturePaletteImage.Format);
+
+            if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed)
+                m_bmp.Palette = picturePaletteImage.Palette;
+            else
+                Color = picturePaletteImage.colorArray;
+
+            toolStripButtonPixelFormat.Checked = (picturePaletteImage.Format == PixelFormat.Format24bppRgb);
+            bitsPerPixel12ToolStripMenuItem.Checked = toolStripButtonPixelFormat.Checked;
+            bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
+
+            bm.ChangePixelFormat(picturePaletteImage.Format);
+
+            trackBarBinning.Maximum = bm.MaxBinning;
+            trackBarBinning.Minimum = bm.MinBinning;
+            trackBarBinning.Value = bm.Binning;
+            labelBinningMin.Text = trackBarBinning.Minimum.ToString();
+            labelBinningMax.Text = trackBarBinning.Maximum.ToString();
+
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             bm.Stop();
+        }
+
+        private void toolStripButtonPixelFormat_CheckedChanged(object sender, EventArgs e)
+        {
+            ToolStripButton tsb = (ToolStripButton)sender;
+
+            picturePaletteImage.Format = (tsb.Checked == true) ? PixelFormat.Format24bppRgb : PixelFormat.Format8bppIndexed;
+
+            toolStripButtonPixelFormat.Image = (picturePaletteImage.Format == PixelFormat.Format8bppIndexed) ? global::BeamOn_2K.Properties.Resources.black_12bit_mode : global::BeamOn_2K.Properties.Resources.black_8bit_mode;
+
+            bitsPerPixel12ToolStripMenuItem.Checked = toolStripButtonPixelFormat.Checked;
+            bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
+        }
+
+        private void pixelFormatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem tsb = (ToolStripMenuItem)sender;
+
+            toolStripButtonPixelFormat.Checked = ((tsb.Name.Contains("12") == true) && (picturePaletteImage.Format != PixelFormat.Format24bppRgb));
+        }
+
+        private void trackBarBinning_Scroll(object sender, EventArgs e)
+        {
+            bm.Binning = trackBarBinning.Value;
+
+            m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, picturePaletteImage.Format);
+
+            if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
+
+            pictureBoxImage.Size = new System.Drawing.Size(bm.ImageRectangle.Width, bm.ImageRectangle.Height);
         }
     }
 }

@@ -32,6 +32,10 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pixelFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bitsPerPixel8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bitsPerPixel12ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.dataPanelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertyBoxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
@@ -41,9 +45,12 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainStatusStrip = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabelTimeStamp = new System.Windows.Forms.ToolStripStatusLabel();
             this.mainToolStrip = new System.Windows.Forms.ToolStrip();
+            this.toolStripButtonPixelFormat = new System.Windows.Forms.ToolStripButton();
             this.mainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.imageSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.picturePaletteImage = new PaletteImage.PaletteImage();
             this.pictureBoxImage = new System.Windows.Forms.PictureBox();
             this.pictureBoxData = new System.Windows.Forms.PictureBox();
             this.dataSplitContainer = new System.Windows.Forms.SplitContainer();
@@ -96,10 +103,9 @@
             this.labelPositionYValue = new System.Windows.Forms.Label();
             this.labelPositionY = new System.Windows.Forms.Label();
             this.labelPositionX = new System.Windows.Forms.Label();
-            this.toolStripStatusLabelTimeStamp = new System.Windows.Forms.ToolStripStatusLabel();
-            this.picturePaletteImage = new PaletteImage.PaletteImage();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
+            this.mainToolStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainSplitContainer)).BeginInit();
             this.mainSplitContainer.Panel1.SuspendLayout();
             this.mainSplitContainer.Panel2.SuspendLayout();
@@ -108,6 +114,7 @@
             this.imageSplitContainer.Panel1.SuspendLayout();
             this.imageSplitContainer.Panel2.SuspendLayout();
             this.imageSplitContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).BeginInit();
             this.pictureBoxImage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).BeginInit();
@@ -127,7 +134,6 @@
             this.gaussGroupBox.SuspendLayout();
             this.ProfileGroupBox.SuspendLayout();
             this.groupBoxPosition.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).BeginInit();
             this.SuspendLayout();
             // 
             // mainMenuStrip
@@ -162,6 +168,8 @@
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.pixelFormatToolStripMenuItem,
+            this.toolStripMenuItem2,
             this.dataPanelToolStripMenuItem,
             this.propertyBoxToolStripMenuItem,
             this.toolStripMenuItem1,
@@ -170,6 +178,34 @@
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "&View";
+            // 
+            // pixelFormatToolStripMenuItem
+            // 
+            this.pixelFormatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.bitsPerPixel8ToolStripMenuItem,
+            this.bitsPerPixel12ToolStripMenuItem});
+            this.pixelFormatToolStripMenuItem.Name = "pixelFormatToolStripMenuItem";
+            this.pixelFormatToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.pixelFormatToolStripMenuItem.Text = "Pi&xel Format";
+            // 
+            // bitsPerPixel8ToolStripMenuItem
+            // 
+            this.bitsPerPixel8ToolStripMenuItem.Name = "bitsPerPixel8ToolStripMenuItem";
+            this.bitsPerPixel8ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.bitsPerPixel8ToolStripMenuItem.Text = "8 Bits Per Pixel";
+            this.bitsPerPixel8ToolStripMenuItem.Click += new System.EventHandler(this.pixelFormatToolStripMenuItem_Click);
+            // 
+            // bitsPerPixel12ToolStripMenuItem
+            // 
+            this.bitsPerPixel12ToolStripMenuItem.Name = "bitsPerPixel12ToolStripMenuItem";
+            this.bitsPerPixel12ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.bitsPerPixel12ToolStripMenuItem.Text = "12 Bits Per Pixel";
+            this.bitsPerPixel12ToolStripMenuItem.Click += new System.EventHandler(this.pixelFormatToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(179, 6);
             // 
             // dataPanelToolStripMenuItem
             // 
@@ -249,20 +285,40 @@
             this.mainStatusStrip.TabIndex = 1;
             this.mainStatusStrip.Text = "statusStrip1";
             // 
+            // toolStripStatusLabelTimeStamp
+            // 
+            this.toolStripStatusLabelTimeStamp.AutoSize = false;
+            this.toolStripStatusLabelTimeStamp.Name = "toolStripStatusLabelTimeStamp";
+            this.toolStripStatusLabelTimeStamp.Size = new System.Drawing.Size(173, 17);
+            // 
             // mainToolStrip
             // 
+            this.mainToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButtonPixelFormat});
             this.mainToolStrip.Location = new System.Drawing.Point(0, 24);
             this.mainToolStrip.Name = "mainToolStrip";
-            this.mainToolStrip.Size = new System.Drawing.Size(1350, 25);
+            this.mainToolStrip.Size = new System.Drawing.Size(1350, 39);
             this.mainToolStrip.TabIndex = 2;
             this.mainToolStrip.Text = "toolStrip1";
+            // 
+            // toolStripButtonPixelFormat
+            // 
+            this.toolStripButtonPixelFormat.AutoSize = false;
+            this.toolStripButtonPixelFormat.CheckOnClick = true;
+            this.toolStripButtonPixelFormat.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonPixelFormat.Image = global::BeamOn_2K.Properties.Resources.black_12bit_mode;
+            this.toolStripButtonPixelFormat.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripButtonPixelFormat.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonPixelFormat.Name = "toolStripButtonPixelFormat";
+            this.toolStripButtonPixelFormat.Size = new System.Drawing.Size(36, 36);
+            this.toolStripButtonPixelFormat.CheckedChanged += new System.EventHandler(this.toolStripButtonPixelFormat_CheckedChanged);
             // 
             // mainSplitContainer
             // 
             this.mainSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainSplitContainer.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
             this.mainSplitContainer.IsSplitterFixed = true;
-            this.mainSplitContainer.Location = new System.Drawing.Point(0, 49);
+            this.mainSplitContainer.Location = new System.Drawing.Point(0, 63);
             this.mainSplitContainer.Name = "mainSplitContainer";
             // 
             // mainSplitContainer.Panel1
@@ -273,7 +329,7 @@
             // 
             this.mainSplitContainer.Panel2.Controls.Add(this.dataSplitContainer);
             this.mainSplitContainer.Panel2MinSize = 300;
-            this.mainSplitContainer.Size = new System.Drawing.Size(1350, 658);
+            this.mainSplitContainer.Size = new System.Drawing.Size(1350, 644);
             this.mainSplitContainer.SplitterDistance = 1025;
             this.mainSplitContainer.TabIndex = 3;
             // 
@@ -295,10 +351,22 @@
             this.imageSplitContainer.Panel2.AutoScroll = true;
             this.imageSplitContainer.Panel2.Controls.Add(this.pictureBoxImage);
             this.imageSplitContainer.Panel2MinSize = 480;
-            this.imageSplitContainer.Size = new System.Drawing.Size(1025, 658);
+            this.imageSplitContainer.Size = new System.Drawing.Size(1025, 644);
             this.imageSplitContainer.SplitterDistance = 25;
             this.imageSplitContainer.TabIndex = 0;
             this.imageSplitContainer.TabStop = false;
+            // 
+            // picturePaletteImage
+            // 
+            this.picturePaletteImage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picturePaletteImage.Format = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
+            this.picturePaletteImage.Location = new System.Drawing.Point(0, 0);
+            this.picturePaletteImage.Name = "picturePaletteImage";
+            this.picturePaletteImage.PaletteLevelUp = 100F;
+            this.picturePaletteImage.Size = new System.Drawing.Size(25, 644);
+            this.picturePaletteImage.TabIndex = 0;
+            this.picturePaletteImage.TabStop = false;
+            this.picturePaletteImage.OnChangePalette += new PaletteImage.PaletteImage.ChangePalette(this.picturePaletteImage_OnChangePalette);
             // 
             // pictureBoxImage
             // 
@@ -343,7 +411,7 @@
             this.dataSplitContainer.Panel2.Controls.Add(this.ProfileGroupBox);
             this.dataSplitContainer.Panel2.Controls.Add(this.groupBoxPosition);
             this.dataSplitContainer.Panel2MinSize = 300;
-            this.dataSplitContainer.Size = new System.Drawing.Size(321, 658);
+            this.dataSplitContainer.Size = new System.Drawing.Size(321, 644);
             this.dataSplitContainer.SplitterDistance = 240;
             this.dataSplitContainer.TabIndex = 0;
             // 
@@ -399,8 +467,9 @@
             this.trackBarBinning.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBarBinning.Location = new System.Drawing.Point(3, 19);
             this.trackBarBinning.Name = "trackBarBinning";
-            this.trackBarBinning.Size = new System.Drawing.Size(128, 45);
+            this.trackBarBinning.Size = new System.Drawing.Size(128, 43);
             this.trackBarBinning.TabIndex = 0;
+            this.trackBarBinning.Scroll += new System.EventHandler(this.trackBarBinning_Scroll);
             // 
             // groupBoxGain
             // 
@@ -440,7 +509,7 @@
             this.trackBarGain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBarGain.Location = new System.Drawing.Point(3, 19);
             this.trackBarGain.Name = "trackBarGain";
-            this.trackBarGain.Size = new System.Drawing.Size(276, 45);
+            this.trackBarGain.Size = new System.Drawing.Size(276, 43);
             this.trackBarGain.TabIndex = 3;
             // 
             // groupBoxExposure
@@ -482,7 +551,7 @@
             this.trackBarExposure.LargeChange = 500000;
             this.trackBarExposure.Location = new System.Drawing.Point(3, 19);
             this.trackBarExposure.Name = "trackBarExposure";
-            this.trackBarExposure.Size = new System.Drawing.Size(273, 45);
+            this.trackBarExposure.Size = new System.Drawing.Size(273, 43);
             this.trackBarExposure.SmallChange = 100000;
             this.trackBarExposure.TabIndex = 6;
             this.trackBarExposure.TickFrequency = 1000000;
@@ -527,7 +596,7 @@
             this.trackBarTransparency.Location = new System.Drawing.Point(3, 19);
             this.trackBarTransparency.Maximum = 255;
             this.trackBarTransparency.Name = "trackBarTransparency";
-            this.trackBarTransparency.Size = new System.Drawing.Size(136, 45);
+            this.trackBarTransparency.Size = new System.Drawing.Size(136, 43);
             this.trackBarTransparency.TabIndex = 6;
             // 
             // gaussGroupBox
@@ -888,24 +957,6 @@
             this.labelPositionX.Text = "X";
             this.labelPositionX.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // toolStripStatusLabelTimeStamp
-            // 
-            this.toolStripStatusLabelTimeStamp.AutoSize = false;
-            this.toolStripStatusLabelTimeStamp.Name = "toolStripStatusLabelTimeStamp";
-            this.toolStripStatusLabelTimeStamp.Size = new System.Drawing.Size(173, 17);
-            // 
-            // picturePaletteImage
-            // 
-            this.picturePaletteImage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.picturePaletteImage.Format = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
-            this.picturePaletteImage.Location = new System.Drawing.Point(0, 0);
-            this.picturePaletteImage.Name = "picturePaletteImage";
-            this.picturePaletteImage.PaletteLevelUp = 100F;
-            this.picturePaletteImage.Size = new System.Drawing.Size(25, 658);
-            this.picturePaletteImage.TabIndex = 0;
-            this.picturePaletteImage.TabStop = false;
-            this.picturePaletteImage.OnChangePalette += new PaletteImage.PaletteImage.ChangePalette(this.picturePaletteImage_OnChangePalette);
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -924,6 +975,8 @@
             this.mainMenuStrip.PerformLayout();
             this.mainStatusStrip.ResumeLayout(false);
             this.mainStatusStrip.PerformLayout();
+            this.mainToolStrip.ResumeLayout(false);
+            this.mainToolStrip.PerformLayout();
             this.mainSplitContainer.Panel1.ResumeLayout(false);
             this.mainSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.mainSplitContainer)).EndInit();
@@ -932,6 +985,7 @@
             this.imageSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.imageSplitContainer)).EndInit();
             this.imageSplitContainer.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).EndInit();
             this.pictureBoxImage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).EndInit();
@@ -958,7 +1012,6 @@
             this.ProfileGroupBox.PerformLayout();
             this.groupBoxPosition.ResumeLayout(false);
             this.groupBoxPosition.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1036,6 +1089,11 @@
         private System.Windows.Forms.PictureBox pictureBoxData;
         private PaletteImage.PaletteImage picturePaletteImage;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelTimeStamp;
+        private System.Windows.Forms.ToolStripButton toolStripButtonPixelFormat;
+        private System.Windows.Forms.ToolStripMenuItem pixelFormatToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bitsPerPixel8ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bitsPerPixel12ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
     }
 }
 

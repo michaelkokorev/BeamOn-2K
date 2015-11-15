@@ -116,6 +116,11 @@ namespace PaletteImage
             get { return (m_pixelFormat == PixelFormat.Format8bppIndexed) ? m_bmpPalette.Palette : null; }
         }
 
+        public Color[] colorArray
+        {
+            get { return m_colorReal; }
+        }
+
         public Single PaletteLevelUp
         {
             get { return m_sPaletteLevelUp; }

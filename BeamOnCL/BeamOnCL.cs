@@ -11,8 +11,6 @@ namespace BeamOnCL
     public class BeamOnCL
     {
         MeasureCamera mc = null;
-        Bitmap m_bmp = null;
-        Object m_lLockBMP = new Object();
 
         public delegate void ImageReceved(object sender, MeasureCamera.NewDataRecevedEventArgs e);
         public event ImageReceved OnImageReceved;
@@ -35,38 +33,6 @@ namespace BeamOnCL
             OnImageReceved(sender, e);
         }
 
-        public void CreateImage()
-        {
-            BitmapData bmpData = null;
-
-            if (m_bmp != null)
-            {
-                lock (m_lLockBMP)
-                {
-                    try
-                    {
-                        bmpData = m_bmp.LockBits(
-                                                 mc.ImageRectangle,
-                                                 System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                                                 m_bmp.PixelFormat
-                                                 );
-
-                        mc.SetData(bmpData.Scan0);
-                    }
-                    catch { }
-                    finally
-                    {
-                        if (bmpData != null) m_bmp.UnlockBits(bmpData);
-                    }
-                }
-            }
-        }
-
-        public Bitmap Image
-        {
-            get { return m_bmp; }
-        }
-
         public void Stop()
         {
             mc.Stop();
@@ -75,38 +41,49 @@ namespace BeamOnCL
         public void Start(PixelFormat pixelFormat)
         {
             mc.Start(pixelFormat);
-            m_bmp = new Bitmap(mc.ImageRectangle.Width, mc.ImageRectangle.Height, pixelFormat);
         }
 
-        public void ChangePixelFormat(ColorPalette Palette, PixelFormat pixelFormat, Color[] color)
+        public void ChangePixelFormat(PixelFormat pixelFormat)
         {
             mc.StopGrabber();
 
-            if (m_bmp.PixelFormat != pixelFormat) CreateData(pixelFormat);
-
-            if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed)
-                m_bmp.Palette = Palette;
-            else
-                mc.Color = color;
+            mc.CreateData(pixelFormat);
 
             mc.StartGrabber();
         }
 
-        private void CreateData(PixelFormat pixelFormat)
+        public void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
         {
-            mc.CreateData(pixelFormat);
-
-            m_bmp = new Bitmap(mc.ImageRectangle.Width, mc.ImageRectangle.Height, pixelFormat);
-        }
-
-        public void SetBitmapData(IntPtr Data)
-        {
-            mc.SetData(Data);
+            mc.SetImageDataArray(Data, colorArray);
         }
 
         public Rectangle ImageRectangle
         {
             get { return mc.ImageRectangle; }
+        }
+
+        public int MaxBinning
+        {
+            get { return mc.MaxBinning; }
+        }
+
+        public int MinBinning
+        {
+            get { return mc.MinBinning; }
+        }
+
+        public int Binning
+        {
+            get { return mc.Binning; }
+
+            set
+            {
+                mc.StopGrabber();
+
+                mc.Binning = value;
+
+                mc.StartGrabber();
+            }
         }
     }
 }
