@@ -24,12 +24,33 @@ namespace BeamOn_2K
 
         private BeamOnCL.BeamOnCL bm = null;
 
+        Pen m_PenCentroid = new Pen(System.Drawing.Color.Black, 0.2f);
+        Pen m_PenEllipse = new Pen(System.Drawing.Color.Green, 2f);
+        Pen m_PenGaussian = new Pen(System.Drawing.Color.Red, 0.2f);
+        Font myFont = new Font("Arial", 10, FontStyle.Bold);
+        Brush PaletteBrush = new SolidBrush(System.Drawing.Color.DarkGray);
+        StringFormat m_strfrm = new StringFormat();
+
+        const UInt16 NUM_POINTS = 64;
+
+        double[] Sin = new double[NUM_POINTS];
+        double[] Cos = new double[NUM_POINTS];
+        Point[] plArea = new Point[NUM_POINTS + 1];
+
         public FormMain()
         {
             InitializeComponent();
 
             bm = new BeamOnCL.BeamOnCL();
             bm.OnImageReceved += new BeamOnCL.BeamOnCL.ImageReceved(bm_OnImageReceved);
+
+            double dStep = Math.PI / (NUM_POINTS / 2f);
+
+            for (int i = 0; i < NUM_POINTS; i++)
+            {
+                Cos[i] = Math.Cos(dStep * i);
+                Sin[i] = Math.Sin(dStep * i);
+            }
         }
 
         void bm_OnImageReceved(object sender, BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e)
@@ -51,6 +72,8 @@ namespace BeamOn_2K
                         bm.SetImageDataArray(bmpData.Scan0, m_colorArray);
 
                         m_bmp.UnlockBits(bmpData);
+
+                        DrawEllipse();
                     }
                     catch { }
                 }
@@ -66,6 +89,51 @@ namespace BeamOn_2K
 
             this.Invalidate();
             pictureBoxImage.Invalidate();
+        }
+
+        private void DrawEllipse()
+        {
+
+            int i;
+            double A11, A21, A12, A22;
+            double Si1, Co1;
+            Si1 = Math.Sin(bm.Ellipse.Angle);
+            Co1 = Math.Cos(bm.Ellipse.Angle);
+
+            A11 = bm.Ellipse.MajorRadius * Co1;
+            A21 = -bm.Ellipse.MajorRadius * Si1;
+            A12 = bm.Ellipse.MinorRadius * Si1;
+            A22 = bm.Ellipse.MinorRadius * Co1;
+
+            switch (bm.Ellipse.Type)
+            {
+                case BeamOnCL.Area.Figure.enRectangle:
+                    {
+                        plArea[0] = new Point((int)(-A11 - A12 + bm.Ellipse.Centroid.X), (int)(A21 + A22 + bm.Ellipse.Centroid.Y));
+                        plArea[1] = new Point((int)(-A11 + A12 + bm.Ellipse.Centroid.X), (int)(A21 - A22 + bm.Ellipse.Centroid.Y));
+                        plArea[2] = new Point((int)(A11 + A12 + bm.Ellipse.Centroid.X), (int)(-A21 - A22 + bm.Ellipse.Centroid.Y));
+                        plArea[3] = new Point((int)(A11 - A12 + bm.Ellipse.Centroid.X), (int)(-A21 + A22 + bm.Ellipse.Centroid.Y));
+                    }
+                    break;
+                case BeamOnCL.Area.Figure.enCircle:
+                //{
+                //    //A11 = CircleRadius * Co1;
+                //    //A21 = -CircleRadius * Si1;
+                //    //A12 = CircleRadius * Si1;
+                //    //A22 = CircleRadius * Co1;
+                //}
+                case BeamOnCL.Area.Figure.enEllipse:
+                    {
+                        plArea[0] = new Point((int)(A11 * Cos[0] + A12 * Sin[0] + bm.Ellipse.Centroid.X), (int)(-A21 * Cos[0] - A22 * Sin[0] + bm.Ellipse.Centroid.Y));
+                        for (i = 1; i < NUM_POINTS; i++)
+                        {
+                            plArea[i] = new Point((int)(A11 * Cos[i] + A12 * Sin[i] + bm.Ellipse.Centroid.X), (int)(-A21 * Cos[i] - A22 * Sin[i] + bm.Ellipse.Centroid.Y));
+                        }
+
+                        plArea[NUM_POINTS] = plArea[0];
+                    }
+                    break;
+            }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -117,10 +185,8 @@ namespace BeamOn_2K
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                //m_pCrossPosition = new Point(e.X, e.Y);
-                //m_lpHorizontal.CrossPoint = new Point(e.X, e.Y);
-                //m_lpVertical.CrossPoint = m_lpHorizontal.CrossPoint;
-                //pictureBoxData.Invalidate();
+                bm.CrossPosition = new Point(e.X, e.Y);
+                pictureBoxData.Invalidate();
             }
         }
 
@@ -128,70 +194,31 @@ namespace BeamOn_2K
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                //m_pCrossPosition = new Point(e.X, e.Y);
-                //m_lpHorizontal.CrossPoint = new Point(e.X, e.Y);
-                //m_lpVertical.CrossPoint = m_lpHorizontal.CrossPoint;
-                //pictureBoxData.Invalidate();
+                bm.CrossPosition = new Point(e.X, e.Y);
+                pictureBoxData.Invalidate();
             }
             else if (e.Button == System.Windows.Forms.MouseButtons.Right)
             {
-                //m_camera.StreamGrabber.Stop();
+                if (bm.ImageRectangle == bm.MaxImageRectangle)
+                {
+                    int iSizeX = (int)((bm.WorkingArea.Width > imageSplitContainer.Panel2.Width) ? bm.WorkingArea.Width : imageSplitContainer.Panel2.Width - 8);
+                    int iSizeY = (int)((bm.WorkingArea.Height > imageSplitContainer.Panel2.Height) ? bm.WorkingArea.Height : imageSplitContainer.Panel2.Height - 8);
 
-                //lock (m_lLockBMP)
-                //{
-                //    if ((splitContainerImage.Panel2.Width < pictureBoxImage.Width) || (splitContainerImage.Panel2.Height < pictureBoxImage.Height))
-                //    {
-                //        int iSizeX = (int)((m_pPositioning.WorkingArea.Width > splitContainerImage.Panel2.Width) ? m_pPositioning.WorkingArea.Width : splitContainerImage.Panel2.Width - 8);
-                //        int iSizeY = (int)((m_pPositioning.WorkingArea.Height > splitContainerImage.Panel2.Height) ? m_pPositioning.WorkingArea.Height : splitContainerImage.Panel2.Height - 8);
-                //        int iSizeXMax = (int)m_camera.Parameters[PLCamera.Width].GetMaximum();
-                //        int iSizeYMax = (int)m_camera.Parameters[PLCamera.Height].GetMaximum();
+                    int iOffsetX = (int)bm.Ellipse.Centroid.X - (int)(iSizeX / 2);
+                    int iOffsetY = (int)bm.Ellipse.Centroid.Y - (int)(iSizeY / 2);
 
-                //        iSizeX = (int)(Math.Floor(iSizeX / 4f) * 4);
-                //        iSizeY = (int)(Math.Floor(iSizeY / 4f) * 4);
+                    bm.ImageRectangle = new Rectangle(iOffsetX, iOffsetY, iSizeX, iSizeY);
+                }
+                else
+                {
+                    bm.ImageRectangle = bm.MaxImageRectangle;
+                }
 
-                //        if (iSizeXMax < iSizeX) iSizeX = iSizeXMax;
-                //        if (iSizeYMax < iSizeY) iSizeY = iSizeYMax;
+                pictureBoxImage.Size = new System.Drawing.Size((int)bm.ImageRectangle.Width, (int)bm.ImageRectangle.Height);
 
-                //        m_camera.Parameters[PLCamera.Width].SetValue(iSizeX);
-                //        m_camera.Parameters[PLCamera.Height].SetValue(iSizeY);
+                m_bmp = new Bitmap(pictureBoxImage.Width, pictureBoxImage.Height, picturePaletteImage.Format);
 
-                //        int iOffsetX = (int)m_pPositioning.Ellipse.Centroid.X - (int)(iSizeX / 2);
-                //        int iOffsetY = (int)m_pPositioning.Ellipse.Centroid.Y - (int)(iSizeY / 2);
-
-                //        if (iOffsetX < 0) iOffsetX = 0;
-                //        if (iOffsetY < 0) iOffsetY = 0;
-
-                //        iOffsetX = (int)(Math.Floor(iOffsetX / 4f) * 4);
-                //        iOffsetY = (int)(Math.Floor(iOffsetY / 4f) * 4);
-
-                //        int IOffsetXMax = (int)m_camera.Parameters[PLCamera.OffsetX].GetMaximum();
-                //        int IOffsetYMax = (int)m_camera.Parameters[PLCamera.OffsetY].GetMaximum();
-                //        if (IOffsetXMax < iOffsetX) iOffsetX = IOffsetXMax;
-                //        if (IOffsetYMax < iOffsetY) iOffsetY = IOffsetYMax;
-
-                //        m_camera.Parameters[PLCamera.OffsetX].SetValue(iOffsetX);
-                //        m_camera.Parameters[PLCamera.OffsetY].SetValue(iOffsetY);
-                //    }
-                //    else
-                //    {
-                //        m_camera.Parameters[PLCamera.OffsetX].SetValue(0);
-                //        m_camera.Parameters[PLCamera.OffsetY].SetValue(0);
-                //        m_camera.Parameters[PLCamera.Width].SetValue((int)m_camera.Parameters[PLCamera.Width].GetMaximum());
-                //        m_camera.Parameters[PLCamera.Height].SetValue((int)m_camera.Parameters[PLCamera.Height].GetMaximum());
-                //    }
-
-                //    pictureBoxImage.Size = new System.Drawing.Size((int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue());
-
-                //    m_bmp = new Bitmap(pictureBoxImage.Width,
-                //                       pictureBoxImage.Height,
-                //                       (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8) ? System.Drawing.Imaging.PixelFormat.Format8bppIndexed : System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-                //    if (picturePaletteImage.Format == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
-
-                //    CreateProfile();
-                //}
-
-                //m_camera.StreamGrabber.Start(GrabStrategy.LatestImages/*.OneByOne*/, GrabLoop.ProvidedByStreamGrabber);
+                if (picturePaletteImage.Format == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
             }
         }
 
@@ -199,23 +226,37 @@ namespace BeamOn_2K
         {
             Graphics grfx = e.Graphics;
 
-            //if (m_bFree == false)
-            //{
-            //    if (m_tpProfile == TypeProfile.tpLIne)
-            //    {
-            //        grfx.DrawLine(m_PenGrid, m_lpHorizontal.LeftPoint, m_lpHorizontal.RightPoint);
-            //        grfx.DrawLine(m_PenGrid, m_lpVertical.LeftPoint, m_lpVertical.RightPoint);
+            if (bm.Measure == true)
+            {
+                Point OldPoint = new Point((int)bm.Ellipse.Centroid.X - 20, (int)bm.Ellipse.Centroid.Y - 20);
+                Point NewPoint = new Point((int)bm.Ellipse.Centroid.X + 20, (int)bm.Ellipse.Centroid.Y + 20);
 
-            //        m_lpHorizontal.Draw(m_PenGrid, DrawOrientation.doHorizontal, grfx);
-            //        m_lpVertical.Draw(m_PenGrid, DrawOrientation.doVertical, grfx);
-            //    }
-            //    else
-            //    {
-            //        m_pPositioning.DrawProfile(m_PenGrid, grfx);
-            //    }
+                grfx.DrawLine(m_PenCentroid, OldPoint, NewPoint);
 
-            //    m_pPositioning.Draw(m_PenGrid, grfx);
-            //}
+                OldPoint = new Point((int)bm.Ellipse.Centroid.X - 20, (int)bm.Ellipse.Centroid.Y + 20);
+                NewPoint = new Point((int)bm.Ellipse.Centroid.X + 20, (int)bm.Ellipse.Centroid.Y - 20);
+
+                grfx.DrawLine(m_PenCentroid, OldPoint, NewPoint);
+
+                grfx.DrawLines(m_PenEllipse, plArea);
+
+                grfx.DrawRectangle(m_PenCentroid, bm.WorkingArea);
+
+                //if (m_tpProfile == TypeProfile.tpLIne)
+                //{
+                //    grfx.DrawLine(m_PenGrid, m_lpHorizontal.LeftPoint, m_lpHorizontal.RightPoint);
+                //    grfx.DrawLine(m_PenGrid, m_lpVertical.LeftPoint, m_lpVertical.RightPoint);
+
+                //    m_lpHorizontal.Draw(m_PenGrid, DrawOrientation.doHorizontal, grfx);
+                //    m_lpVertical.Draw(m_PenGrid, DrawOrientation.doVertical, grfx);
+                //}
+                //else
+                //{
+                //    m_pPositioning.DrawProfile(m_PenGrid, grfx);
+                //}
+
+                //m_pPositioning.Draw(m_PenGrid, grfx);
+            }
         }
 
         private void UpdateVisibleAsync(Int64 Timestamp)
@@ -277,33 +318,58 @@ namespace BeamOn_2K
 
         private void FormMain_Load(object sender, EventArgs e)
         {
-            bm.Start(PixelFormat.Format8bppIndexed);
+            if (bm.Start(PixelFormat.Format8bppIndexed) == true)
+            {
+                m_sw = Stopwatch.StartNew();
 
-            m_sw = Stopwatch.StartNew();
+                picturePaletteImage.Format = PixelFormat.Format8bppIndexed;
 
-            picturePaletteImage.Format = PixelFormat.Format8bppIndexed;
+                pictureBoxImage.Size = new System.Drawing.Size(bm.ImageRectangle.Width, bm.ImageRectangle.Height);
 
-            pictureBoxImage.Size = new System.Drawing.Size(bm.ImageRectangle.Width, bm.ImageRectangle.Height);
+                m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, picturePaletteImage.Format);
 
-            m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, picturePaletteImage.Format);
+                if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed)
+                    m_bmp.Palette = picturePaletteImage.Palette;
+                else
+                    Color = picturePaletteImage.colorArray;
 
-            if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed)
-                m_bmp.Palette = picturePaletteImage.Palette;
+                toolStripButtonPixelFormat.Checked = (picturePaletteImage.Format == PixelFormat.Format24bppRgb);
+                bitsPerPixel12ToolStripMenuItem.Checked = toolStripButtonPixelFormat.Checked;
+                bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
+                toolStripStatusLabelPixelFormat.Text = (toolStripButtonPixelFormat.Checked == true) ? "12 bpp" : "8 bpp";
+
+                bm.ChangePixelFormat(picturePaletteImage.Format);
+
+                trackBarBinning.Maximum = bm.MaxBinning;
+                trackBarBinning.Minimum = bm.MinBinning;
+                trackBarBinning.Value = bm.Binning;
+                labelBinningMin.Text = trackBarBinning.Minimum.ToString();
+                labelBinningMax.Text = trackBarBinning.Maximum.ToString();
+
+                trackBarGain.Maximum = bm.MaxGain;
+                trackBarGain.Minimum = bm.MinGain;
+                trackBarGain.Value = bm.Gain;
+                labelGainMin.Text = trackBarGain.Minimum.ToString();
+                labelGainMax.Text = trackBarGain.Maximum.ToString();
+
+                trackBarExposure.Maximum = bm.MaxExposure / 1000;
+                trackBarExposure.Minimum = bm.MinExposure;
+                trackBarExposure.Value = bm.Exposure;
+                labelExposureMin.Text = trackBarExposure.Minimum.ToString();
+                labelExposureMax.Text = trackBarExposure.Maximum.ToString();
+
+                measuringToolStripMenuItem.Checked = bm.Measure;
+            }
             else
-                Color = picturePaletteImage.colorArray;
+            {
+                CustomMessageBox.Show("Software cannot found measurement camera." +
+                                "Please check connection between measurement camera and computer USB port. ",
+                                "Hardware Error #1:",
+                                 MessageBoxButtons.OK,
+                                 MessageBoxIcon.Stop);
 
-            toolStripButtonPixelFormat.Checked = (picturePaletteImage.Format == PixelFormat.Format24bppRgb);
-            bitsPerPixel12ToolStripMenuItem.Checked = toolStripButtonPixelFormat.Checked;
-            bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
-
-            bm.ChangePixelFormat(picturePaletteImage.Format);
-
-            trackBarBinning.Maximum = bm.MaxBinning;
-            trackBarBinning.Minimum = bm.MinBinning;
-            trackBarBinning.Value = bm.Binning;
-            labelBinningMin.Text = trackBarBinning.Minimum.ToString();
-            labelBinningMax.Text = trackBarBinning.Maximum.ToString();
-
+                this.Close();
+            }
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -321,6 +387,8 @@ namespace BeamOn_2K
 
             bitsPerPixel12ToolStripMenuItem.Checked = toolStripButtonPixelFormat.Checked;
             bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
+
+            toolStripStatusLabelPixelFormat.Text = (toolStripButtonPixelFormat.Checked == true) ? "12 bpp" : "8 bpp";
         }
 
         private void pixelFormatToolStripMenuItem_Click(object sender, EventArgs e)
@@ -339,6 +407,26 @@ namespace BeamOn_2K
             if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
 
             pictureBoxImage.Size = new System.Drawing.Size(bm.ImageRectangle.Width, bm.ImageRectangle.Height);
+        }
+
+        private void trackBarTransparency_Scroll(object sender, EventArgs e)
+        {
+            this.pictureBoxData.BackColor = System.Drawing.Color.FromArgb(trackBarTransparency.Value, pictureBoxData.BackColor.R, pictureBoxData.BackColor.G, pictureBoxData.BackColor.B);
+        }
+
+        private void trackBarGain_Scroll(object sender, EventArgs e)
+        {
+            bm.Gain = trackBarGain.Value;
+        }
+
+        private void trackBarExposure_Scroll(object sender, EventArgs e)
+        {
+            bm.Exposure = trackBarExposure.Value;
+        }
+
+        private void measuringToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            bm.Measure = measuringToolStripMenuItem.Checked;
         }
     }
 }
