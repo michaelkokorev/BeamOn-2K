@@ -28,13 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pixelFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bitsPerPixel8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bitsPerPixel12ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.dataPanelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertyBoxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,15 +40,27 @@
             this.toolBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pixelFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bitsPerPixel8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bitsPerPixel12ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.measuringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.scaleProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.typeProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lineProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sumProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainStatusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelTimeStamp = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelPixelFormat = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelTypeProfile = new System.Windows.Forms.ToolStripStatusLabel();
             this.mainToolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripButtonPixelFormat = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonTypeProfile = new System.Windows.Forms.ToolStripButton();
             this.mainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.imageSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.picturePaletteImage = new PaletteImage.PaletteImage();
             this.pictureBoxImage = new System.Windows.Forms.PictureBox();
             this.pictureBoxData = new System.Windows.Forms.PictureBox();
             this.dataSplitContainer = new System.Windows.Forms.SplitContainer();
@@ -103,8 +113,6 @@
             this.labelPositionYValue = new System.Windows.Forms.Label();
             this.labelPositionY = new System.Windows.Forms.Label();
             this.labelPositionX = new System.Windows.Forms.Label();
-            this.picturePaletteImage = new PaletteImage.PaletteImage();
-            this.measuringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -116,6 +124,7 @@
             this.imageSplitContainer.Panel1.SuspendLayout();
             this.imageSplitContainer.Panel2.SuspendLayout();
             this.imageSplitContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).BeginInit();
             this.pictureBoxImage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).BeginInit();
@@ -135,7 +144,6 @@
             this.gaussGroupBox.SuspendLayout();
             this.ProfileGroupBox.SuspendLayout();
             this.groupBoxPosition.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).BeginInit();
             this.SuspendLayout();
             // 
             // mainMenuStrip
@@ -170,7 +178,6 @@
             // viewToolStripMenuItem
             // 
             this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.pixelFormatToolStripMenuItem,
             this.toolStripMenuItem2,
             this.dataPanelToolStripMenuItem,
             this.propertyBoxToolStripMenuItem,
@@ -180,29 +187,6 @@
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.viewToolStripMenuItem.Text = "&View";
-            // 
-            // pixelFormatToolStripMenuItem
-            // 
-            this.pixelFormatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.bitsPerPixel8ToolStripMenuItem,
-            this.bitsPerPixel12ToolStripMenuItem});
-            this.pixelFormatToolStripMenuItem.Name = "pixelFormatToolStripMenuItem";
-            this.pixelFormatToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
-            this.pixelFormatToolStripMenuItem.Text = "Pi&xel Format";
-            // 
-            // bitsPerPixel8ToolStripMenuItem
-            // 
-            this.bitsPerPixel8ToolStripMenuItem.Name = "bitsPerPixel8ToolStripMenuItem";
-            this.bitsPerPixel8ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.bitsPerPixel8ToolStripMenuItem.Text = "8 Bits Per Pixel";
-            this.bitsPerPixel8ToolStripMenuItem.Click += new System.EventHandler(this.pixelFormatToolStripMenuItem_Click);
-            // 
-            // bitsPerPixel12ToolStripMenuItem
-            // 
-            this.bitsPerPixel12ToolStripMenuItem.Name = "bitsPerPixel12ToolStripMenuItem";
-            this.bitsPerPixel12ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.bitsPerPixel12ToolStripMenuItem.Text = "12 Bits Per Pixel";
-            this.bitsPerPixel12ToolStripMenuItem.Click += new System.EventHandler(this.pixelFormatToolStripMenuItem_Click);
             // 
             // toolStripMenuItem2
             // 
@@ -260,10 +244,81 @@
             // propertyToolStripMenuItem
             // 
             this.propertyToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.measuringToolStripMenuItem});
+            this.pixelFormatToolStripMenuItem,
+            this.toolStripMenuItem3,
+            this.measuringToolStripMenuItem,
+            this.scaleProfileToolStripMenuItem,
+            this.typeProfileToolStripMenuItem});
             this.propertyToolStripMenuItem.Name = "propertyToolStripMenuItem";
             this.propertyToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
             this.propertyToolStripMenuItem.Text = "&Property";
+            // 
+            // pixelFormatToolStripMenuItem
+            // 
+            this.pixelFormatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.bitsPerPixel8ToolStripMenuItem,
+            this.bitsPerPixel12ToolStripMenuItem});
+            this.pixelFormatToolStripMenuItem.Name = "pixelFormatToolStripMenuItem";
+            this.pixelFormatToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.pixelFormatToolStripMenuItem.Text = "Pi&xel Format";
+            // 
+            // bitsPerPixel8ToolStripMenuItem
+            // 
+            this.bitsPerPixel8ToolStripMenuItem.Name = "bitsPerPixel8ToolStripMenuItem";
+            this.bitsPerPixel8ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.bitsPerPixel8ToolStripMenuItem.Text = "8 Bits Per Pixel";
+            this.bitsPerPixel8ToolStripMenuItem.Click += new System.EventHandler(this.pixelFormatToolStripMenuItem_Click);
+            // 
+            // bitsPerPixel12ToolStripMenuItem
+            // 
+            this.bitsPerPixel12ToolStripMenuItem.Name = "bitsPerPixel12ToolStripMenuItem";
+            this.bitsPerPixel12ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.bitsPerPixel12ToolStripMenuItem.Text = "12 Bits Per Pixel";
+            this.bitsPerPixel12ToolStripMenuItem.Click += new System.EventHandler(this.pixelFormatToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(149, 6);
+            // 
+            // measuringToolStripMenuItem
+            // 
+            this.measuringToolStripMenuItem.CheckOnClick = true;
+            this.measuringToolStripMenuItem.Name = "measuringToolStripMenuItem";
+            this.measuringToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.measuringToolStripMenuItem.Text = "&Measuring";
+            this.measuringToolStripMenuItem.CheckedChanged += new System.EventHandler(this.measuringToolStripMenuItem_CheckedChanged);
+            // 
+            // scaleProfileToolStripMenuItem
+            // 
+            this.scaleProfileToolStripMenuItem.CheckOnClick = true;
+            this.scaleProfileToolStripMenuItem.Name = "scaleProfileToolStripMenuItem";
+            this.scaleProfileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.scaleProfileToolStripMenuItem.Text = "Scale &Profile";
+            this.scaleProfileToolStripMenuItem.CheckedChanged += new System.EventHandler(this.scaleProfileToolStripMenuItem_CheckedChanged);
+            // 
+            // typeProfileToolStripMenuItem
+            // 
+            this.typeProfileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lineProfileToolStripMenuItem,
+            this.sumProfileToolStripMenuItem});
+            this.typeProfileToolStripMenuItem.Name = "typeProfileToolStripMenuItem";
+            this.typeProfileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.typeProfileToolStripMenuItem.Text = "T&ype Profile";
+            // 
+            // lineProfileToolStripMenuItem
+            // 
+            this.lineProfileToolStripMenuItem.Name = "lineProfileToolStripMenuItem";
+            this.lineProfileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.lineProfileToolStripMenuItem.Text = "&Line Profile";
+            this.lineProfileToolStripMenuItem.Click += new System.EventHandler(this.typeProfileToolStripMenuItem_Click);
+            // 
+            // sumProfileToolStripMenuItem
+            // 
+            this.sumProfileToolStripMenuItem.Name = "sumProfileToolStripMenuItem";
+            this.sumProfileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.sumProfileToolStripMenuItem.Text = "&Sum Profile";
+            this.sumProfileToolStripMenuItem.Click += new System.EventHandler(this.typeProfileToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -283,7 +338,8 @@
             // 
             this.mainStatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabelTimeStamp,
-            this.toolStripStatusLabelPixelFormat});
+            this.toolStripStatusLabelPixelFormat,
+            this.toolStripStatusLabelTypeProfile});
             this.mainStatusStrip.Location = new System.Drawing.Point(0, 705);
             this.mainStatusStrip.Name = "mainStatusStrip";
             this.mainStatusStrip.Size = new System.Drawing.Size(1350, 24);
@@ -311,10 +367,17 @@
             this.toolStripStatusLabelPixelFormat.Name = "toolStripStatusLabelPixelFormat";
             this.toolStripStatusLabelPixelFormat.Size = new System.Drawing.Size(100, 19);
             // 
+            // toolStripStatusLabelTypeProfile
+            // 
+            this.toolStripStatusLabelTypeProfile.AutoSize = false;
+            this.toolStripStatusLabelTypeProfile.Name = "toolStripStatusLabelTypeProfile";
+            this.toolStripStatusLabelTypeProfile.Size = new System.Drawing.Size(100, 19);
+            // 
             // mainToolStrip
             // 
             this.mainToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButtonPixelFormat});
+            this.toolStripButtonPixelFormat,
+            this.toolStripButtonTypeProfile});
             this.mainToolStrip.Location = new System.Drawing.Point(0, 24);
             this.mainToolStrip.Name = "mainToolStrip";
             this.mainToolStrip.Size = new System.Drawing.Size(1350, 39);
@@ -332,6 +395,19 @@
             this.toolStripButtonPixelFormat.Name = "toolStripButtonPixelFormat";
             this.toolStripButtonPixelFormat.Size = new System.Drawing.Size(36, 36);
             this.toolStripButtonPixelFormat.CheckedChanged += new System.EventHandler(this.toolStripButtonPixelFormat_CheckedChanged);
+            // 
+            // toolStripButtonTypeProfile
+            // 
+            this.toolStripButtonTypeProfile.AutoSize = false;
+            this.toolStripButtonTypeProfile.CheckOnClick = true;
+            this.toolStripButtonTypeProfile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonTypeProfile.Font = new System.Drawing.Font("Arial Rounded MT Bold", 9.75F);
+            this.toolStripButtonTypeProfile.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonTypeProfile.Image")));
+            this.toolStripButtonTypeProfile.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonTypeProfile.Name = "toolStripButtonTypeProfile";
+            this.toolStripButtonTypeProfile.Size = new System.Drawing.Size(36, 36);
+            this.toolStripButtonTypeProfile.Text = "Sum";
+            this.toolStripButtonTypeProfile.CheckedChanged += new System.EventHandler(this.toolStripButtonTypeProfile_CheckedChanged);
             // 
             // mainSplitContainer
             // 
@@ -375,6 +451,18 @@
             this.imageSplitContainer.SplitterDistance = 25;
             this.imageSplitContainer.TabIndex = 0;
             this.imageSplitContainer.TabStop = false;
+            // 
+            // picturePaletteImage
+            // 
+            this.picturePaletteImage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picturePaletteImage.Format = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
+            this.picturePaletteImage.Location = new System.Drawing.Point(0, 0);
+            this.picturePaletteImage.Name = "picturePaletteImage";
+            this.picturePaletteImage.PaletteLevelUp = 100F;
+            this.picturePaletteImage.Size = new System.Drawing.Size(25, 642);
+            this.picturePaletteImage.TabIndex = 0;
+            this.picturePaletteImage.TabStop = false;
+            this.picturePaletteImage.OnChangePalette += new PaletteImage.PaletteImage.ChangePalette(this.picturePaletteImage_OnChangePalette);
             // 
             // pictureBoxImage
             // 
@@ -475,7 +563,7 @@
             this.trackBarBinning.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBarBinning.Location = new System.Drawing.Point(3, 19);
             this.trackBarBinning.Name = "trackBarBinning";
-            this.trackBarBinning.Size = new System.Drawing.Size(128, 45);
+            this.trackBarBinning.Size = new System.Drawing.Size(128, 43);
             this.trackBarBinning.TabIndex = 0;
             this.trackBarBinning.Scroll += new System.EventHandler(this.trackBarBinning_Scroll);
             // 
@@ -517,7 +605,7 @@
             this.trackBarGain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBarGain.Location = new System.Drawing.Point(3, 19);
             this.trackBarGain.Name = "trackBarGain";
-            this.trackBarGain.Size = new System.Drawing.Size(276, 45);
+            this.trackBarGain.Size = new System.Drawing.Size(276, 43);
             this.trackBarGain.TabIndex = 3;
             this.trackBarGain.Scroll += new System.EventHandler(this.trackBarGain_Scroll);
             // 
@@ -560,7 +648,7 @@
             this.trackBarExposure.LargeChange = 500000;
             this.trackBarExposure.Location = new System.Drawing.Point(3, 19);
             this.trackBarExposure.Name = "trackBarExposure";
-            this.trackBarExposure.Size = new System.Drawing.Size(273, 45);
+            this.trackBarExposure.Size = new System.Drawing.Size(273, 43);
             this.trackBarExposure.SmallChange = 100000;
             this.trackBarExposure.TabIndex = 6;
             this.trackBarExposure.TickFrequency = 1000000;
@@ -606,7 +694,7 @@
             this.trackBarTransparency.Location = new System.Drawing.Point(3, 19);
             this.trackBarTransparency.Maximum = 255;
             this.trackBarTransparency.Name = "trackBarTransparency";
-            this.trackBarTransparency.Size = new System.Drawing.Size(136, 45);
+            this.trackBarTransparency.Size = new System.Drawing.Size(136, 43);
             this.trackBarTransparency.SmallChange = 5;
             this.trackBarTransparency.TabIndex = 6;
             this.trackBarTransparency.Scroll += new System.EventHandler(this.trackBarTransparency_Scroll);
@@ -969,26 +1057,6 @@
             this.labelPositionX.Text = "X";
             this.labelPositionX.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // picturePaletteImage
-            // 
-            this.picturePaletteImage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.picturePaletteImage.Format = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
-            this.picturePaletteImage.Location = new System.Drawing.Point(0, 0);
-            this.picturePaletteImage.Name = "picturePaletteImage";
-            this.picturePaletteImage.PaletteLevelUp = 100F;
-            this.picturePaletteImage.Size = new System.Drawing.Size(25, 642);
-            this.picturePaletteImage.TabIndex = 0;
-            this.picturePaletteImage.TabStop = false;
-            this.picturePaletteImage.OnChangePalette += new PaletteImage.PaletteImage.ChangePalette(this.picturePaletteImage_OnChangePalette);
-            // 
-            // measuringToolStripMenuItem
-            // 
-            this.measuringToolStripMenuItem.CheckOnClick = true;
-            this.measuringToolStripMenuItem.Name = "measuringToolStripMenuItem";
-            this.measuringToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.measuringToolStripMenuItem.Text = "&Measuring";
-            this.measuringToolStripMenuItem.CheckedChanged += new System.EventHandler(this.measuringToolStripMenuItem_CheckedChanged);
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1017,6 +1085,7 @@
             this.imageSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.imageSplitContainer)).EndInit();
             this.imageSplitContainer.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).EndInit();
             this.pictureBoxImage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).EndInit();
@@ -1043,7 +1112,6 @@
             this.ProfileGroupBox.PerformLayout();
             this.groupBoxPosition.ResumeLayout(false);
             this.groupBoxPosition.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1122,12 +1190,19 @@
         private PaletteImage.PaletteImage picturePaletteImage;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelTimeStamp;
         private System.Windows.Forms.ToolStripButton toolStripButtonPixelFormat;
-        private System.Windows.Forms.ToolStripMenuItem pixelFormatToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem bitsPerPixel8ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem bitsPerPixel12ToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelPixelFormat;
         private System.Windows.Forms.ToolStripMenuItem measuringToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem scaleProfileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pixelFormatToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bitsPerPixel8ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bitsPerPixel12ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripMenuItem typeProfileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem lineProfileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sumProfileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton toolStripButtonTypeProfile;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelTypeProfile;
     }
 }
 

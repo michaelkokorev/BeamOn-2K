@@ -13,12 +13,12 @@ namespace BeamOn_2K
 {
     public partial class FormMain : Form
     {
-        private delegate void AsyncChangePalette(ColorPalette cpValue, PixelFormat pixelFormat, Color[] color);
+        private delegate void AsyncChangePalette(ColorPalette cpValue, PixelFormat pixelFormat, System.Drawing.Color[] color);
         private delegate void AsyncTimeStamp(Int64 iValue);
 
         Object m_lLockBMP = new Object();
         Bitmap m_bmp = null;
-        Color[] m_colorArray = null;
+        System.Drawing.Color[] m_colorArray = null;
 
         Stopwatch m_sw = null;
 
@@ -30,12 +30,22 @@ namespace BeamOn_2K
         Font myFont = new Font("Arial", 10, FontStyle.Bold);
         Brush PaletteBrush = new SolidBrush(System.Drawing.Color.DarkGray);
         StringFormat m_strfrm = new StringFormat();
+        Pen m_PenGrid = new Pen(System.Drawing.Color.DarkGray, 0.1f);
+
+        Pen m_PenClipLevel1 = new Pen(System.Drawing.Color.Red, 0.1f);
+        Pen m_PenClipLevel2 = new Pen(System.Drawing.Color.Blue, 0.1f);
+        Pen m_PenClipLevel3 = new Pen(System.Drawing.Color.Yellow, 0.1f);
 
         const UInt16 NUM_POINTS = 64;
 
         double[] Sin = new double[NUM_POINTS];
         double[] Cos = new double[NUM_POINTS];
         Point[] plArea = new Point[NUM_POINTS + 1];
+
+        public enum DrawOrientation { doHorizontal, doVertical };
+        Boolean m_bScaleProfile = false;
+
+        float[] m_fClipLevelArray = new float[] { 13.5f, 50f, 80f };
 
         public FormMain()
         {
@@ -242,21 +252,107 @@ namespace BeamOn_2K
 
                 grfx.DrawRectangle(m_PenCentroid, bm.WorkingArea);
 
-                //if (m_tpProfile == TypeProfile.tpLIne)
-                //{
-                //    grfx.DrawLine(m_PenGrid, m_lpHorizontal.LeftPoint, m_lpHorizontal.RightPoint);
-                //    grfx.DrawLine(m_PenGrid, m_lpVertical.LeftPoint, m_lpVertical.RightPoint);
+                if (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpLIne)
+                {
+                    grfx.DrawLine(m_PenGrid, bm.lineProfileHorizontalLeft, bm.lineProfileHorizontalRight);
+                    grfx.DrawLine(m_PenGrid, bm.lineProfileVerticalLeft, bm.lineProfileVerticalRight);
+                }
 
-                //    m_lpHorizontal.Draw(m_PenGrid, DrawOrientation.doHorizontal, grfx);
-                //    m_lpVertical.Draw(m_PenGrid, DrawOrientation.doVertical, grfx);
-                //}
-                //else
-                //{
-                //    m_pPositioning.DrawProfile(m_PenGrid, grfx);
-                //}
-
-                //m_pPositioning.Draw(m_PenGrid, grfx);
+                DrawProfile(bm.profileHorizontal, (m_bScaleProfile == true) ? bm.maxProfileHorizontal : ((bm.pixelFormat == PixelFormat.Format8bppIndexed) ? (UInt16)255 : (UInt16)4095), m_PenGrid, DrawOrientation.doHorizontal, grfx);
+                DrawProfile(bm.profileVertical, (m_bScaleProfile == true) ? bm.maxProfileVertical : ((bm.pixelFormat == PixelFormat.Format8bppIndexed) ? (UInt16)255 : (UInt16)4095), m_PenGrid, DrawOrientation.doVertical, grfx);
             }
+        }
+
+        public void DrawProfile(Double[] dataProfile, Double MaxProfile, Pen pen, DrawOrientation drawOrientation, Graphics grfx)
+        {
+            Point OldPoint = new Point();
+            Point NewPoint;
+
+            int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
+            int iHeightProfile = (int)(iHeight / 3f);
+
+            Double fCoeffAmpl = iHeightProfile / MaxProfile;
+            Double fCoeffStep = 0;
+
+            try
+            {
+                if (drawOrientation == DrawOrientation.doHorizontal)
+                {
+                    fCoeffStep = pictureBoxData.Width / (float)dataProfile.Length;
+
+                    int iShiftY = 0;
+                    if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
+                    {
+                        iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
+                        if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
+                    }
+
+                    OldPoint = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile[0] * fCoeffAmpl) - iShiftY);
+
+                    for (int i = 1; i < dataProfile.Length; i++)
+                    {
+                        NewPoint = new Point((int)Math.Ceiling(i * fCoeffStep), iHeight - (int)Math.Ceiling(dataProfile[i] * fCoeffAmpl) - iShiftY);
+
+                        grfx.DrawLine(pen, OldPoint, NewPoint);
+
+                        OldPoint = NewPoint;
+                    }
+
+                    if (m_bScaleProfile == true)
+                    {
+                        int iLineLevel1 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[0] / 100f) - iShiftY;
+                        int iLineLevel2 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[1] / 100f) - iShiftY;
+                        int iLineLevel3 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[2] / 100f) - iShiftY;
+
+                        for (int i = 0; i < pictureBoxData.Width; i += 6)
+                        {
+                            grfx.DrawLine(m_PenClipLevel1, i, iLineLevel1, i + 3, iLineLevel1);
+                            grfx.DrawLine(m_PenClipLevel2, i, iLineLevel2, i + 3, iLineLevel2);
+                            grfx.DrawLine(m_PenClipLevel3, i, iLineLevel3, i + 3, iLineLevel3);
+                        }
+                    }
+                }
+                else
+                {
+                    fCoeffStep = pictureBoxData.Height / (float)dataProfile.Length;
+
+                    int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
+
+                    OldPoint = new Point((int)Math.Ceiling(dataProfile[0] * fCoeffAmpl) - iShiftX, 0);
+
+                    for (int i = 1; i < dataProfile.Length; i++)
+                    {
+                        NewPoint = new Point((int)Math.Ceiling(dataProfile[i] * fCoeffAmpl), (int)Math.Ceiling(i * fCoeffStep) - iShiftX);
+
+                        grfx.DrawLine(pen, OldPoint, NewPoint);
+
+                        OldPoint = NewPoint;
+                    }
+
+                    if (m_bScaleProfile == true)
+                    {
+                        int iLineLevel1 = (int)(iHeightProfile * m_fClipLevelArray[0] / 100f - iShiftX);
+                        int iLineLevel2 = (int)(iHeightProfile * m_fClipLevelArray[1] / 100f - iShiftX);
+                        int iLineLevel3 = (int)(iHeightProfile * m_fClipLevelArray[2] / 100f - iShiftX);
+
+                        for (int i = 0; i < pictureBoxData.Height; i += 6)
+                        {
+                            grfx.DrawLine(m_PenClipLevel1, iLineLevel1, i, iLineLevel1, i + 3);
+                            grfx.DrawLine(m_PenClipLevel2, iLineLevel2, i, iLineLevel2, i + 3);
+                            grfx.DrawLine(m_PenClipLevel3, iLineLevel3, i, iLineLevel3, i + 3);
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            //grfx.DrawString("Horizontal Gaussian Correlation: " + String.Format("{0:F1}", m_fCorrelationHorizontal) + "%", myFont, PaletteBrush, new PointF(20, m_AreaRect.Height - 20), m_strfrm);
+            //grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevel1) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalProfileClipLevel1) + "(µm)", myFont, PaletteBrush, new PointF(20, m_AreaRect.Height - 40), m_strfrm);
+            //grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevel2) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalProfileClipLevel2) + "(µm)", myFont, PaletteBrush, new PointF(20, m_AreaRect.Height - 60), m_strfrm);
+
+            //grfx.DrawString("Vertical Gaussian Correlation: " + String.Format("{0:F1}", m_fCorrelationVertical) + "%", myFont, PaletteBrush, new PointF(20, 60), m_strfrm);
+            //grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevel1) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalProfileClipLevel1) + "(µm)", myFont, PaletteBrush, new PointF(20, 40), m_strfrm);
+            //grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevel2) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalProfileClipLevel2) + "(µm)", myFont, PaletteBrush, new PointF(20, 20), m_strfrm);
         }
 
         private void UpdateVisibleAsync(Int64 Timestamp)
@@ -308,7 +404,7 @@ namespace BeamOn_2K
                     else
                         Color = color;
 
-                    bm.ChangePixelFormat(pixelFormat);
+                    bm.pixelFormat = pixelFormat;
                 });
             }
             catch
@@ -338,7 +434,12 @@ namespace BeamOn_2K
                 bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
                 toolStripStatusLabelPixelFormat.Text = (toolStripButtonPixelFormat.Checked == true) ? "12 bpp" : "8 bpp";
 
-                bm.ChangePixelFormat(picturePaletteImage.Format);
+                bm.pixelFormat = picturePaletteImage.Format;
+
+                toolStripButtonTypeProfile.Checked = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum);
+                lineProfileToolStripMenuItem.Checked = !toolStripButtonTypeProfile.Checked;
+                sumProfileToolStripMenuItem.Checked = toolStripButtonTypeProfile.Checked;
+                toolStripStatusLabelTypeProfile.Text = (toolStripButtonTypeProfile.Checked == true) ? "Sum" : "Line";
 
                 trackBarBinning.Maximum = bm.MaxBinning;
                 trackBarBinning.Minimum = bm.MinBinning;
@@ -359,6 +460,10 @@ namespace BeamOn_2K
                 labelExposureMax.Text = trackBarExposure.Maximum.ToString();
 
                 measuringToolStripMenuItem.Checked = bm.Measure;
+
+                scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
+                typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
+                toolStripButtonTypeProfile.Enabled = measuringToolStripMenuItem.Checked;
             }
             else
             {
@@ -375,27 +480,6 @@ namespace BeamOn_2K
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             bm.Stop();
-        }
-
-        private void toolStripButtonPixelFormat_CheckedChanged(object sender, EventArgs e)
-        {
-            ToolStripButton tsb = (ToolStripButton)sender;
-
-            picturePaletteImage.Format = (tsb.Checked == true) ? PixelFormat.Format24bppRgb : PixelFormat.Format8bppIndexed;
-
-            toolStripButtonPixelFormat.Image = (picturePaletteImage.Format == PixelFormat.Format8bppIndexed) ? global::BeamOn_2K.Properties.Resources.black_12bit_mode : global::BeamOn_2K.Properties.Resources.black_8bit_mode;
-
-            bitsPerPixel12ToolStripMenuItem.Checked = toolStripButtonPixelFormat.Checked;
-            bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
-
-            toolStripStatusLabelPixelFormat.Text = (toolStripButtonPixelFormat.Checked == true) ? "12 bpp" : "8 bpp";
-        }
-
-        private void pixelFormatToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ToolStripMenuItem tsb = (ToolStripMenuItem)sender;
-
-            toolStripButtonPixelFormat.Checked = ((tsb.Name.Contains("12") == true) && (picturePaletteImage.Format != PixelFormat.Format24bppRgb));
         }
 
         private void trackBarBinning_Scroll(object sender, EventArgs e)
@@ -427,6 +511,57 @@ namespace BeamOn_2K
         private void measuringToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             bm.Measure = measuringToolStripMenuItem.Checked;
+
+            scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
+            typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
+            toolStripButtonTypeProfile.Enabled = measuringToolStripMenuItem.Checked;
+        }
+
+        private void scaleProfileToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            m_bScaleProfile = scaleProfileToolStripMenuItem.Checked;
+        }
+
+        private void toolStripButtonPixelFormat_CheckedChanged(object sender, EventArgs e)
+        {
+            ToolStripButton tsb = (ToolStripButton)sender;
+
+            picturePaletteImage.Format = (tsb.Checked == true) ? PixelFormat.Format24bppRgb : PixelFormat.Format8bppIndexed;
+
+            toolStripButtonPixelFormat.Image = (picturePaletteImage.Format == PixelFormat.Format8bppIndexed) ? global::BeamOn_2K.Properties.Resources.black_12bit_mode : global::BeamOn_2K.Properties.Resources.black_8bit_mode;
+
+            bitsPerPixel12ToolStripMenuItem.Checked = toolStripButtonPixelFormat.Checked;
+            bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
+
+            toolStripStatusLabelPixelFormat.Text = (toolStripButtonPixelFormat.Checked == true) ? "12 bpp" : "8 bpp";
+
+        }
+
+        private void pixelFormatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem tsb = (ToolStripMenuItem)sender;
+
+            toolStripButtonPixelFormat.Checked = ((tsb.Name.Contains("12") == true) && (picturePaletteImage.Format != PixelFormat.Format24bppRgb));
+        }
+
+        private void typeProfileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem tsb = (ToolStripMenuItem)sender;
+
+            toolStripButtonTypeProfile.Checked = ((tsb.Name.Contains("sum") == true) && (bm.typeProfile != BeamOnCL.BeamOnCL.TypeProfile.tpSum));
+        }
+
+        private void toolStripButtonTypeProfile_CheckedChanged(object sender, EventArgs e)
+        {
+            ToolStripButton tsb = (ToolStripButton)sender;
+
+            bm.typeProfile = (toolStripButtonTypeProfile.Checked == true) ? BeamOnCL.BeamOnCL.TypeProfile.tpSum : BeamOnCL.BeamOnCL.TypeProfile.tpLIne;
+
+            lineProfileToolStripMenuItem.Checked = !toolStripButtonTypeProfile.Checked;
+            sumProfileToolStripMenuItem.Checked = toolStripButtonTypeProfile.Checked;
+
+            toolStripButtonTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpLIne) ? "Sum" : "Line";
+            toolStripStatusLabelTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum) ? "Sum" : "Line";
         }
     }
 }

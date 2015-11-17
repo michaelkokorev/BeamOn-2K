@@ -8,7 +8,6 @@ namespace BeamOnCL
 {
     class Profile
     {
-        public enum DrawOrientation { doHorizontal, doVertical };
         protected Double[] m_sDataProfile = null;
 
         protected RectangleF m_rArea;
@@ -21,18 +20,17 @@ namespace BeamOnCL
         protected Double m_dCos = 0;
         protected Double m_dSin = 0;
 
-        protected UInt16 m_uiMaxValue = 0;
-
         protected PointF m_LeftPoint = new PointF();
         protected PointF m_RightPoint = new PointF();
 
         protected Point m_CrossPoint = new Point();
 
-        Boolean m_bScaleProfile = false;
         double[] delta = new double[4];
 
-        float m_fClipLevel1 = 13.5f;
-        float m_fClipLevel2 = 50f;
+        public Double[] DataProfile
+        {
+            get { return m_sDataProfile; }
+        }
 
         public Profile(Rectangle rArea)
         {
@@ -64,31 +62,50 @@ namespace BeamOnCL
             get { return m_RightPoint; }
         }
 
-        public Boolean ScaleProfile
+        public Double MaxProfile
         {
-            get { return m_bScaleProfile; }
-
-            set { m_bScaleProfile = value; }
+            get { return m_sMaxProfile; }
         }
 
-        public Single ClipLevel2
+        double GetWidth(float iLevel)
         {
-            get { return m_fClipLevel2; }
+            double f_Board;
+            int iLeft, iRight;
+            double f_Left;
+            double f_Right;
 
-            set
-            {
-                if ((value >= 0) && (value <= 100)) m_fClipLevel2 = value;
-            }
-        }
+            if (iLevel >= 100) return (0);
 
-        public Single ClipLevel1
-        {
-            get { return m_fClipLevel1; }
+            f_Board = m_sMaxProfile * iLevel / 100f;
 
-            set
-            {
-                if ((value >= 0) && (value <= 100)) m_fClipLevel1 = value;
-            }
+            if (f_Board <= 0) return (0);
+
+            //if(m_wWidthMetod == M_METOD_DIFF_INS)
+            //{
+            ////Inside
+            //    for (iLeft = iStart; ((iLeft > 0) && (plProf[iLeft] > f_Board)); iLeft--);
+            //    for (iRight = iStart; ((iRight < plProf.Length) && (plProf[iRight] > f_Board)); iRight++) ;
+
+            //    if (plProf[iLeft + 1] <= plProf[iLeft]) return (0);
+            //    f_Left = iLeft + (f_Board - plProf[iLeft]) / (plProf[iLeft + 1] - plProf[iLeft]);
+
+            //    if (plProf[iRight - 1] <= plProf[iRight]) return (0);
+            //    f_Right = iRight - (f_Board - plProf[iRight]) / (plProf[iRight - 1] - plProf[iRight]);
+            //}
+            //else
+            //{
+            // Outside
+            for (iLeft = 0; ((iLeft < m_sDataProfile.Length) && (m_sDataProfile[iLeft] < f_Board)); iLeft++) ;
+            for (iRight = m_sDataProfile.Length - 1; ((iRight > 0) && (m_sDataProfile[iRight] < f_Board)); iRight--) ;
+
+            if ((iLeft == 0) || (m_sDataProfile[iLeft - 1] >= m_sDataProfile[iLeft])) return (0);
+            f_Left = iLeft - (m_sDataProfile[iLeft] - f_Board) / (m_sDataProfile[iLeft] - m_sDataProfile[iLeft - 1]);
+
+            if ((iRight == m_sDataProfile.Length - 1) || (m_sDataProfile[iRight + 1] >= m_sDataProfile[iRight])) return (0);
+            f_Right = iRight + (m_sDataProfile[iRight] - f_Board) / (m_sDataProfile[iRight] - m_sDataProfile[iRight + 1]);
+            //}
+
+            return (f_Right - f_Left);
         }
 
         public virtual void Create(SnapshotBase snapshot)
@@ -105,7 +122,6 @@ namespace BeamOnCL
             {
                 if ((snapshot != null) && (m_sDataProfile != null))
                 {
-                    m_uiMaxValue = (snapshot.GetType() == typeof(Snapshot<byte>)) ? (UInt16)255 : (UInt16)4095;
                     m_sMaxProfile = 0;
                     m_sMinProfile = Double.MaxValue;
 

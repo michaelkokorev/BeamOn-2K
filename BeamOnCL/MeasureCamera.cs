@@ -79,7 +79,7 @@ namespace BeamOnCL
                 m_camera.Parameters[PLCamera.OffsetX].SetValue(0);
                 m_camera.Parameters[PLCamera.OffsetY].SetValue(0);
 
-                CreateData(pixelFormat);
+                this.pixelFormat = pixelFormat;
 
                 StartGrabber();
 
@@ -150,7 +150,7 @@ namespace BeamOnCL
 
         public Rectangle MaxImageRectangle
         {
-            get { return (m_camera != null) ? new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetMaximum(), (int)m_camera.Parameters[PLCamera.Height].GetMaximum()): new Rectangle(); }
+            get { return (m_camera != null) ? new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetMaximum(), (int)m_camera.Parameters[PLCamera.Height].GetMaximum()) : new Rectangle(); }
         }
 
         public Rectangle ImageRectangle
@@ -197,16 +197,21 @@ namespace BeamOnCL
             }
         }
 
-        public void CreateData(PixelFormat pixelFormat)
+        public PixelFormat pixelFormat
         {
-            if (m_camera != null)
-            {
-                m_camera.Parameters[PLCamera.PixelFormat].TrySetValue((pixelFormat == PixelFormat.Format8bppIndexed) ? PLCamera.PixelFormat.Mono8 : PLCamera.PixelFormat.Mono12);
+            get { return (m_camera != null) ? ((m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8) ? PixelFormat.Format8bppIndexed : PixelFormat.Format24bppRgb) : PixelFormat.DontCare; }
 
-                if (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8)
-                    m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
-                else
-                    m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+            set
+            {
+                if (m_camera != null)
+                {
+                    m_camera.Parameters[PLCamera.PixelFormat].TrySetValue((value == PixelFormat.Format8bppIndexed) ? PLCamera.PixelFormat.Mono8 : PLCamera.PixelFormat.Mono12);
+
+                    if (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8)
+                        m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+                    else
+                        m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+                }
             }
         }
 

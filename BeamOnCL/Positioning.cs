@@ -17,6 +17,7 @@ namespace BeamOnCL
         double[] m_dGaussianHorizontal = null;
         double[] m_dGaussianVertical = null;
         double[] m_dProfile45 = null;
+        long[] tmpMax = null;
 
         double m_dProfileVerticalMax = double.MinValue;
         double m_dProfileHorizontalMax = double.MinValue;
@@ -101,6 +102,28 @@ namespace BeamOnCL
             m_dGaussianHorizontal = new double[m_AreaRect.Width];
             m_dGaussianVertical = new double[m_AreaRect.Height];
             m_dProfile45 = new double[m_AreaRect.Width + m_AreaRect.Height];
+
+            tmpMax = new long[Math.Max(m_AreaRect.Height, m_AreaRect.Width)];
+        }
+
+        public Double[] HorizontalProfile
+        {
+            get { return m_dProfileHorizontal; }
+        }
+
+        public Double[] VerticalProfile
+        {
+            get { return m_dProfileVertical; }
+        }
+
+        public Double MaxHorizontalProfile
+        {
+            get { return m_dProfileHorizontalMax; }
+        }
+
+        public Double MaxVerticalProfile
+        {
+            get { return m_dProfileVerticalMax; }
         }
 
         public void GetData(SnapshotBase snapshot)
@@ -190,8 +213,6 @@ namespace BeamOnCL
 
             ArrayFill<double>(m_dProfileHorizontal, 0f);
             ArrayFill<double>(m_dProfileVertical, 0f);
-            ArrayFill<double>(m_dGaussianHorizontal, 0f);
-            ArrayFill<double>(m_dGaussianVertical, 0f);
             ArrayFill<double>(m_dProfile45, 0f);
 
             m_dProfileVerticalMax = double.MinValue;
@@ -226,8 +247,8 @@ namespace BeamOnCL
 
                 if (m_dProfileVertical[i] > f_Threshold)
                 {
-                    l_Sum += m_dProfileVertical[i] / 10000.0;
-                    l_Sum0 += (m_dProfileVertical[i] / 10000.0) * i;
+                    l_Sum += m_dProfileVertical[i];// / 10000.0;
+                    l_Sum0 += m_dProfileVertical[i] * i;// / 10000.0);
                 }
             }
 
@@ -235,7 +256,8 @@ namespace BeamOnCL
 
             m_dProfileVerticalMax -= l_dProfileVerticalMin;
 
-            double fSigma = (float)(l_Sum * 10000.0 / 0.926 / (float)m_dProfileVerticalMax / Math.Sqrt(Math.PI * 2));
+            //double fSigma = (float)(l_Sum * 10000.0 / 0.926 / (float)m_dProfileVerticalMax / Math.Sqrt(Math.PI * 2));
+            double fSigma = (float)(l_Sum / 0.926 / (float)m_dProfileVerticalMax / Math.Sqrt(Math.PI * 2));
 
             if (fSigma > 0)
             {
@@ -276,8 +298,8 @@ namespace BeamOnCL
 
                 if (m_dProfileHorizontal[i] > f_Threshold)
                 {
-                    l_Sum += m_dProfileHorizontal[i] / 10000.0;
-                    l_Sum0 += (m_dProfileHorizontal[i] / 10000.0) * i;
+                    l_Sum += m_dProfileHorizontal[i];// / 10000.0;
+                    l_Sum0 += m_dProfileHorizontal[i] * i;// / 10000.0);
                 }
             }
 
@@ -285,7 +307,8 @@ namespace BeamOnCL
 
             m_dProfileHorizontalMax -= l_dProfileHorizontalMin;
 
-            fSigma = (float)(l_Sum * 10000.0 / 0.926 / (float)m_dProfileHorizontalMax / Math.Sqrt(Math.PI * 2));
+            //fSigma = (float)(l_Sum * 10000.0 / 0.926 / (float)m_dProfileHorizontalMax / Math.Sqrt(Math.PI * 2));
+            fSigma = (float)(l_Sum / 0.926 / (float)m_dProfileHorizontalMax / Math.Sqrt(Math.PI * 2));
 
             if (fSigma > 0)
             {
@@ -688,27 +711,14 @@ namespace BeamOnCL
             float fLeft, fRight;
             int iPeak = 0;
 
-            long[] tmpProf = new long[Math.Max(m_AreaRect.Height, m_AreaRect.Width)];
-            long[] tmpMax = new long[Math.Max(m_AreaRect.Height, m_AreaRect.Width)];
-            long tmpMin;
-
             for (int i = 0; i < m_AreaRect.Width; i++)
             {
-                for (int j = 0; j < m_AreaRect.Height; j++) tmpProf[j] = snapshot.GetPixelColor(j * m_AreaRect.Width + i);
+                tmpMax[i] = 0;
 
-                tmpMin = tmpMax[i] = tmpProf[0];
-
-                for (int j = 1; j < m_AreaRect.Height; j++)
+                for (int j = 0, iOffset = i; j < m_AreaRect.Height; j++, iOffset += m_AreaRect.Width)
                 {
-                    n_CurrentColor = tmpProf[j];
-
-                    if (tmpMax[i] < n_CurrentColor)
-                        tmpMax[i] = n_CurrentColor;
-                    else if (tmpMin > n_CurrentColor)
-                        tmpMin = n_CurrentColor;
+                    if (tmpMax[i] < snapshot.GetPixelColor(iOffset)) tmpMax[i] = snapshot.GetPixelColor(iOffset);
                 }
-
-                tmpMax[i] -= tmpMin;
 
                 if (n_MaxColor < tmpMax[i])
                 {
@@ -723,8 +733,6 @@ namespace BeamOnCL
 
             if (n_MaxColor > 0)
             {
-                //01.06.14
-                //		f_Threshold = (float)((n_MaxColor - n_MinColor) * 0.5f + n_MinColor);
                 f_Threshold = (float)((n_MaxColor - n_MinColor) * 0.135f + n_MinColor);
 
                 for (iLeft = 0; ((iLeft < iPeak) && (tmpMax[iLeft] < f_Threshold)); iLeft++) ;
@@ -732,7 +740,7 @@ namespace BeamOnCL
 
                 fLeft = (iLeft > 0) ? (float)(iLeft - 1 + (f_Threshold - tmpMax[iLeft - 1]) / (float)(tmpMax[iLeft] - tmpMax[iLeft - 1])) : (float)0;
                 fRight = (iRight < (m_AreaRect.Width - 1)) ? iRight + 1 - (f_Threshold - tmpMax[iRight + 1]) / (float)(tmpMax[iRight] - tmpMax[iRight + 1]) : m_AreaRect.Width - 1;
-                //01.06.14
+
                 fWidth = (float)(2 * m_CoefAlgoritmHor * (fRight - fLeft));
 
                 l_Sum = l_Sum0 = 0;
@@ -750,9 +758,6 @@ namespace BeamOnCL
 
                 fCentroid = (float)(l_Sum0 / l_Sum);
 
-                //		iRadius = (int)(m_CoefAlgoritm * 0.764297584 * l_Sum / (float)n_MaxColor);
-                //		iRadius = (int)(m_CoefAlgoritm * 0.50406319 * l_Sum / (float)n_MaxColor);
-
                 fLeftTmp = fCentroid - fWidth / 2f;
             }
 
@@ -761,21 +766,12 @@ namespace BeamOnCL
 
             for (int i = 0; i < m_AreaRect.Height; i++)
             {
-                for (int j = 0; j < m_AreaRect.Width; j++) tmpProf[j] = snapshot.GetPixelColor(j + i * m_AreaRect.Width);
+                tmpMax[i] = 0;
 
-                tmpMin = tmpMax[i] = tmpProf[0];
-
-                for (int j = 1; j < m_AreaRect.Width; j++)
+                for (int j = 0, iOffset = i * m_AreaRect.Width; j < m_AreaRect.Width; j++, iOffset++)
                 {
-                    n_CurrentColor = tmpProf[j];
-
-                    if (tmpMax[i] < n_CurrentColor)
-                        tmpMax[i] = n_CurrentColor;
-                    else if (tmpMin > n_CurrentColor)
-                        tmpMin = n_CurrentColor;
+                    if (tmpMax[i] < snapshot.GetPixelColor(iOffset)) tmpMax[i] = snapshot.GetPixelColor(iOffset);
                 }
-
-                tmpMax[i] -= tmpMin;
 
                 if (n_MaxColor < tmpMax[i])
                 {
@@ -790,18 +786,14 @@ namespace BeamOnCL
 
             if (n_MaxColor > 0)
             {
-                //01.06.14
-                //		f_Threshold = (float)((n_MaxColor - n_MinColor) * 0.5f + n_MinColor);
                 f_Threshold = (float)((n_MaxColor - n_MinColor) * 0.135f + n_MinColor);
-
 
                 for (iLeft = 0; ((iLeft < iPeak) && (tmpMax[iLeft] < f_Threshold)); iLeft++) ;
                 for (iRight = m_AreaRect.Height - 1; ((iRight > iPeak) && (tmpMax[iRight] < f_Threshold)); iRight--) ;
 
-
                 fLeft = (iLeft > 0) ? (float)(iLeft - 1 + (f_Threshold - tmpMax[iLeft - 1]) / (float)(tmpMax[iLeft] - tmpMax[iLeft - 1])) : (float)0;
                 fRight = (iRight < (m_AreaRect.Height - 1)) ? iRight + 1 - (f_Threshold - tmpMax[iRight + 1]) / (float)(tmpMax[iRight] - tmpMax[iRight + 1]) : m_AreaRect.Height - 1;
-                //01.06.14
+
                 fHeight = (float)(2 * m_CoefAlgoritmVert * (fRight - fLeft));
 
                 l_Sum = l_Sum0 = 0;
@@ -818,9 +810,6 @@ namespace BeamOnCL
                 }
 
                 fCentroid = (float)(l_Sum0 / l_Sum);
-
-                //		iRadius = (int)(m_CoefAlgoritm * 0.764297584 * l_Sum / (float)n_MaxColor);
-                //		iRadius = (int)(m_CoefAlgoritm * 0.50406319 * l_Sum / (float)n_MaxColor);
 
                 fTopTmp = fCentroid - fHeight / 2f;
             }

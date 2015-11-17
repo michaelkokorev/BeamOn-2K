@@ -28,7 +28,6 @@ namespace BeamOnCL
             {
                 if ((snapshot != null) && (m_sDataProfile != null))
                 {
-                    m_uiMaxValue = (snapshot.GetType() == typeof(Snapshot<byte>)) ? (UInt16)255 : (UInt16)4095;
                     m_sMaxProfile = 0;
                     m_sMinProfile = Double.MaxValue;
 

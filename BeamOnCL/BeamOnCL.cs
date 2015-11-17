@@ -17,6 +17,8 @@ namespace BeamOnCL
         Positioning m_pPositioning = null;
 
         Point m_pCrossPosition = new Point(0, 0);
+        public enum TypeProfile { tpLIne, tpSum };
+        TypeProfile m_tpProfile = TypeProfile.tpLIne;
 
         Boolean m_bMeasure = false;
 
@@ -43,6 +45,12 @@ namespace BeamOnCL
             set { m_bMeasure = value; }
         }
 
+        public TypeProfile typeProfile
+        {
+            get { return m_tpProfile; }
+            set { m_tpProfile = value; }
+        }
+
         public Point CrossPosition
         {
             get { return m_pCrossPosition; }
@@ -53,6 +61,46 @@ namespace BeamOnCL
                 m_lpHorizontal.CrossPoint = m_pCrossPosition;
                 m_lpVertical.CrossPoint = m_pCrossPosition;
             }
+        }
+
+        public PointF lineProfileHorizontalLeft
+        {
+            get { return m_lpHorizontal.LeftPoint; }
+        }
+
+        public PointF lineProfileHorizontalRight
+        {
+            get { return m_lpHorizontal.RightPoint; }
+        }
+
+        public PointF lineProfileVerticalLeft
+        {
+            get { return m_lpVertical.LeftPoint; }
+        }
+
+        public PointF lineProfileVerticalRight
+        {
+            get { return m_lpVertical.RightPoint; }
+        }
+
+        public Double[] profileHorizontal
+        {
+            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpHorizontal.DataProfile : m_pPositioning.HorizontalProfile; }
+        }
+
+        public Double[] profileVertical
+        {
+            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpVertical.DataProfile : m_pPositioning.VerticalProfile; }
+        }
+
+        public Double maxProfileHorizontal
+        {
+            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpHorizontal.MaxProfile : m_pPositioning.MaxHorizontalProfile; }
+        }
+
+        public Double maxProfileVertical
+        {
+            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpVertical.MaxProfile : m_pPositioning.MaxVerticalProfile; }
         }
 
         void mc_OnNewDataReceved(object sender, MeasureCamera.NewDataRecevedEventArgs e)
@@ -92,15 +140,20 @@ namespace BeamOnCL
             return bRet;
         }
 
-        public void ChangePixelFormat(PixelFormat pixelFormat)
+        public PixelFormat pixelFormat
         {
-            mc.StopGrabber();
+            get{return mc.pixelFormat;}
 
-            mc.CreateData(pixelFormat);
+            set
+            {
+                mc.StopGrabber();
 
-            CreateProfile();
+                mc.pixelFormat = value;
 
-            mc.StartGrabber();
+                CreateProfile();
+
+                mc.StartGrabber();
+            }
         }
 
         public void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
