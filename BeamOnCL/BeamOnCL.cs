@@ -20,8 +20,6 @@ namespace BeamOnCL
         public enum TypeProfile { tpLIne, tpSum };
         TypeProfile m_tpProfile = TypeProfile.tpLIne;
 
-        Boolean m_bMeasure = false;
-
         public delegate void ImageReceved(object sender, MeasureCamera.NewDataRecevedEventArgs e);
         public event ImageReceved OnImageReceved;
 
@@ -36,13 +34,6 @@ namespace BeamOnCL
         void mc_OnChangeStatusCamera(object sender, EventArgs e)
         {
             //throw new NotImplementedException();
-        }
-
-        public Boolean Measure
-        {
-            get { return m_bMeasure; }
-
-            set { m_bMeasure = value; }
         }
 
         public TypeProfile typeProfile
@@ -83,36 +74,26 @@ namespace BeamOnCL
             get { return m_lpVertical.RightPoint; }
         }
 
-        public Double[] profileHorizontal
+        public Profile profileHorizontal
         {
-            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpHorizontal.DataProfile : m_pPositioning.HorizontalProfile; }
+            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpHorizontal : m_pPositioning.HorizontalProfile; }
         }
 
-        public Double[] profileVertical
+        public Profile profileVertical
         {
-            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpVertical.DataProfile : m_pPositioning.VerticalProfile; }
+            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpVertical : m_pPositioning.VerticalProfile; }
         }
 
-        public Double maxProfileHorizontal
+        public void GetMeasure(SnapshotBase snapshot)
         {
-            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpHorizontal.MaxProfile : m_pPositioning.MaxHorizontalProfile; }
-        }
+            m_pPositioning.GetData(snapshot);
 
-        public Double maxProfileVertical
-        {
-            get { return (m_tpProfile == TypeProfile.tpLIne) ? m_lpVertical.MaxProfile : m_pPositioning.MaxVerticalProfile; }
+            m_lpHorizontal.Create(snapshot);
+            m_lpVertical.Create(snapshot);
         }
 
         void mc_OnNewDataReceved(object sender, MeasureCamera.NewDataRecevedEventArgs e)
         {
-            if (m_bMeasure == true)
-            {
-                m_pPositioning.GetData(mc.Snapshot);//.Create(m_snapshot);
-
-                m_lpHorizontal.Create(mc.Snapshot);
-                m_lpVertical.Create(mc.Snapshot);
-            }
-
             OnImageReceved(sender, e);
         }
 
@@ -135,14 +116,14 @@ namespace BeamOnCL
         {
             Boolean bRet = mc.Start(pixelFormat);
 
-            CreateProfile();
+            if (bRet == true) CreateProfile();
 
             return bRet;
         }
 
         public PixelFormat pixelFormat
         {
-            get{return mc.pixelFormat;}
+            get { return mc.pixelFormat; }
 
             set
             {

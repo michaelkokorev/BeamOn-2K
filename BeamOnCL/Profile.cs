@@ -6,9 +6,10 @@ using System.Drawing;
 
 namespace BeamOnCL
 {
-    class Profile
+    public class Profile
     {
-        protected Double[] m_sDataProfile = null;
+        public Double[] m_sDataProfile = null;
+        public Gaussian m_sGaussian = null;
 
         protected RectangleF m_rArea;
         protected Double m_sMaxProfile;
@@ -25,7 +26,14 @@ namespace BeamOnCL
 
         protected Point m_CrossPoint = new Point();
 
+        protected int m_iCentroid = 0;
+
         double[] delta = new double[4];
+
+        public Gaussian GaussianData
+        {
+            get { return m_sGaussian; }
+        }
 
         public Double[] DataProfile
         {
@@ -65,9 +73,10 @@ namespace BeamOnCL
         public Double MaxProfile
         {
             get { return m_sMaxProfile; }
+            set { m_sMaxProfile = value; }
         }
 
-        double GetWidth(float iLevel)
+        public double GetWidth(float iLevel)
         {
             double f_Board;
             int iLeft, iRight;
@@ -117,6 +126,9 @@ namespace BeamOnCL
             SizeF sfp = new SizeF(-(float)m_dSin, (float)m_dCos);
             //SizeF sfp = new SizeF(-(float)m_dSin, -(float)m_dCos);
             SizeF sfp1 = new SizeF((float)m_dSin, (float)m_dCos);
+
+            Double l_Sum = 0;
+            Double l_Sum0 = 0;
 
             try
             {
@@ -192,8 +204,26 @@ namespace BeamOnCL
                         dot += sf;
                     }
 
-                    for (int i = 0; i < m_sDataProfile.Length; i++) m_sDataProfile[i] -= m_sMinProfile;
+                    float f_Threshold = (float)((m_sMaxProfile - m_sMinProfile) * 0.2);
+
+                    for (int i = 0; i < m_sDataProfile.Length; i++)
+                    {
+                        m_sDataProfile[i] = (m_sDataProfile[i] > m_sMinProfile) ? m_sDataProfile[i] - m_sMinProfile : 0;
+
+                        if (m_sDataProfile[i] > f_Threshold)
+                        {
+                            l_Sum += m_sDataProfile[i];
+                            l_Sum0 += m_sDataProfile[i] * i;
+                        }
+                    }
+
                     m_sMaxProfile -= m_sMinProfile;
+
+
+                    m_iCentroid = (l_Sum == 0) ? (int)(snapshot.Height / 2f) : (int)(l_Sum0 / l_Sum);
+
+
+                    m_sGaussian.Create(m_sDataProfile, m_sMaxProfile, m_iCentroid, l_Sum);
                 }
             }
             catch { }
@@ -330,6 +360,42 @@ namespace BeamOnCL
             int LenghtProfile = (int)Math.Ceiling(Math.Sqrt(((m_RightPoint.X - m_LeftPoint.X) * (m_RightPoint.X - m_LeftPoint.X)) + ((m_RightPoint.Y - m_LeftPoint.Y) * (m_RightPoint.Y - m_LeftPoint.Y))));
 
             m_sDataProfile = new double[LenghtProfile];
+            m_sGaussian = new Gaussian(LenghtProfile);
+        }
+
+        public void ClearProfile()
+        {
+            ArrayFill<double>(m_sDataProfile, 0f);
+        }
+
+        public static void ArrayFill<T>(T[] arrayToFill, T fillValue)
+        {
+            // if called with a single value, wrap the value in an array and call the main function
+            ArrayFill<T>(arrayToFill, new T[] { fillValue });
+        }
+
+        public static void ArrayFill<T>(T[] arrayToFill, T[] fillValue)
+        {
+            if (fillValue.Length >= arrayToFill.Length)
+            {
+                throw new ArgumentException("fillValue array length must be smaller than length of arrayToFill");
+            }
+
+            // set the initial array value
+            Array.Copy(fillValue, arrayToFill, fillValue.Length);
+
+            int arrayToFillHalfLength = arrayToFill.Length / 2;
+
+            for (int i = fillValue.Length; i < arrayToFill.Length; i *= 2)
+            {
+                int copyLength = i;
+                if (i > arrayToFillHalfLength)
+                {
+                    copyLength = arrayToFill.Length - i;
+                }
+
+                Array.Copy(arrayToFill, 0, arrayToFill, i, copyLength);
+            }
         }
     }
 }

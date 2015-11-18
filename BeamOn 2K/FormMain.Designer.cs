@@ -113,6 +113,7 @@
             this.labelPositionYValue = new System.Windows.Forms.Label();
             this.labelPositionY = new System.Windows.Forms.Label();
             this.labelPositionX = new System.Windows.Forms.Label();
+            this.gaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -248,7 +249,8 @@
             this.toolStripMenuItem3,
             this.measuringToolStripMenuItem,
             this.scaleProfileToolStripMenuItem,
-            this.typeProfileToolStripMenuItem});
+            this.typeProfileToolStripMenuItem,
+            this.gaussianToolStripMenuItem});
             this.propertyToolStripMenuItem.Name = "propertyToolStripMenuItem";
             this.propertyToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
             this.propertyToolStripMenuItem.Text = "&Property";
@@ -309,14 +311,14 @@
             // lineProfileToolStripMenuItem
             // 
             this.lineProfileToolStripMenuItem.Name = "lineProfileToolStripMenuItem";
-            this.lineProfileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.lineProfileToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.lineProfileToolStripMenuItem.Text = "&Line Profile";
             this.lineProfileToolStripMenuItem.Click += new System.EventHandler(this.typeProfileToolStripMenuItem_Click);
             // 
             // sumProfileToolStripMenuItem
             // 
             this.sumProfileToolStripMenuItem.Name = "sumProfileToolStripMenuItem";
-            this.sumProfileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.sumProfileToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.sumProfileToolStripMenuItem.Text = "&Sum Profile";
             this.sumProfileToolStripMenuItem.Click += new System.EventHandler(this.typeProfileToolStripMenuItem_Click);
             // 
@@ -370,6 +372,10 @@
             // toolStripStatusLabelTypeProfile
             // 
             this.toolStripStatusLabelTypeProfile.AutoSize = false;
+            this.toolStripStatusLabelTypeProfile.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Top) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right) 
+            | System.Windows.Forms.ToolStripStatusLabelBorderSides.Bottom)));
+            this.toolStripStatusLabelTypeProfile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripStatusLabelTypeProfile.Name = "toolStripStatusLabelTypeProfile";
             this.toolStripStatusLabelTypeProfile.Size = new System.Drawing.Size(100, 19);
             // 
@@ -1057,6 +1063,14 @@
             this.labelPositionX.Text = "X";
             this.labelPositionX.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // gaussianToolStripMenuItem
+            // 
+            this.gaussianToolStripMenuItem.CheckOnClick = true;
+            this.gaussianToolStripMenuItem.Name = "gaussianToolStripMenuItem";
+            this.gaussianToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.gaussianToolStripMenuItem.Text = "&Gaussian";
+            this.gaussianToolStripMenuItem.Click += new System.EventHandler(this.gaussianToolStripMenuItem_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1203,6 +1217,7 @@
         private System.Windows.Forms.ToolStripMenuItem sumProfileToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton toolStripButtonTypeProfile;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelTypeProfile;
+        private System.Windows.Forms.ToolStripMenuItem gaussianToolStripMenuItem;
     }
 }
 

@@ -12,19 +12,13 @@ namespace BeamOnCL
 
         float m_fPixelSize = 5.86f;
 
-        double[] m_dProfileHorizontal = null;
-        double[] m_dProfileVertical = null;
-        double[] m_dGaussianHorizontal = null;
-        double[] m_dGaussianVertical = null;
+        SumProfile m_dProfileHorizontal = null;
+        SumProfile m_dProfileVertical = null;
+
         double[] m_dProfile45 = null;
         long[] tmpMax = null;
 
-        double m_dProfileVerticalMax = double.MinValue;
-        double m_dProfileHorizontalMax = double.MinValue;
         double m_dProfile45Max = double.MinValue;
-
-        double m_fCorrelationHorizontal = 0f;
-        double m_fCorrelationVertical = 0f;
 
         double m_CoefAlgoritmVert = 1.5f;
         double m_CoefAlgoritmHor = 1.5f;
@@ -35,13 +29,6 @@ namespace BeamOnCL
         Area m_WorkingAreaRect;
         Area m_EllipseArea = new Area();
         PointF m_pfOldCentroid = new PointF();
-
-        float m_fClipLevel1 = 13.5f;
-        float m_fClipLevel2 = 50f;
-        float m_fWidthHorizontalProfileClipLevel1 = 0f;
-        float m_fWidthHorizontalProfileClipLevel2 = 0f;
-        float m_fWidthVerticalProfileClipLevel1 = 0f;
-        float m_fWidthVerticalProfileClipLevel2 = 0f;
 
         public Area Ellipse
         {
@@ -60,36 +47,6 @@ namespace BeamOnCL
             set { if ((value > 0) && (value < 100)) m_fLevel = value; }
         }
 
-        public static void ArrayFill<T>(T[] arrayToFill, T fillValue)
-        {
-            // if called with a single value, wrap the value in an array and call the main function
-            ArrayFill<T>(arrayToFill, new T[] { fillValue });
-        }
-
-        public static void ArrayFill<T>(T[] arrayToFill, T[] fillValue)
-        {
-            if (fillValue.Length >= arrayToFill.Length)
-            {
-                throw new ArgumentException("fillValue array length must be smaller than length of arrayToFill");
-            }
-
-            // set the initial array value
-            Array.Copy(fillValue, arrayToFill, fillValue.Length);
-
-            int arrayToFillHalfLength = arrayToFill.Length / 2;
-
-            for (int i = fillValue.Length; i < arrayToFill.Length; i *= 2)
-            {
-                int copyLength = i;
-                if (i > arrayToFillHalfLength)
-                {
-                    copyLength = arrayToFill.Length - i;
-                }
-
-                Array.Copy(arrayToFill, 0, arrayToFill, i, copyLength);
-            }
-        }
-
         public Positioning(Rectangle rect)
         {
             m_AreaRect = rect;
@@ -97,33 +54,25 @@ namespace BeamOnCL
             m_WorkingAreaRect = m_AreaRect;
             m_WorkingAreaRect.Type = Area.Figure.enRectangle;
 
-            m_dProfileHorizontal = new double[m_AreaRect.Width];
-            m_dProfileVertical = new double[m_AreaRect.Height];
-            m_dGaussianHorizontal = new double[m_AreaRect.Width];
-            m_dGaussianVertical = new double[m_AreaRect.Height];
+            m_dProfileHorizontal = new SumProfile(m_AreaRect);
+            m_dProfileHorizontal.Angle = 0f;
+
+            m_dProfileVertical = new SumProfile(m_AreaRect);
+            m_dProfileVertical.Angle = Math.PI / 2f;
+
             m_dProfile45 = new double[m_AreaRect.Width + m_AreaRect.Height];
 
             tmpMax = new long[Math.Max(m_AreaRect.Height, m_AreaRect.Width)];
         }
 
-        public Double[] HorizontalProfile
+        public Profile HorizontalProfile
         {
             get { return m_dProfileHorizontal; }
         }
 
-        public Double[] VerticalProfile
+        public Profile VerticalProfile
         {
             get { return m_dProfileVertical; }
-        }
-
-        public Double MaxHorizontalProfile
-        {
-            get { return m_dProfileHorizontalMax; }
-        }
-
-        public Double MaxVerticalProfile
-        {
-            get { return m_dProfileVerticalMax; }
         }
 
         public void GetData(SnapshotBase snapshot)
@@ -188,148 +137,108 @@ namespace BeamOnCL
                     if (bFlagFirst == true) continue;
                 }
             }
+
+            Create2(snapshot);
         }
 
         public void Create(SnapshotBase snapshot)
         {
             UInt16 uiData = 0;
-            int iShift = 0;
             double l_dProfileVerticalMin = double.MaxValue;
             double l_dProfileHorizontalMin = double.MaxValue;
-            double l_dProfile45Min = double.MaxValue;
-
-            int l_iProfileVerticalPeak = 0;
-            int l_iProfileHorizontalPeak = 0;
-            int l_iProfile45Peak = 0;
+            double l_dProfileVerticalMax = 0;
+            double l_dProfileHorizontalMax = 0;
 
             float f_Threshold = 0;
             double l_Sum = 0;
             double l_Sum0 = 0;
-            double f_Coeff = 0;
-
-            int l_Y, l_X, nCount;
 
             Rectangle rect = m_WorkingAreaRect;
 
-            ArrayFill<double>(m_dProfileHorizontal, 0f);
-            ArrayFill<double>(m_dProfileVertical, 0f);
-            ArrayFill<double>(m_dProfile45, 0f);
+            m_dProfileHorizontal.ClearProfile();
+            m_dProfileVertical.ClearProfile();
 
-            m_dProfileVerticalMax = double.MinValue;
-            m_dProfileHorizontalMax = double.MinValue;
             m_dProfile45Max = double.MinValue;
 
             for (int i = rect.Top; i < rect.Bottom; i++)
             {
-                iShift = i * snapshot.Width + rect.Left;
-
-                for (int j = rect.Left; j < rect.Right; j++, iShift++)
+                for (int j = rect.Left, iShift = j + i * snapshot.Width; j < rect.Right; j++, iShift++)
                 {
                     uiData = snapshot.GetPixelColor(iShift);
-                    m_dProfileHorizontal[j] += uiData;
-                    m_dProfileVertical[i] += uiData;
+                    m_dProfileHorizontal.m_sDataProfile[j] += uiData;
+                    m_dProfileVertical.m_sDataProfile[i] += uiData;
                 }
 
-                if (l_dProfileVerticalMin > m_dProfileVertical[i])
-                    l_dProfileVerticalMin = m_dProfileVertical[i];
-                else if (m_dProfileVerticalMax < m_dProfileVertical[i])
-                {
-                    m_dProfileVerticalMax = m_dProfileVertical[i];
-                    l_iProfileVerticalPeak = i;
-                }
+                if (l_dProfileVerticalMin > m_dProfileVertical.m_sDataProfile[i])
+                    l_dProfileVerticalMin = m_dProfileVertical.m_sDataProfile[i];
+                else if (l_dProfileVerticalMax < m_dProfileVertical.m_sDataProfile[i])
+                    l_dProfileVerticalMax = m_dProfileVertical.m_sDataProfile[i];
             }
 
-            f_Threshold = (float)((m_dProfileVerticalMax - l_dProfileVerticalMin) * 0.2);
+            f_Threshold = (float)((l_dProfileVerticalMax - l_dProfileVerticalMin) * 0.2);
 
             for (int i = rect.Top; i < rect.Bottom; i++)
             {
-                m_dProfileVertical[i] = (m_dProfileVertical[i] > l_dProfileVerticalMin) ? m_dProfileVertical[i] - l_dProfileVerticalMin : 0;
+                m_dProfileVertical.m_sDataProfile[i] = (m_dProfileVertical.m_sDataProfile[i] > l_dProfileVerticalMin) ? m_dProfileVertical.m_sDataProfile[i] - l_dProfileVerticalMin : 0;
 
-                if (m_dProfileVertical[i] > f_Threshold)
+                if (m_dProfileVertical.m_sDataProfile[i] > f_Threshold)
                 {
-                    l_Sum += m_dProfileVertical[i];// / 10000.0;
-                    l_Sum0 += m_dProfileVertical[i] * i;// / 10000.0);
+                    l_Sum += m_dProfileVertical.m_sDataProfile[i];
+                    l_Sum0 += m_dProfileVertical.m_sDataProfile[i] * i;
                 }
             }
 
             m_EllipseArea.Centroid = new PointF(m_EllipseArea.Centroid.X, (l_Sum == 0) ? (float)(snapshot.Height / 2f) : (float)(l_Sum0 / l_Sum));
 
-            m_dProfileVerticalMax -= l_dProfileVerticalMin;
+            l_dProfileVerticalMax -= l_dProfileVerticalMin;
 
-            //double fSigma = (float)(l_Sum * 10000.0 / 0.926 / (float)m_dProfileVerticalMax / Math.Sqrt(Math.PI * 2));
-            double fSigma = (float)(l_Sum / 0.926 / (float)m_dProfileVerticalMax / Math.Sqrt(Math.PI * 2));
+            m_dProfileVertical.m_sGaussian.Create(m_dProfileVertical.m_sDataProfile, l_dProfileVerticalMax, (int)m_EllipseArea.Centroid.Y, l_Sum);
 
-            if (fSigma > 0)
+            for (int i = rect.Left; i < rect.Right; i++)
             {
-                l_Sum = l_Sum0 = 0;
-
-                for (int i = rect.Top; i < rect.Bottom; i++)
-                {
-                    f_Coeff = (i - m_EllipseArea.Centroid.Y) / fSigma;
-                    m_dGaussianVertical[i] = m_dProfileVerticalMax * Math.Exp(-f_Coeff * f_Coeff / 2);
-
-                    f_Coeff = m_dGaussianVertical[i];
-                    l_Sum += f_Coeff * f_Coeff;
-                    f_Coeff = m_dProfileVertical[i] - m_dGaussianVertical[i];
-                    l_Sum0 += f_Coeff * f_Coeff;
-                }
-
-                m_fCorrelationVertical = 100 * (1 - Math.Sqrt(l_Sum0 / (l_Sum0 + l_Sum)));
+                if (l_dProfileHorizontalMin > m_dProfileHorizontal.m_sDataProfile[i])
+                    l_dProfileHorizontalMin = m_dProfileHorizontal.m_sDataProfile[i];
+                else if (l_dProfileHorizontalMax < m_dProfileHorizontal.m_sDataProfile[i])
+                    l_dProfileHorizontalMax = m_dProfileHorizontal.m_sDataProfile[i];
             }
 
-            f_Threshold = (float)((m_dProfileVerticalMax - l_dProfileVerticalMin) * 0.2);
-
-            for (int i = rect.Left; i < rect.Right; i++, iShift++)
-            {
-                if (l_dProfileHorizontalMin > m_dProfileHorizontal[i])
-                    l_dProfileHorizontalMin = m_dProfileHorizontal[i];
-                else if (m_dProfileHorizontalMax < m_dProfileHorizontal[i])
-                {
-                    m_dProfileHorizontalMax = m_dProfileHorizontal[i];
-                    l_iProfileHorizontalPeak = i;
-                }
-            }
+            f_Threshold = (float)((l_dProfileHorizontalMax - l_dProfileHorizontalMin) * 0.2);
 
             l_Sum = l_Sum0 = 0;
 
-            for (int i = rect.Left; i < rect.Right; i++, iShift++)
+            for (int i = rect.Left; i < rect.Right; i++)
             {
-                m_dProfileHorizontal[i] = (m_dProfileHorizontal[i] > l_dProfileHorizontalMin) ? m_dProfileHorizontal[i] - l_dProfileHorizontalMin : 0;
+                m_dProfileHorizontal.m_sDataProfile[i] = (m_dProfileHorizontal.m_sDataProfile[i] > l_dProfileHorizontalMin) ? m_dProfileHorizontal.m_sDataProfile[i] - l_dProfileHorizontalMin : 0;
 
-                if (m_dProfileHorizontal[i] > f_Threshold)
+                if (m_dProfileHorizontal.m_sDataProfile[i] > f_Threshold)
                 {
-                    l_Sum += m_dProfileHorizontal[i];// / 10000.0;
-                    l_Sum0 += m_dProfileHorizontal[i] * i;// / 10000.0);
+                    l_Sum += m_dProfileHorizontal.m_sDataProfile[i];
+                    l_Sum0 += m_dProfileHorizontal.m_sDataProfile[i] * i;
                 }
             }
 
             m_EllipseArea.Centroid = new PointF((l_Sum == 0) ? (float)(snapshot.Width / 2f) : (float)(l_Sum0 / l_Sum), m_EllipseArea.Centroid.Y);
 
-            m_dProfileHorizontalMax -= l_dProfileHorizontalMin;
+            l_dProfileHorizontalMax -= l_dProfileHorizontalMin;
 
-            //fSigma = (float)(l_Sum * 10000.0 / 0.926 / (float)m_dProfileHorizontalMax / Math.Sqrt(Math.PI * 2));
-            fSigma = (float)(l_Sum / 0.926 / (float)m_dProfileHorizontalMax / Math.Sqrt(Math.PI * 2));
+            m_dProfileHorizontal.m_sGaussian.Create(m_dProfileHorizontal.m_sDataProfile, l_dProfileHorizontalMax, (int)m_EllipseArea.Centroid.X, l_Sum);
 
-            if (fSigma > 0)
-            {
-                l_Sum = l_Sum0 = 0;
+            m_dProfileHorizontal.MaxProfile = l_dProfileHorizontalMax;
+            m_dProfileVertical.MaxProfile = l_dProfileVerticalMax;
+        }
 
-                for (int i = rect.Left; i < rect.Right; i++)
-                {
-                    f_Coeff = (i - m_EllipseArea.Centroid.X) / fSigma;
-                    m_dGaussianHorizontal[i] = m_dProfileHorizontalMax * Math.Exp(-f_Coeff * f_Coeff / 2);
-
-                    f_Coeff = m_dGaussianHorizontal[i];
-                    l_Sum += f_Coeff * f_Coeff;
-                    f_Coeff = m_dProfileHorizontal[i] - m_dGaussianHorizontal[i];
-                    l_Sum0 += f_Coeff * f_Coeff;
-                }
-
-                m_fCorrelationHorizontal = (float)(100 * (1 - Math.Sqrt(l_Sum0 / (l_Sum0 + l_Sum))));
-            }
+        public void Create2(SnapshotBase snapshot)
+        {
+            double l_dProfile45Min = double.MaxValue;
+            int l_iProfile45Peak = 0;
+            int l_Y, l_X, nCount;
 
             int iLeft = m_dProfile45.Length;
             int iRight = 0;
+
+            Rectangle rect = m_WorkingAreaRect;
+
+            Profile.ArrayFill<double>(m_dProfile45, 0f);
 
             for (int i = 0; i < m_dProfile45.Length; i++)
             {
@@ -368,13 +277,9 @@ namespace BeamOnCL
 
             m_dProfile45Max -= l_dProfile45Min;
 
-            m_fWidthHorizontalProfileClipLevel1 = (float)(GetWidth(m_dProfileHorizontal, m_fClipLevel1, (int)m_EllipseArea.Centroid.X, m_dProfileHorizontalMax) * m_fPixelSize);
-            m_fWidthHorizontalProfileClipLevel2 = (float)(GetWidth(m_dProfileHorizontal, m_fClipLevel2, (int)m_EllipseArea.Centroid.X, m_dProfileHorizontalMax) * m_fPixelSize);
-            m_fWidthVerticalProfileClipLevel1 = (float)(GetWidth(m_dProfileVertical, m_fClipLevel1, (int)m_EllipseArea.Centroid.Y, m_dProfileVerticalMax) * m_fPixelSize);
-            m_fWidthVerticalProfileClipLevel2 = (float)(GetWidth(m_dProfileVertical, m_fClipLevel2, (int)m_EllipseArea.Centroid.Y, m_dProfileVerticalMax) * m_fPixelSize);
+            double fWidthH45 = m_dProfileHorizontal.GetWidth(m_fLevel);
+            double fWidthV45 = m_dProfileVertical.GetWidth(m_fLevel);
 
-            double fWidthH45 = GetWidth(m_dProfileHorizontal, m_fLevel, (int)m_EllipseArea.Centroid.X, m_dProfileHorizontalMax);
-            double fWidthV45 = GetWidth(m_dProfileVertical, m_fLevel, (int)m_EllipseArea.Centroid.Y, m_dProfileVerticalMax);
             double fWidthV = GetWidth(m_dProfile45, m_fLevel, l_iProfile45Peak, m_dProfile45Max) / Math.Sqrt(2f);
 
             double Wo0 = fWidthV45 * fWidthV45 / 4.0;

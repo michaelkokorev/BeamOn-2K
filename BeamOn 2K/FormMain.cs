@@ -44,8 +44,12 @@ namespace BeamOn_2K
 
         public enum DrawOrientation { doHorizontal, doVertical };
         Boolean m_bScaleProfile = false;
+        Boolean m_bGaussian = false;
+        Boolean m_bMeasure = false;
 
         float[] m_fClipLevelArray = new float[] { 13.5f, 50f, 80f };
+        float[] m_fWidthHorizontalClip = new float[3];
+        float[] m_fWidthVerticalClip = new float[3];
 
         public FormMain()
         {
@@ -74,16 +78,27 @@ namespace BeamOn_2K
                     try
                     {
                         bmpData = m_bmp.LockBits(
-                                                 bm.ImageRectangle,
+                                                 e.Snapshot.ImageRectangle,
                                                  System.Drawing.Imaging.ImageLockMode.WriteOnly,
                                                  m_bmp.PixelFormat
                                                  );
 
-                        bm.SetImageDataArray(bmpData.Scan0, m_colorArray);
+                        e.Snapshot.SetImageDataArray(bmpData.Scan0, m_colorArray);
 
                         m_bmp.UnlockBits(bmpData);
 
-                        DrawEllipse();
+                        if (m_bMeasure == true)
+                        {
+                            bm.GetMeasure(e.Snapshot);
+
+                            DrawEllipse();
+
+                            for (int i = 0; i < m_fClipLevelArray.Length; i++)
+                            {
+                                m_fWidthHorizontalClip[i] = (float)bm.profileHorizontal.GetWidth(m_fClipLevelArray[i]);
+                                m_fWidthVerticalClip[i] = (float)bm.profileVertical.GetWidth(m_fClipLevelArray[i]);
+                            }
+                        }
                     }
                     catch { }
                 }
@@ -99,6 +114,7 @@ namespace BeamOn_2K
 
             this.Invalidate();
             pictureBoxImage.Invalidate();
+            pictureBoxData.Invalidate();
         }
 
         private void DrawEllipse()
@@ -236,7 +252,7 @@ namespace BeamOn_2K
         {
             Graphics grfx = e.Graphics;
 
-            if (bm.Measure == true)
+            if (m_bMeasure == true)
             {
                 Point OldPoint = new Point((int)bm.Ellipse.Centroid.X - 20, (int)bm.Ellipse.Centroid.Y - 20);
                 Point NewPoint = new Point((int)bm.Ellipse.Centroid.X + 20, (int)bm.Ellipse.Centroid.Y + 20);
@@ -258,101 +274,117 @@ namespace BeamOn_2K
                     grfx.DrawLine(m_PenGrid, bm.lineProfileVerticalLeft, bm.lineProfileVerticalRight);
                 }
 
-                DrawProfile(bm.profileHorizontal, (m_bScaleProfile == true) ? bm.maxProfileHorizontal : ((bm.pixelFormat == PixelFormat.Format8bppIndexed) ? (UInt16)255 : (UInt16)4095), m_PenGrid, DrawOrientation.doHorizontal, grfx);
-                DrawProfile(bm.profileVertical, (m_bScaleProfile == true) ? bm.maxProfileVertical : ((bm.pixelFormat == PixelFormat.Format8bppIndexed) ? (UInt16)255 : (UInt16)4095), m_PenGrid, DrawOrientation.doVertical, grfx);
+                DrawProfile(bm.profileVertical, m_PenGrid, DrawOrientation.doVertical, grfx);
+                DrawProfile(bm.profileHorizontal, m_PenGrid, DrawOrientation.doHorizontal, grfx);
+
+                int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
+
+                grfx.DrawString("Horizontal Gaussian Correlation: " + String.Format("{0:F1}", bm.profileHorizontal.GaussianData.Correlation) + "%", myFont, PaletteBrush, new PointF(20, iHeight - 20), m_strfrm);
+                grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[0]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalClip[0]) + "(µm)", myFont, PaletteBrush, new PointF(20, iHeight - 40), m_strfrm);
+                grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[1]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalClip[1]) + "(µm)", myFont, PaletteBrush, new PointF(20, iHeight - 60), m_strfrm);
+                grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[2]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalClip[2]) + "(µm)", myFont, PaletteBrush, new PointF(20, iHeight - 80), m_strfrm);
+
+                grfx.DrawString("Vertical Gaussian Correlation: " + String.Format("{0:F1}", bm.profileVertical.GaussianData.Correlation) + "%", myFont, PaletteBrush, new PointF(20, 80), m_strfrm);
+                grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[0]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalClip[0]) + "(µm)", myFont, PaletteBrush, new PointF(20, 60), m_strfrm);
+                grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[1]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalClip[1]) + "(µm)", myFont, PaletteBrush, new PointF(20, 40), m_strfrm);
+                grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[2]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalClip[2]) + "(µm)", myFont, PaletteBrush, new PointF(20, 20), m_strfrm);
             }
         }
 
-        public void DrawProfile(Double[] dataProfile, Double MaxProfile, Pen pen, DrawOrientation drawOrientation, Graphics grfx)
+        public void DrawProfile(BeamOnCL.Profile dataProfile, Pen pen, DrawOrientation drawOrientation, Graphics grfx)
         {
             Point OldPoint = new Point();
             Point NewPoint;
 
+            Point OldPointGaussian = new Point();
+            Point NewPointGaussian;
+
             int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
             int iHeightProfile = (int)(iHeight / 3f);
 
-            Double fCoeffAmpl = iHeightProfile / MaxProfile;
+            Double MaxProfile = (m_bScaleProfile == true) ? dataProfile.MaxProfile : ((bm.pixelFormat == PixelFormat.Format8bppIndexed) ? (UInt16)255 : (UInt16)4095);
+            Double fCoeffAmpl = (MaxProfile > 0) ? iHeightProfile / MaxProfile : 0;
             Double fCoeffStep = 0;
 
-            try
+            if (drawOrientation == DrawOrientation.doHorizontal)
             {
-                if (drawOrientation == DrawOrientation.doHorizontal)
+                fCoeffStep = pictureBoxData.Width / (float)dataProfile.DataProfile.Length;
+
+                int iShiftY = 0;
+                if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
                 {
-                    fCoeffStep = pictureBoxData.Width / (float)dataProfile.Length;
+                    iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
+                    if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
+                }
 
-                    int iShiftY = 0;
-                    if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
+                OldPoint = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftY);
+                if (m_bGaussian == true) OldPointGaussian = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftY);
+
+                for (int i = 1; i < dataProfile.DataProfile.Length; i++)
+                {
+                    NewPoint = new Point((int)Math.Ceiling(i * fCoeffStep), iHeight - (int)Math.Ceiling(dataProfile.DataProfile[i] * fCoeffAmpl) - iShiftY);
+                    grfx.DrawLine(pen, OldPoint, NewPoint);
+                    OldPoint = NewPoint;
+
+                    if (m_bGaussian == true)
                     {
-                        iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
-                        if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
-                    }
-
-                    OldPoint = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile[0] * fCoeffAmpl) - iShiftY);
-
-                    for (int i = 1; i < dataProfile.Length; i++)
-                    {
-                        NewPoint = new Point((int)Math.Ceiling(i * fCoeffStep), iHeight - (int)Math.Ceiling(dataProfile[i] * fCoeffAmpl) - iShiftY);
-
-                        grfx.DrawLine(pen, OldPoint, NewPoint);
-
-                        OldPoint = NewPoint;
-                    }
-
-                    if (m_bScaleProfile == true)
-                    {
-                        int iLineLevel1 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[0] / 100f) - iShiftY;
-                        int iLineLevel2 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[1] / 100f) - iShiftY;
-                        int iLineLevel3 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[2] / 100f) - iShiftY;
-
-                        for (int i = 0; i < pictureBoxData.Width; i += 6)
-                        {
-                            grfx.DrawLine(m_PenClipLevel1, i, iLineLevel1, i + 3, iLineLevel1);
-                            grfx.DrawLine(m_PenClipLevel2, i, iLineLevel2, i + 3, iLineLevel2);
-                            grfx.DrawLine(m_PenClipLevel3, i, iLineLevel3, i + 3, iLineLevel3);
-                        }
+                        NewPointGaussian = new Point((int)Math.Ceiling(i * fCoeffStep), iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[i] * fCoeffAmpl) - iShiftY);
+                        grfx.DrawLine(m_PenGaussian, OldPointGaussian, NewPointGaussian);
+                        OldPointGaussian = NewPointGaussian;
                     }
                 }
-                else
+
+                if (m_bScaleProfile == true)
                 {
-                    fCoeffStep = pictureBoxData.Height / (float)dataProfile.Length;
+                    int iLineLevel1 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[0] / 100f) - iShiftY;
+                    int iLineLevel2 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[1] / 100f) - iShiftY;
+                    int iLineLevel3 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[2] / 100f) - iShiftY;
 
-                    int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
-
-                    OldPoint = new Point((int)Math.Ceiling(dataProfile[0] * fCoeffAmpl) - iShiftX, 0);
-
-                    for (int i = 1; i < dataProfile.Length; i++)
+                    for (int i = 0; i < pictureBoxData.Width; i += 6)
                     {
-                        NewPoint = new Point((int)Math.Ceiling(dataProfile[i] * fCoeffAmpl), (int)Math.Ceiling(i * fCoeffStep) - iShiftX);
-
-                        grfx.DrawLine(pen, OldPoint, NewPoint);
-
-                        OldPoint = NewPoint;
-                    }
-
-                    if (m_bScaleProfile == true)
-                    {
-                        int iLineLevel1 = (int)(iHeightProfile * m_fClipLevelArray[0] / 100f - iShiftX);
-                        int iLineLevel2 = (int)(iHeightProfile * m_fClipLevelArray[1] / 100f - iShiftX);
-                        int iLineLevel3 = (int)(iHeightProfile * m_fClipLevelArray[2] / 100f - iShiftX);
-
-                        for (int i = 0; i < pictureBoxData.Height; i += 6)
-                        {
-                            grfx.DrawLine(m_PenClipLevel1, iLineLevel1, i, iLineLevel1, i + 3);
-                            grfx.DrawLine(m_PenClipLevel2, iLineLevel2, i, iLineLevel2, i + 3);
-                            grfx.DrawLine(m_PenClipLevel3, iLineLevel3, i, iLineLevel3, i + 3);
-                        }
+                        grfx.DrawLine(m_PenClipLevel1, i, iLineLevel1, i + 3, iLineLevel1);
+                        grfx.DrawLine(m_PenClipLevel2, i, iLineLevel2, i + 3, iLineLevel2);
+                        grfx.DrawLine(m_PenClipLevel3, i, iLineLevel3, i + 3, iLineLevel3);
                     }
                 }
             }
-            catch { }
+            else
+            {
+                fCoeffStep = pictureBoxData.Height / (float)dataProfile.DataProfile.Length;
 
-            //grfx.DrawString("Horizontal Gaussian Correlation: " + String.Format("{0:F1}", m_fCorrelationHorizontal) + "%", myFont, PaletteBrush, new PointF(20, m_AreaRect.Height - 20), m_strfrm);
-            //grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevel1) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalProfileClipLevel1) + "(µm)", myFont, PaletteBrush, new PointF(20, m_AreaRect.Height - 40), m_strfrm);
-            //grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevel2) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalProfileClipLevel2) + "(µm)", myFont, PaletteBrush, new PointF(20, m_AreaRect.Height - 60), m_strfrm);
+                int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
 
-            //grfx.DrawString("Vertical Gaussian Correlation: " + String.Format("{0:F1}", m_fCorrelationVertical) + "%", myFont, PaletteBrush, new PointF(20, 60), m_strfrm);
-            //grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevel1) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalProfileClipLevel1) + "(µm)", myFont, PaletteBrush, new PointF(20, 40), m_strfrm);
-            //grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevel2) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalProfileClipLevel2) + "(µm)", myFont, PaletteBrush, new PointF(20, 20), m_strfrm);
+                OldPoint = new Point((int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftX, 0);
+                if (m_bGaussian == true) OldPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftX, 0);
+
+                for (int i = 1; i < dataProfile.DataProfile.Length; i++)
+                {
+                    NewPoint = new Point((int)Math.Ceiling(dataProfile.DataProfile[i] * fCoeffAmpl), (int)Math.Ceiling(i * fCoeffStep) - iShiftX);
+                    grfx.DrawLine(pen, OldPoint, NewPoint);
+                    OldPoint = NewPoint;
+
+                    if (m_bGaussian == true)
+                    {
+                        NewPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[i] * fCoeffAmpl), (int)Math.Ceiling(i * fCoeffStep) - iShiftX);
+                        grfx.DrawLine(m_PenGaussian, OldPointGaussian, NewPointGaussian);
+                        OldPointGaussian = NewPointGaussian;
+                    }
+                }
+
+                if (m_bScaleProfile == true)
+                {
+                    int iLineLevel1 = (int)(iHeightProfile * m_fClipLevelArray[0] / 100f - iShiftX);
+                    int iLineLevel2 = (int)(iHeightProfile * m_fClipLevelArray[1] / 100f - iShiftX);
+                    int iLineLevel3 = (int)(iHeightProfile * m_fClipLevelArray[2] / 100f - iShiftX);
+
+                    for (int i = 0; i < pictureBoxData.Height; i += 6)
+                    {
+                        grfx.DrawLine(m_PenClipLevel1, iLineLevel1, i, iLineLevel1, i + 3);
+                        grfx.DrawLine(m_PenClipLevel2, iLineLevel2, i, iLineLevel2, i + 3);
+                        grfx.DrawLine(m_PenClipLevel3, iLineLevel3, i, iLineLevel3, i + 3);
+                    }
+                }
+            }
         }
 
         private void UpdateVisibleAsync(Int64 Timestamp)
@@ -459,7 +491,7 @@ namespace BeamOn_2K
                 labelExposureMin.Text = trackBarExposure.Minimum.ToString();
                 labelExposureMax.Text = trackBarExposure.Maximum.ToString();
 
-                measuringToolStripMenuItem.Checked = bm.Measure;
+                measuringToolStripMenuItem.Checked = m_bMeasure;
 
                 scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
                 typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
@@ -510,7 +542,7 @@ namespace BeamOn_2K
 
         private void measuringToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
-            bm.Measure = measuringToolStripMenuItem.Checked;
+            m_bMeasure = measuringToolStripMenuItem.Checked;
 
             scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
             typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
@@ -562,6 +594,11 @@ namespace BeamOn_2K
 
             toolStripButtonTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpLIne) ? "Sum" : "Line";
             toolStripStatusLabelTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum) ? "Sum" : "Line";
+        }
+
+        private void gaussianToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_bGaussian = gaussianToolStripMenuItem.Checked;
         }
     }
 }
