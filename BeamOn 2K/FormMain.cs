@@ -48,8 +48,15 @@ namespace BeamOn_2K
         Boolean m_bMeasure = false;
 
         float[] m_fClipLevelArray = new float[] { 13.5f, 50f, 80f };
+
         float[] m_fWidthHorizontalClip = new float[3];
         float[] m_fWidthVerticalClip = new float[3];
+
+        float[] m_fWidthGaussianHorizontalClip = new float[3];
+        float[] m_fWidthGaussianVerticalClip = new float[3];
+
+        float m_fGaussianHorizontalCorrelation = 0;
+        float m_fGaussianVerticalCorrelation = 0;
 
         public FormMain()
         {
@@ -87,6 +94,17 @@ namespace BeamOn_2K
 
                         m_bmp.UnlockBits(bmpData);
 
+                        //// Assign a temporary variable to dispose the bitmap after assigning the new bitmap to the display control.
+                        //Bitmap bitmapOld = pictureBoxImage.Image as Bitmap;
+                        // Provide the display control with the new bitmap. This action automatically updates the display.
+                        //pictureBoxImage.Image = m_bmp;
+                        //if (bitmapOld != null)
+                        //{
+                        //    // Dispose the bitmap.
+                        //    bitmapOld.Dispose();
+                        //}
+
+
                         if (m_bMeasure == true)
                         {
                             bm.GetMeasure(e.Snapshot);
@@ -97,6 +115,18 @@ namespace BeamOn_2K
                             {
                                 m_fWidthHorizontalClip[i] = (float)bm.profileHorizontal.GetWidth(m_fClipLevelArray[i]);
                                 m_fWidthVerticalClip[i] = (float)bm.profileVertical.GetWidth(m_fClipLevelArray[i]);
+                            }
+
+                            if (m_bGaussian == true)
+                            {
+                                for (int i = 0; i < m_fClipLevelArray.Length; i++)
+                                {
+                                    m_fWidthGaussianHorizontalClip[i] = (float)bm.profileHorizontal.GaussianData.GetWidth(m_fClipLevelArray[i]);
+                                    m_fWidthGaussianVerticalClip[i] = (float)bm.profileVertical.GaussianData.GetWidth(m_fClipLevelArray[i]);
+                                }
+
+                                m_fGaussianHorizontalCorrelation = bm.profileHorizontal.GaussianData.Correlation;
+                                m_fGaussianVerticalCorrelation = bm.profileVertical.GaussianData.Correlation;
                             }
                         }
                     }
@@ -113,8 +143,11 @@ namespace BeamOn_2K
             m_sw.Start();
 
             this.Invalidate();
-            pictureBoxImage.Invalidate();
+            dataSplitContainer.Panel2.Invalidate();
+//            pictureBoxImage.Invalidate();
             pictureBoxData.Invalidate();
+
+            System.Threading.Thread.Sleep(10);
         }
 
         private void DrawEllipse()
@@ -279,15 +312,26 @@ namespace BeamOn_2K
 
                 int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
 
-                grfx.DrawString("Horizontal Gaussian Correlation: " + String.Format("{0:F1}", bm.profileHorizontal.GaussianData.Correlation) + "%", myFont, PaletteBrush, new PointF(20, iHeight - 20), m_strfrm);
-                grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[0]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalClip[0]) + "(µm)", myFont, PaletteBrush, new PointF(20, iHeight - 40), m_strfrm);
-                grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[1]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalClip[1]) + "(µm)", myFont, PaletteBrush, new PointF(20, iHeight - 60), m_strfrm);
-                grfx.DrawString("Horizontal Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[2]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalClip[2]) + "(µm)", myFont, PaletteBrush, new PointF(20, iHeight - 80), m_strfrm);
+                int iShiftY = 0;
+                if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
+                {
+                    iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
+                    if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
+                }
 
-                grfx.DrawString("Vertical Gaussian Correlation: " + String.Format("{0:F1}", bm.profileVertical.GaussianData.Correlation) + "%", myFont, PaletteBrush, new PointF(20, 80), m_strfrm);
-                grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[0]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalClip[0]) + "(µm)", myFont, PaletteBrush, new PointF(20, 60), m_strfrm);
-                grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[1]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalClip[1]) + "(µm)", myFont, PaletteBrush, new PointF(20, 40), m_strfrm);
-                grfx.DrawString("Vertical Profile ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[2]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalClip[2]) + "(µm)", myFont, PaletteBrush, new PointF(20, 20), m_strfrm);
+                int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
+
+                grfx.DrawString("Horizontal Profile", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 100 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[2]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalClip[2]) + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 80 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[1]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalClip[1]) + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 60 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[0]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthHorizontalClip[0]) + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 40 - iShiftY), m_strfrm);
+                if (m_bGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_fGaussianHorizontalCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 20 - iShiftY), m_strfrm);
+
+                grfx.DrawString("Vertical Profile", myFont, PaletteBrush, new PointF(20 - iShiftX, 20 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[2]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalClip[2]) + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 40 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[1]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalClip[1]) + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 60 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", m_fClipLevelArray[0]) + "%" + " Width: " + String.Format("{0:F2}", m_fWidthVerticalClip[0]) + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 80 - iShiftY), m_strfrm);
+                if (m_bGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_fGaussianVerticalCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, 100 - iShiftY), m_strfrm);
             }
         }
 
@@ -496,6 +540,13 @@ namespace BeamOn_2K
                 scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
                 typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
                 toolStripButtonTypeProfile.Enabled = measuringToolStripMenuItem.Checked;
+                gaussianToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
+
+                groupBoxPosition.Enabled = m_bMeasure;
+                ProfileGroupBox.Enabled = m_bMeasure;
+                gaussGroupBox.Enabled = m_bMeasure && m_bGaussian;
+
+                dataSplitContainer.Panel1Collapsed = !propertyBoxToolStripMenuItem.Checked;
             }
             else
             {
@@ -544,9 +595,14 @@ namespace BeamOn_2K
         {
             m_bMeasure = measuringToolStripMenuItem.Checked;
 
+            groupBoxPosition.Enabled = m_bMeasure;
+            ProfileGroupBox.Enabled = m_bMeasure;
+            gaussGroupBox.Enabled = m_bMeasure && m_bGaussian;
+
             scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
             typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
             toolStripButtonTypeProfile.Enabled = measuringToolStripMenuItem.Checked;
+            gaussianToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
         }
 
         private void scaleProfileToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
@@ -599,6 +655,39 @@ namespace BeamOn_2K
         private void gaussianToolStripMenuItem_Click(object sender, EventArgs e)
         {
             m_bGaussian = gaussianToolStripMenuItem.Checked;
+
+            gaussGroupBox.Enabled = m_bMeasure && m_bGaussian;
+        }
+
+        private void dataSplitContainer_Panel2_Paint(object sender, PaintEventArgs e)
+        {
+            if (m_bMeasure == true)
+            {
+                labelPositionXValue.Text = bm.Ellipse.Centroid.X.ToString();
+                labelPositionYValue.Text = bm.Ellipse.Centroid.Y.ToString();
+
+                labelHorizontalValue1.Text = m_fWidthHorizontalClip[0].ToString();
+                labelHorizontalValue2.Text = m_fWidthHorizontalClip[1].ToString();
+                labelHorizontalValue3.Text = m_fWidthHorizontalClip[2].ToString();
+
+                labelVerticalValue1.Text = m_fWidthVerticalClip[0].ToString();
+                labelVerticalValue2.Text = m_fWidthVerticalClip[1].ToString();
+                labelVerticalValue3.Text = m_fWidthVerticalClip[2].ToString();
+
+                if (m_bGaussian == true)
+                {
+                    labelGaussianHorizontalValue1.Text = m_fWidthGaussianHorizontalClip[0].ToString();
+                    labelGaussianHorizontalValue2.Text = m_fWidthGaussianHorizontalClip[1].ToString();
+                    labelGaussianHorizontalValue3.Text = m_fWidthGaussianHorizontalClip[2].ToString();
+
+                    labelGaussianVerticalValue1.Text = m_fWidthGaussianVerticalClip[0].ToString();
+                    labelGaussianVerticalValue2.Text = m_fWidthGaussianVerticalClip[1].ToString();
+                    labelGaussianVerticalValue3.Text = m_fWidthGaussianVerticalClip[2].ToString();
+
+                    labelGaussianCorrelationHorizontalValue.Text = m_fGaussianHorizontalCorrelation.ToString();
+                    labelGaussianCorrelationVerticalValue.Text = m_fGaussianVerticalCorrelation.ToString();
+                }
+            }
         }
     }
 }

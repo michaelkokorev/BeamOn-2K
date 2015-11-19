@@ -127,7 +127,7 @@ namespace BeamOnCL
 
             set
             {
-                mc.StopGrabber();
+               mc.StopGrabber();
 
                 mc.pixelFormat = value;
 

@@ -10,17 +10,17 @@ namespace BeamOnCL
     class Snapshot<T> : SnapshotBase
     {
         public T[] m_tMatrixArray = null;
-        byte[] rgbValues = null;
+//        byte[] rgbValues = null;
 
         public Snapshot(Rectangle rArea)
             : base(rArea)
         {
             m_tMatrixArray = new T[(int)m_rArea.Width * (int)m_rArea.Height];
 
-            rgbValues = new byte[m_tMatrixArray.Length * 3];
+//            rgbValues = new byte[m_tMatrixArray.Length * 3];
         }
 
-        public override void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
+        public unsafe override void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
         {
             if (typeof(T) == typeof(byte))
                 Marshal.Copy(m_tMatrixArray as byte[], 0, Data, m_tMatrixArray.Length);
@@ -28,17 +28,27 @@ namespace BeamOnCL
             {
                 if (colorArray != null)
                 {
+                    byte* bp = (byte*)Data;
                     for (int i = 0; i < m_tMatrixArray.Length; i++)
                     {
                         object d = m_tMatrixArray[i];
 
-                        rgbValues[i * 3] = colorArray[(UInt16)d].B;
-                        rgbValues[i * 3 + 1] = colorArray[(UInt16)d].G;
-                        rgbValues[i * 3 + 2] = colorArray[(UInt16)d].R;
+                        bp[i * 3] = colorArray[(UInt16)d].B;
+                        bp[i * 3 + 1] = colorArray[(UInt16)d].G;
+                        bp[i * 3 + 2] = colorArray[(UInt16)d].R;
                     }
 
-                    // Copy the RGB values back to the bitmap
-                    Marshal.Copy(rgbValues, 0, Data, rgbValues.Length);
+                    //for (int i = 0; i < m_tMatrixArray.Length; i++)
+                    //{
+                    //    object d = m_tMatrixArray[i];
+
+                    //    rgbValues[i * 3] = colorArray[(UInt16)d].B;
+                    //    rgbValues[i * 3 + 1] = colorArray[(UInt16)d].G;
+                    //    rgbValues[i * 3 + 2] = colorArray[(UInt16)d].R;
+                    //}
+
+                    //// Copy the RGB values back to the bitmap
+                    //Marshal.Copy(rgbValues, 0, Data, rgbValues.Length);
                 }
             }
         }

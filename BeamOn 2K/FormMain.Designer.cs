@@ -49,6 +49,7 @@
             this.typeProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lineProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sumProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainStatusStrip = new System.Windows.Forms.StatusStrip();
@@ -60,7 +61,6 @@
             this.toolStripButtonTypeProfile = new System.Windows.Forms.ToolStripButton();
             this.mainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.imageSplitContainer = new System.Windows.Forms.SplitContainer();
-            this.picturePaletteImage = new PaletteImage.PaletteImage();
             this.pictureBoxImage = new System.Windows.Forms.PictureBox();
             this.pictureBoxData = new System.Windows.Forms.PictureBox();
             this.dataSplitContainer = new System.Windows.Forms.SplitContainer();
@@ -113,7 +113,7 @@
             this.labelPositionYValue = new System.Windows.Forms.Label();
             this.labelPositionY = new System.Windows.Forms.Label();
             this.labelPositionX = new System.Windows.Forms.Label();
-            this.gaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.picturePaletteImage = new PaletteImage.PaletteImage();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -125,7 +125,6 @@
             this.imageSplitContainer.Panel1.SuspendLayout();
             this.imageSplitContainer.Panel2.SuspendLayout();
             this.imageSplitContainer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).BeginInit();
             this.pictureBoxImage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).BeginInit();
@@ -145,6 +144,7 @@
             this.gaussGroupBox.SuspendLayout();
             this.ProfileGroupBox.SuspendLayout();
             this.groupBoxPosition.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).BeginInit();
             this.SuspendLayout();
             // 
             // mainMenuStrip
@@ -156,7 +156,7 @@
             this.helpToolStripMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
-            this.mainMenuStrip.Size = new System.Drawing.Size(1350, 24);
+            this.mainMenuStrip.Size = new System.Drawing.Size(1401, 24);
             this.mainMenuStrip.TabIndex = 0;
             this.mainMenuStrip.Text = "menuStrip1";
             // 
@@ -206,9 +206,7 @@
             // 
             // propertyBoxToolStripMenuItem
             // 
-            this.propertyBoxToolStripMenuItem.Checked = true;
             this.propertyBoxToolStripMenuItem.CheckOnClick = true;
-            this.propertyBoxToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.propertyBoxToolStripMenuItem.Name = "propertyBoxToolStripMenuItem";
             this.propertyBoxToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
             this.propertyBoxToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
@@ -261,7 +259,7 @@
             this.bitsPerPixel8ToolStripMenuItem,
             this.bitsPerPixel12ToolStripMenuItem});
             this.pixelFormatToolStripMenuItem.Name = "pixelFormatToolStripMenuItem";
-            this.pixelFormatToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.pixelFormatToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.pixelFormatToolStripMenuItem.Text = "Pi&xel Format";
             // 
             // bitsPerPixel8ToolStripMenuItem
@@ -281,13 +279,13 @@
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(136, 6);
             // 
             // measuringToolStripMenuItem
             // 
             this.measuringToolStripMenuItem.CheckOnClick = true;
             this.measuringToolStripMenuItem.Name = "measuringToolStripMenuItem";
-            this.measuringToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.measuringToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.measuringToolStripMenuItem.Text = "&Measuring";
             this.measuringToolStripMenuItem.CheckedChanged += new System.EventHandler(this.measuringToolStripMenuItem_CheckedChanged);
             // 
@@ -295,7 +293,7 @@
             // 
             this.scaleProfileToolStripMenuItem.CheckOnClick = true;
             this.scaleProfileToolStripMenuItem.Name = "scaleProfileToolStripMenuItem";
-            this.scaleProfileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.scaleProfileToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.scaleProfileToolStripMenuItem.Text = "Scale &Profile";
             this.scaleProfileToolStripMenuItem.CheckedChanged += new System.EventHandler(this.scaleProfileToolStripMenuItem_CheckedChanged);
             // 
@@ -305,7 +303,7 @@
             this.lineProfileToolStripMenuItem,
             this.sumProfileToolStripMenuItem});
             this.typeProfileToolStripMenuItem.Name = "typeProfileToolStripMenuItem";
-            this.typeProfileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.typeProfileToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.typeProfileToolStripMenuItem.Text = "T&ype Profile";
             // 
             // lineProfileToolStripMenuItem
@@ -321,6 +319,14 @@
             this.sumProfileToolStripMenuItem.Size = new System.Drawing.Size(135, 22);
             this.sumProfileToolStripMenuItem.Text = "&Sum Profile";
             this.sumProfileToolStripMenuItem.Click += new System.EventHandler(this.typeProfileToolStripMenuItem_Click);
+            // 
+            // gaussianToolStripMenuItem
+            // 
+            this.gaussianToolStripMenuItem.CheckOnClick = true;
+            this.gaussianToolStripMenuItem.Name = "gaussianToolStripMenuItem";
+            this.gaussianToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.gaussianToolStripMenuItem.Text = "&Gaussian";
+            this.gaussianToolStripMenuItem.Click += new System.EventHandler(this.gaussianToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -342,9 +348,9 @@
             this.toolStripStatusLabelTimeStamp,
             this.toolStripStatusLabelPixelFormat,
             this.toolStripStatusLabelTypeProfile});
-            this.mainStatusStrip.Location = new System.Drawing.Point(0, 705);
+            this.mainStatusStrip.Location = new System.Drawing.Point(0, 785);
             this.mainStatusStrip.Name = "mainStatusStrip";
-            this.mainStatusStrip.Size = new System.Drawing.Size(1350, 24);
+            this.mainStatusStrip.Size = new System.Drawing.Size(1401, 24);
             this.mainStatusStrip.TabIndex = 1;
             this.mainStatusStrip.Text = "statusStrip1";
             // 
@@ -386,7 +392,7 @@
             this.toolStripButtonTypeProfile});
             this.mainToolStrip.Location = new System.Drawing.Point(0, 24);
             this.mainToolStrip.Name = "mainToolStrip";
-            this.mainToolStrip.Size = new System.Drawing.Size(1350, 39);
+            this.mainToolStrip.Size = new System.Drawing.Size(1401, 39);
             this.mainToolStrip.TabIndex = 2;
             this.mainToolStrip.Text = "toolStrip1";
             // 
@@ -431,8 +437,8 @@
             // 
             this.mainSplitContainer.Panel2.Controls.Add(this.dataSplitContainer);
             this.mainSplitContainer.Panel2MinSize = 300;
-            this.mainSplitContainer.Size = new System.Drawing.Size(1350, 642);
-            this.mainSplitContainer.SplitterDistance = 1025;
+            this.mainSplitContainer.Size = new System.Drawing.Size(1401, 722);
+            this.mainSplitContainer.SplitterDistance = 1076;
             this.mainSplitContainer.TabIndex = 3;
             // 
             // imageSplitContainer
@@ -453,22 +459,10 @@
             this.imageSplitContainer.Panel2.AutoScroll = true;
             this.imageSplitContainer.Panel2.Controls.Add(this.pictureBoxImage);
             this.imageSplitContainer.Panel2MinSize = 480;
-            this.imageSplitContainer.Size = new System.Drawing.Size(1025, 642);
+            this.imageSplitContainer.Size = new System.Drawing.Size(1076, 722);
             this.imageSplitContainer.SplitterDistance = 25;
             this.imageSplitContainer.TabIndex = 0;
             this.imageSplitContainer.TabStop = false;
-            // 
-            // picturePaletteImage
-            // 
-            this.picturePaletteImage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.picturePaletteImage.Format = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
-            this.picturePaletteImage.Location = new System.Drawing.Point(0, 0);
-            this.picturePaletteImage.Name = "picturePaletteImage";
-            this.picturePaletteImage.PaletteLevelUp = 100F;
-            this.picturePaletteImage.Size = new System.Drawing.Size(25, 642);
-            this.picturePaletteImage.TabIndex = 0;
-            this.picturePaletteImage.TabStop = false;
-            this.picturePaletteImage.OnChangePalette += new PaletteImage.PaletteImage.ChangePalette(this.picturePaletteImage_OnChangePalette);
             // 
             // pictureBoxImage
             // 
@@ -512,9 +506,10 @@
             this.dataSplitContainer.Panel2.Controls.Add(this.gaussGroupBox);
             this.dataSplitContainer.Panel2.Controls.Add(this.ProfileGroupBox);
             this.dataSplitContainer.Panel2.Controls.Add(this.groupBoxPosition);
+            this.dataSplitContainer.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.dataSplitContainer_Panel2_Paint);
             this.dataSplitContainer.Panel2MinSize = 300;
-            this.dataSplitContainer.Size = new System.Drawing.Size(321, 642);
-            this.dataSplitContainer.SplitterDistance = 240;
+            this.dataSplitContainer.Size = new System.Drawing.Size(321, 722);
+            this.dataSplitContainer.SplitterDistance = 269;
             this.dataSplitContainer.TabIndex = 0;
             // 
             // propertyGroupBox
@@ -569,7 +564,7 @@
             this.trackBarBinning.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBarBinning.Location = new System.Drawing.Point(3, 19);
             this.trackBarBinning.Name = "trackBarBinning";
-            this.trackBarBinning.Size = new System.Drawing.Size(128, 43);
+            this.trackBarBinning.Size = new System.Drawing.Size(128, 45);
             this.trackBarBinning.TabIndex = 0;
             this.trackBarBinning.Scroll += new System.EventHandler(this.trackBarBinning_Scroll);
             // 
@@ -611,7 +606,7 @@
             this.trackBarGain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBarGain.Location = new System.Drawing.Point(3, 19);
             this.trackBarGain.Name = "trackBarGain";
-            this.trackBarGain.Size = new System.Drawing.Size(276, 43);
+            this.trackBarGain.Size = new System.Drawing.Size(276, 45);
             this.trackBarGain.TabIndex = 3;
             this.trackBarGain.Scroll += new System.EventHandler(this.trackBarGain_Scroll);
             // 
@@ -654,7 +649,7 @@
             this.trackBarExposure.LargeChange = 500000;
             this.trackBarExposure.Location = new System.Drawing.Point(3, 19);
             this.trackBarExposure.Name = "trackBarExposure";
-            this.trackBarExposure.Size = new System.Drawing.Size(273, 43);
+            this.trackBarExposure.Size = new System.Drawing.Size(273, 45);
             this.trackBarExposure.SmallChange = 100000;
             this.trackBarExposure.TabIndex = 6;
             this.trackBarExposure.TickFrequency = 1000000;
@@ -700,7 +695,7 @@
             this.trackBarTransparency.Location = new System.Drawing.Point(3, 19);
             this.trackBarTransparency.Maximum = 255;
             this.trackBarTransparency.Name = "trackBarTransparency";
-            this.trackBarTransparency.Size = new System.Drawing.Size(136, 43);
+            this.trackBarTransparency.Size = new System.Drawing.Size(136, 45);
             this.trackBarTransparency.SmallChange = 5;
             this.trackBarTransparency.TabIndex = 6;
             this.trackBarTransparency.Scroll += new System.EventHandler(this.trackBarTransparency_Scroll);
@@ -722,13 +717,12 @@
             this.gaussGroupBox.Controls.Add(this.labelGaussianClipLevel1);
             this.gaussGroupBox.Controls.Add(this.labelGaussianClipLevel2);
             this.gaussGroupBox.Font = new System.Drawing.Font("Arial Rounded MT Bold", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gaussGroupBox.Location = new System.Drawing.Point(3, 367);
+            this.gaussGroupBox.Location = new System.Drawing.Point(6, 367);
             this.gaussGroupBox.Name = "gaussGroupBox";
             this.gaussGroupBox.Size = new System.Drawing.Size(297, 288);
             this.gaussGroupBox.TabIndex = 9;
             this.gaussGroupBox.TabStop = false;
             this.gaussGroupBox.Text = "Gaussian(µm)";
-            this.gaussGroupBox.Visible = false;
             // 
             // labelCorrelation
             // 
@@ -887,7 +881,7 @@
             this.ProfileGroupBox.Controls.Add(this.labelClipLevel1);
             this.ProfileGroupBox.Controls.Add(this.labelClipLevel2);
             this.ProfileGroupBox.Font = new System.Drawing.Font("Arial Rounded MT Bold", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ProfileGroupBox.Location = new System.Drawing.Point(2, 134);
+            this.ProfileGroupBox.Location = new System.Drawing.Point(6, 134);
             this.ProfileGroupBox.Name = "ProfileGroupBox";
             this.ProfileGroupBox.Size = new System.Drawing.Size(297, 227);
             this.ProfileGroupBox.TabIndex = 8;
@@ -1063,19 +1057,23 @@
             this.labelPositionX.Text = "X";
             this.labelPositionX.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // gaussianToolStripMenuItem
+            // picturePaletteImage
             // 
-            this.gaussianToolStripMenuItem.CheckOnClick = true;
-            this.gaussianToolStripMenuItem.Name = "gaussianToolStripMenuItem";
-            this.gaussianToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.gaussianToolStripMenuItem.Text = "&Gaussian";
-            this.gaussianToolStripMenuItem.Click += new System.EventHandler(this.gaussianToolStripMenuItem_Click);
+            this.picturePaletteImage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picturePaletteImage.Format = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
+            this.picturePaletteImage.Location = new System.Drawing.Point(0, 0);
+            this.picturePaletteImage.Name = "picturePaletteImage";
+            this.picturePaletteImage.PaletteLevelUp = 100F;
+            this.picturePaletteImage.Size = new System.Drawing.Size(25, 722);
+            this.picturePaletteImage.TabIndex = 0;
+            this.picturePaletteImage.TabStop = false;
+            this.picturePaletteImage.OnChangePalette += new PaletteImage.PaletteImage.ChangePalette(this.picturePaletteImage_OnChangePalette);
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1350, 729);
+            this.ClientSize = new System.Drawing.Size(1401, 809);
             this.Controls.Add(this.mainSplitContainer);
             this.Controls.Add(this.mainToolStrip);
             this.Controls.Add(this.mainStatusStrip);
@@ -1099,7 +1097,6 @@
             this.imageSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.imageSplitContainer)).EndInit();
             this.imageSplitContainer.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).EndInit();
             this.pictureBoxImage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).EndInit();
@@ -1126,6 +1123,7 @@
             this.ProfileGroupBox.PerformLayout();
             this.groupBoxPosition.ResumeLayout(false);
             this.groupBoxPosition.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

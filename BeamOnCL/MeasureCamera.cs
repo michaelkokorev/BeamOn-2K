@@ -5,6 +5,7 @@ using System.Text;
 using Basler.Pylon;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Threading;
 
 namespace BeamOnCL
 {
@@ -36,6 +37,21 @@ namespace BeamOnCL
 
         SnapshotBase m_snapshot = null;
 
+#if WATCHDOG
+        static EventWaitHandle evHardwareFailure = new AutoResetEvent(false);
+        Thread ThreadWatchDog = null;
+        bool fWatchDogContinue;
+
+        private void WatchDog()
+        {
+            while (camera.StreamGrabber.IsGrabbing)
+            {
+                if (evHardwareFailure.WaitOne(1500, false))
+                {
+                }
+            }
+        }
+#endif
         public MeasureCamera()
         {
             cameraList = CameraFinder.Enumerate(DeviceType.Usb);
@@ -44,7 +60,7 @@ namespace BeamOnCL
             {
                 m_camera = new Camera(cameraList.ElementAt(0));
 
-                m_camera.CameraOpened += new EventHandler<EventArgs>(m_camera_CameraOpened);
+                //                m_camera.CameraOpened += new EventHandler<EventArgs>(m_camera_CameraOpened);
                 m_camera.CameraClosing += new EventHandler<EventArgs>(m_camera_CameraClosing);
                 m_camera.ConnectionLost += new EventHandler<EventArgs>(m_camera_ConnectionLost);
 
@@ -64,26 +80,39 @@ namespace BeamOnCL
             if (m_camera != null)
             {
                 m_camera.CameraOpened += Configuration.AcquireContinuous;
+                try
+                {
+                    m_camera.Open(5000, TimeoutHandling.ThrowException);
 
-                m_camera.Open();
+                    m_camera.Parameters[PLCamera.GainAuto].TrySetValue(PLCamera.GainAuto.Off);
+                    m_camera.Parameters[PLCamera.ExposureAuto].TrySetValue(PLCamera.ExposureAuto.Off);
 
-                m_camera.Parameters[PLCamera.GainAuto].TrySetValue(PLCamera.GainAuto.Off);
-                m_camera.Parameters[PLCamera.ExposureAuto].TrySetValue(PLCamera.ExposureAuto.Off);
+                    m_camera.Parameters[PLCamera.BinningHorizontal].SetValue((int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum());
+                    m_camera.Parameters[PLCamera.BinningVertical].SetValue((int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum());
 
-                m_camera.Parameters[PLCamera.BinningHorizontal].SetValue((int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum());
-                m_camera.Parameters[PLCamera.BinningVertical].SetValue((int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum());
+                    m_camera.Parameters[PLCamera.Width].SetValue((int)m_camera.Parameters[PLCamera.Width].GetMaximum());
+                    m_camera.Parameters[PLCamera.Height].SetValue((int)m_camera.Parameters[PLCamera.Height].GetMaximum());
 
-                m_camera.Parameters[PLCamera.Width].SetValue((int)m_camera.Parameters[PLCamera.Width].GetMaximum());
-                m_camera.Parameters[PLCamera.Height].SetValue((int)m_camera.Parameters[PLCamera.Height].GetMaximum());
+                    m_camera.Parameters[PLCamera.OffsetX].SetValue(0);
+                    m_camera.Parameters[PLCamera.OffsetY].SetValue(0);
 
-                m_camera.Parameters[PLCamera.OffsetX].SetValue(0);
-                m_camera.Parameters[PLCamera.OffsetY].SetValue(0);
+                    this.pixelFormat = pixelFormat;
 
-                this.pixelFormat = pixelFormat;
+                    //m_camera.Parameters[PLTransportLayer.HeartbeatTimeout].TrySetValue(1000, IntegerValueCorrection.Nearest);  // 1000 ms timeout
 
-                StartGrabber();
+                    //                StartGrabber();
+#if WATCHDOG
+                fWatchDogContinue = true;
+                ThreadWatchDog = new Thread(new ThreadStart(WatchDog));
+                ThreadWatchDog.Start();
+#endif
 
-                bRet = true;
+                    bRet = true;
+                }
+                catch (Exception)
+                {
+
+                }
             }
 
             return bRet;
@@ -91,16 +120,94 @@ namespace BeamOnCL
 
         public void Stop()
         {
+#if WATCHDOG
+            if ((ThreadWatchDog != null) && (ThreadWatchDog.IsAlive == true))
+            {
+                fWatchDogContinue = false;
+                ThreadWatchDog.Abort();
+                ThreadWatchDog.Join();
+            }
+#endif
             if (m_camera != null)
             {
-                m_camera.StreamGrabber.Stop();
+                StopGrabber();
                 m_camera.Close();
             }
         }
 
+        // Starts the continuous grabbing of images and handles exceptions.
+        private void ContinuousShot()
+        {
+            try
+            {
+                // Start the grabbing of images until grabbing is stopped.
+                m_camera.Parameters[PLCamera.AcquisitionMode].SetValue(PLCamera.AcquisitionMode.Continuous);
+                m_camera.StreamGrabber.Start(GrabStrategy.OneByOne, GrabLoop.ProvidedByStreamGrabber);
+            }
+            catch (Exception exception)
+            {
+                ShowException(exception);
+            }
+        }
+
+        // Starts the grabbing of a single image and handles exceptions.
+        private void OneShot()
+        {
+            try
+            {
+                // Starts the grabbing of one image.
+                m_camera.Parameters[PLCamera.AcquisitionMode].SetValue(PLCamera.AcquisitionMode.SingleFrame);
+                m_camera.StreamGrabber.Start(1, GrabStrategy.OneByOne, GrabLoop.ProvidedByStreamGrabber);
+            }
+            catch (Exception exception)
+            {
+                ShowException(exception);
+            }
+        }
+
+
+        //// Stops the grabbing of images and handles exceptions.
+        //private void Stop()
+        //{
+        //    // Stop the grabbing.
+        //    try
+        //    {
+        //        m_camera.StreamGrabber.Stop();
+        //    }
+        //    catch (Exception exception)
+        //    {
+        //        ShowException(exception);
+        //    }
+        //}
+
+        // Closes the camera object and handles exceptions.
+        private void DestroyCamera()
+        {
+            // Destroy the camera object.
+            try
+            {
+                if (m_camera != null)
+                {
+                    m_camera.Close();
+                    m_camera.Dispose();
+                    m_camera = null;
+                }
+            }
+            catch (Exception exception)
+            {
+                ShowException(exception);
+            }
+        }
+
+        // Shows exceptions in a message box.
+        private void ShowException(Exception exception)
+        {
+ //           System.Windows.Form.MessageBox.Show("Exception caught:\n" + exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
         public void StartGrabber()
         {
-            if (m_camera != null) m_camera.StreamGrabber.Start(GrabStrategy.LatestImages/*.OneByOne*/, GrabLoop.ProvidedByStreamGrabber);
+            if ((m_camera != null) && (m_camera.StreamGrabber.IsGrabbing == false)) m_camera.StreamGrabber.Start(GrabStrategy.LatestImages/*.OneByOne*/, GrabLoop.ProvidedByStreamGrabber);
         }
 
         public void StopGrabber()
