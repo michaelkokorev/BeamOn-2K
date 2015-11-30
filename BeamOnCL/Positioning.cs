@@ -47,17 +47,24 @@ namespace BeamOnCL
             set { if ((value > 0) && (value < 100)) m_fLevel = value; }
         }
 
-        public Positioning(Rectangle rect)
+        public Single PixelSize
         {
+            get { return m_fPixelSize; }
+        }
+
+        public Positioning(Rectangle rect, float fPixelSize = 5.86f)
+        {
+            m_fPixelSize = fPixelSize;
+
             m_AreaRect = rect;
 
             m_WorkingAreaRect = m_AreaRect;
             m_WorkingAreaRect.Type = Area.Figure.enRectangle;
 
-            m_dProfileHorizontal = new SumProfile(m_AreaRect);
+            m_dProfileHorizontal = new SumProfile(m_AreaRect, m_fPixelSize);
             m_dProfileHorizontal.Angle = 0f;
 
-            m_dProfileVertical = new SumProfile(m_AreaRect);
+            m_dProfileVertical = new SumProfile(m_AreaRect, m_fPixelSize);
             m_dProfileVertical.Angle = Math.PI / 2f;
 
             m_dProfile45 = new double[m_AreaRect.Width + m_AreaRect.Height];
@@ -277,10 +284,9 @@ namespace BeamOnCL
 
             m_dProfile45Max -= l_dProfile45Min;
 
-            double fWidthH45 = m_dProfileHorizontal.GetWidth(m_fLevel);
-            double fWidthV45 = m_dProfileVertical.GetWidth(m_fLevel);
-
-            double fWidthV = GetWidth(m_dProfile45, m_fLevel, l_iProfile45Peak, m_dProfile45Max) / Math.Sqrt(2f);
+            double fWidthH45 = GetWidth(m_dProfileHorizontal.DataProfile, m_fLevel, m_dProfileHorizontal.MaxProfile);
+            double fWidthV45 = GetWidth(m_dProfileVertical.DataProfile, m_fLevel, m_dProfileVertical.MaxProfile);
+            double fWidthV = GetWidth(m_dProfile45, m_fLevel, m_dProfile45Max) / Math.Sqrt(2f);
 
             double Wo0 = fWidthV45 * fWidthV45 / 4.0;
             double Wo1 = (fWidthV45 + fWidthH45) / Math.Sqrt(2f);
@@ -559,7 +565,7 @@ namespace BeamOnCL
             }
         }
 
-        double GetWidth(double[] plProf, float iLevel, int iStart, double lMax)
+        double GetWidth(double[] plProf, float iLevel, double lMax)
         {
             double f_Board;
             int iLeft, iRight;

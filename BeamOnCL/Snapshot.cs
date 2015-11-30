@@ -26,16 +26,18 @@ namespace BeamOnCL
                 Marshal.Copy(m_tMatrixArray as byte[], 0, Data, m_tMatrixArray.Length);
             else
             {
+                Color color;
+
                 if (colorArray != null)
                 {
                     byte* bp = (byte*)Data;
                     for (int i = 0; i < m_tMatrixArray.Length; i++)
                     {
-                        object d = m_tMatrixArray[i];
+                        color = colorArray[(UInt16)((object)m_tMatrixArray[i])];
 
-                        bp[i * 3] = colorArray[(UInt16)d].B;
-                        bp[i * 3 + 1] = colorArray[(UInt16)d].G;
-                        bp[i * 3 + 2] = colorArray[(UInt16)d].R;
+                        bp[i * 3] = color.B;
+                        bp[i * 3 + 1] = color.G;
+                        bp[i * 3 + 2] = color.R;
                     }
 
                     //for (int i = 0; i < m_tMatrixArray.Length; i++)

@@ -257,7 +257,7 @@ namespace BeamOnCL
 
         public Rectangle MaxImageRectangle
         {
-            get { return (m_camera != null) ? new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetMaximum(), (int)m_camera.Parameters[PLCamera.Height].GetMaximum()) : new Rectangle(); }
+            get { return (m_camera != null) ? new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.WidthMax/*.SensorWidth*/].GetValue(), (int)m_camera.Parameters[PLCamera.HeightMax/*.SensorHeight*/].GetValue()) : new Rectangle(); }
         }
 
         public Rectangle ImageRectangle
@@ -268,19 +268,8 @@ namespace BeamOnCL
             {
                 if (m_camera != null)
                 {
-                    int iOffsetX = (int)(Math.Floor(value.X / 4f) * 4);
-
-                    if (iOffsetX < (int)m_camera.Parameters[PLCamera.OffsetX].GetMinimum()) iOffsetX = (int)m_camera.Parameters[PLCamera.OffsetX].GetMinimum();
-                    if (iOffsetX > (int)m_camera.Parameters[PLCamera.OffsetX].GetMaximum()) iOffsetX = (int)m_camera.Parameters[PLCamera.OffsetX].GetMaximum();
-
-                    m_camera.Parameters[PLCamera.OffsetX].SetValue(iOffsetX);
-
-                    int iOffsetY = (int)(Math.Floor(value.Y / 4f) * 4);
-
-                    if (iOffsetY < (int)m_camera.Parameters[PLCamera.OffsetY].GetMinimum()) iOffsetY = (int)m_camera.Parameters[PLCamera.OffsetY].GetMinimum();
-                    if (iOffsetY > (int)m_camera.Parameters[PLCamera.OffsetY].GetMaximum()) iOffsetY = (int)m_camera.Parameters[PLCamera.OffsetY].GetMaximum();
-
-                    m_camera.Parameters[PLCamera.OffsetY].SetValue(iOffsetY);
+                    m_camera.Parameters[PLCamera.OffsetX].SetValue(m_camera.Parameters[PLCamera.OffsetX].GetMinimum());
+                    m_camera.Parameters[PLCamera.OffsetY].SetValue(m_camera.Parameters[PLCamera.OffsetY].GetMinimum());
 
                     int iWidth = (int)(Math.Floor(value.Width / 4f) * 4);
 
@@ -296,10 +285,21 @@ namespace BeamOnCL
 
                     m_camera.Parameters[PLCamera.Height].SetValue(iHeight);
 
-                    if (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8)
-                        m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
-                    else
-                        m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+                    int iOffsetX = (int)(Math.Floor(value.X / 4f) * 4);
+
+                    if (iOffsetX < (int)m_camera.Parameters[PLCamera.OffsetX].GetMinimum()) iOffsetX = (int)m_camera.Parameters[PLCamera.OffsetX].GetMinimum();
+                    if (iOffsetX > (int)m_camera.Parameters[PLCamera.OffsetX].GetMaximum()) iOffsetX = (int)m_camera.Parameters[PLCamera.OffsetX].GetMaximum();
+
+                    m_camera.Parameters[PLCamera.OffsetX].SetValue(iOffsetX);
+
+                    int iOffsetY = (int)(Math.Floor(value.Y / 4f) * 4);
+
+                    if (iOffsetY < (int)m_camera.Parameters[PLCamera.OffsetY].GetMinimum()) iOffsetY = (int)m_camera.Parameters[PLCamera.OffsetY].GetMinimum();
+                    if (iOffsetY > (int)m_camera.Parameters[PLCamera.OffsetY].GetMaximum()) iOffsetY = (int)m_camera.Parameters[PLCamera.OffsetY].GetMaximum();
+
+                    m_camera.Parameters[PLCamera.OffsetY].SetValue(iOffsetY);
+
+                    CreateSnapshot();
                 }
             }
         }
@@ -314,10 +314,7 @@ namespace BeamOnCL
                 {
                     m_camera.Parameters[PLCamera.PixelFormat].TrySetValue((value == PixelFormat.Format8bppIndexed) ? PLCamera.PixelFormat.Mono8 : PLCamera.PixelFormat.Mono12);
 
-                    if (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8)
-                        m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
-                    else
-                        m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+                    CreateSnapshot();
                 }
             }
         }
@@ -345,13 +342,18 @@ namespace BeamOnCL
                         m_camera.Parameters[PLCamera.BinningHorizontal].SetValue(value);
                         m_camera.Parameters[PLCamera.BinningVertical].SetValue(value);
 
-                        if (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8)
-                            m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
-                        else
-                            m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+                        CreateSnapshot();
                     }
                 }
             }
+        }
+
+        private void CreateSnapshot()
+        {
+            if (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8)
+                m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+            else
+                m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
         }
 
         public int MaxGain

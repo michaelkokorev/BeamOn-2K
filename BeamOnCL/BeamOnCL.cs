@@ -12,6 +12,14 @@ namespace BeamOnCL
     {
         MeasureCamera mc = null;
 
+        const UInt16 NUM_POINTS = 64;
+
+        double[] Sin = new double[NUM_POINTS];
+        double[] Cos = new double[NUM_POINTS];
+        Point[] plArea = new Point[NUM_POINTS + 1];
+
+        float m_fPixelSize = 5.86f;
+
         Profile m_lpHorizontal = null;
         Profile m_lpVertical = null;
         Positioning m_pPositioning = null;
@@ -29,11 +37,90 @@ namespace BeamOnCL
 
             mc.OnNewDataReceved += new MeasureCamera.NewDataReceved(mc_OnNewDataReceved);
             mc.OnChangeStatusCamera += new MeasureCamera.ChangeStatusCamera(mc_OnChangeStatusCamera);
+
+            double dStep = Math.PI / (NUM_POINTS / 2f);
+
+            for (int i = 0; i < NUM_POINTS; i++)
+            {
+                Cos[i] = Math.Cos(dStep * i);
+                Sin[i] = Math.Sin(dStep * i);
+            }
         }
 
         void mc_OnChangeStatusCamera(object sender, EventArgs e)
         {
             //throw new NotImplementedException();
+        }
+
+        public Point[] CreateEllipse()
+        {
+            int i;
+            double A11, A21, A12, A22;
+            double Si1, Co1;
+            Si1 = Math.Sin(m_pPositioning.Ellipse.Angle);
+            Co1 = Math.Cos(m_pPositioning.Ellipse.Angle);
+
+            A11 = m_pPositioning.Ellipse.MajorRadius * Co1;
+            A21 = -m_pPositioning.Ellipse.MajorRadius * Si1;
+            A12 = m_pPositioning.Ellipse.MinorRadius * Si1;
+            A22 = m_pPositioning.Ellipse.MinorRadius * Co1;
+
+            switch (m_pPositioning.Ellipse.Type)
+            {
+                case Area.Figure.enRectangle:
+                    {
+                        plArea[0] = new Point((int)(-A11 - A12 + m_pPositioning.Ellipse.Centroid.X), (int)(A21 + A22 + m_pPositioning.Ellipse.Centroid.Y));
+                        plArea[1] = new Point((int)(-A11 + A12 + m_pPositioning.Ellipse.Centroid.X), (int)(A21 - A22 + m_pPositioning.Ellipse.Centroid.Y));
+                        plArea[2] = new Point((int)(A11 + A12 + m_pPositioning.Ellipse.Centroid.X), (int)(-A21 - A22 + m_pPositioning.Ellipse.Centroid.Y));
+                        plArea[3] = new Point((int)(A11 - A12 + m_pPositioning.Ellipse.Centroid.X), (int)(-A21 + A22 + m_pPositioning.Ellipse.Centroid.Y));
+                    }
+                    break;
+                case Area.Figure.enCircle:
+                //{
+                //    //A11 = CircleRadius * Co1;
+                //    //A21 = -CircleRadius * Si1;
+                //    //A12 = CircleRadius * Si1;
+                //    //A22 = CircleRadius * Co1;
+                //}
+                case Area.Figure.enEllipse:
+                    {
+                        plArea[0] = new Point((int)(A11 * Cos[0] + A12 * Sin[0] + m_pPositioning.Ellipse.Centroid.X), (int)(-A21 * Cos[0] - A22 * Sin[0] + m_pPositioning.Ellipse.Centroid.Y));
+                        for (i = 1; i < NUM_POINTS; i++)
+                        {
+                            plArea[i] = new Point((int)(A11 * Cos[i] + A12 * Sin[i] + m_pPositioning.Ellipse.Centroid.X), (int)(-A21 * Cos[i] - A22 * Sin[i] + m_pPositioning.Ellipse.Centroid.Y));
+                        }
+
+                        plArea[NUM_POINTS] = plArea[0];
+                    }
+                    break;
+            }
+
+            return plArea;
+        }
+
+        public double Angle
+        {
+            get { return m_pPositioning.Ellipse.Angle; }
+        }
+
+        public double MinorRadius
+        {
+            get { return m_pPositioning.Ellipse.MinorRadius * m_fPixelSize; }
+        }
+
+        public double MajorRadius
+        {
+            get { return m_pPositioning.Ellipse.MajorRadius * m_fPixelSize; }
+        }
+
+        public PointF Centroid
+        {
+            get { return new PointF(m_pPositioning.Ellipse.Centroid.X * m_fPixelSize, m_pPositioning.Ellipse.Centroid.Y * m_fPixelSize); }
+        }
+
+        public PointF PixelCentroid
+        {
+            get { return new PointF(m_pPositioning.Ellipse.Centroid.X, m_pPositioning.Ellipse.Centroid.Y); }
         }
 
         public TypeProfile typeProfile
@@ -97,11 +184,6 @@ namespace BeamOnCL
             OnImageReceved(sender, e);
         }
 
-        public Area Ellipse
-        {
-            get { return m_pPositioning.Ellipse; }
-        }
-
         public Rectangle WorkingArea
         {
             get { return m_pPositioning.WorkingArea; }
@@ -127,7 +209,7 @@ namespace BeamOnCL
 
             set
             {
-               mc.StopGrabber();
+                mc.StopGrabber();
 
                 mc.pixelFormat = value;
 
@@ -145,16 +227,16 @@ namespace BeamOnCL
         private void CreateProfile()
         {
             //m_lpHorizontal = new SumProfile(new Rectangle(0, 0, pictureBoxImage.Width, pictureBoxImage.Height));
-            m_lpHorizontal = new LineProfile(new Rectangle(0, 0, mc.Snapshot.Width, mc.Snapshot.Height));
+            m_lpHorizontal = new LineProfile(new Rectangle(0, 0, mc.Snapshot.Width, mc.Snapshot.Height), m_fPixelSize);
             m_lpHorizontal.CrossPoint = m_pCrossPosition;
             m_lpHorizontal.Angle = 0;
 
             //m_lpVertical = new SumProfile(new Rectangle(0, 0, pictureBoxImage.Width, pictureBoxImage.Height));
-            m_lpVertical = new LineProfile(new Rectangle(0, 0, mc.Snapshot.Width, mc.Snapshot.Height));
+            m_lpVertical = new LineProfile(new Rectangle(0, 0, mc.Snapshot.Width, mc.Snapshot.Height), m_fPixelSize);
             m_lpVertical.CrossPoint = m_pCrossPosition;
             m_lpVertical.Angle = Math.PI / 2f;
 
-            m_pPositioning = new Positioning(new Rectangle(0, 0, mc.Snapshot.Width, mc.Snapshot.Height));
+            m_pPositioning = new Positioning(new Rectangle(0, 0, mc.Snapshot.Width, mc.Snapshot.Height), m_fPixelSize);
         }
 
         public Rectangle ImageRectangle

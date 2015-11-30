@@ -36,12 +36,6 @@ namespace BeamOn_2K
         Pen m_PenClipLevel2 = new Pen(System.Drawing.Color.Blue, 0.1f);
         Pen m_PenClipLevel3 = new Pen(System.Drawing.Color.Yellow, 0.1f);
 
-        const UInt16 NUM_POINTS = 64;
-
-        double[] Sin = new double[NUM_POINTS];
-        double[] Cos = new double[NUM_POINTS];
-        Point[] plArea = new Point[NUM_POINTS + 1];
-
         public enum DrawOrientation { doHorizontal, doVertical };
         Boolean m_bScaleProfile = false;
         Boolean m_bGaussian = false;
@@ -58,20 +52,16 @@ namespace BeamOn_2K
         float m_fGaussianHorizontalCorrelation = 0;
         float m_fGaussianVerticalCorrelation = 0;
 
+        BeamOnCL.Profile m_profileHorizontal = null;
+        BeamOnCL.Profile m_profileVertical = null;
+        Point[] plArea = null;
+
         public FormMain()
         {
             InitializeComponent();
 
             bm = new BeamOnCL.BeamOnCL();
             bm.OnImageReceved += new BeamOnCL.BeamOnCL.ImageReceved(bm_OnImageReceved);
-
-            double dStep = Math.PI / (NUM_POINTS / 2f);
-
-            for (int i = 0; i < NUM_POINTS; i++)
-            {
-                Cos[i] = Math.Cos(dStep * i);
-                Sin[i] = Math.Sin(dStep * i);
-            }
         }
 
         void bm_OnImageReceved(object sender, BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e)
@@ -85,9 +75,9 @@ namespace BeamOn_2K
                     try
                     {
                         bmpData = m_bmp.LockBits(
-                                                 e.Snapshot.ImageRectangle,
-                                                 System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                                                 m_bmp.PixelFormat
+                                                    new Rectangle(new Point(0, 0), e.Snapshot.ImageRectangle.Size),
+                                                    System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                                    m_bmp.PixelFormat
                                                  );
 
                         e.Snapshot.SetImageDataArray(bmpData.Scan0, m_colorArray);
@@ -109,24 +99,27 @@ namespace BeamOn_2K
                         {
                             bm.GetMeasure(e.Snapshot);
 
-                            DrawEllipse();
+                            plArea = bm.CreateEllipse();
+
+                            m_profileHorizontal = new BeamOnCL.Profile(bm.profileHorizontal);
+                            m_profileVertical = new BeamOnCL.Profile(bm.profileVertical);
 
                             for (int i = 0; i < m_fClipLevelArray.Length; i++)
                             {
-                                m_fWidthHorizontalClip[i] = (float)bm.profileHorizontal.GetWidth(m_fClipLevelArray[i]);
-                                m_fWidthVerticalClip[i] = (float)bm.profileVertical.GetWidth(m_fClipLevelArray[i]);
+                                m_fWidthHorizontalClip[i] = (float)m_profileHorizontal.GetWidth(m_fClipLevelArray[i]);
+                                m_fWidthVerticalClip[i] = (float)m_profileVertical.GetWidth(m_fClipLevelArray[i]);
                             }
 
                             if (m_bGaussian == true)
                             {
                                 for (int i = 0; i < m_fClipLevelArray.Length; i++)
                                 {
-                                    m_fWidthGaussianHorizontalClip[i] = (float)bm.profileHorizontal.GaussianData.GetWidth(m_fClipLevelArray[i]);
-                                    m_fWidthGaussianVerticalClip[i] = (float)bm.profileVertical.GaussianData.GetWidth(m_fClipLevelArray[i]);
+                                    m_fWidthGaussianHorizontalClip[i] = (float)m_profileHorizontal.GaussianData.GetWidth(m_fClipLevelArray[i]);
+                                    m_fWidthGaussianVerticalClip[i] = (float)m_profileVertical.GaussianData.GetWidth(m_fClipLevelArray[i]);
                                 }
 
-                                m_fGaussianHorizontalCorrelation = bm.profileHorizontal.GaussianData.Correlation;
-                                m_fGaussianVerticalCorrelation = bm.profileVertical.GaussianData.Correlation;
+                                m_fGaussianHorizontalCorrelation = m_profileHorizontal.GaussianData.Correlation;
+                                m_fGaussianVerticalCorrelation = m_profileVertical.GaussianData.Correlation;
                             }
                         }
                     }
@@ -144,55 +137,10 @@ namespace BeamOn_2K
 
             this.Invalidate();
             dataSplitContainer.Panel2.Invalidate();
-//            pictureBoxImage.Invalidate();
+            //            pictureBoxImage.Invalidate();
             pictureBoxData.Invalidate();
 
             System.Threading.Thread.Sleep(10);
-        }
-
-        private void DrawEllipse()
-        {
-
-            int i;
-            double A11, A21, A12, A22;
-            double Si1, Co1;
-            Si1 = Math.Sin(bm.Ellipse.Angle);
-            Co1 = Math.Cos(bm.Ellipse.Angle);
-
-            A11 = bm.Ellipse.MajorRadius * Co1;
-            A21 = -bm.Ellipse.MajorRadius * Si1;
-            A12 = bm.Ellipse.MinorRadius * Si1;
-            A22 = bm.Ellipse.MinorRadius * Co1;
-
-            switch (bm.Ellipse.Type)
-            {
-                case BeamOnCL.Area.Figure.enRectangle:
-                    {
-                        plArea[0] = new Point((int)(-A11 - A12 + bm.Ellipse.Centroid.X), (int)(A21 + A22 + bm.Ellipse.Centroid.Y));
-                        plArea[1] = new Point((int)(-A11 + A12 + bm.Ellipse.Centroid.X), (int)(A21 - A22 + bm.Ellipse.Centroid.Y));
-                        plArea[2] = new Point((int)(A11 + A12 + bm.Ellipse.Centroid.X), (int)(-A21 - A22 + bm.Ellipse.Centroid.Y));
-                        plArea[3] = new Point((int)(A11 - A12 + bm.Ellipse.Centroid.X), (int)(-A21 + A22 + bm.Ellipse.Centroid.Y));
-                    }
-                    break;
-                case BeamOnCL.Area.Figure.enCircle:
-                //{
-                //    //A11 = CircleRadius * Co1;
-                //    //A21 = -CircleRadius * Si1;
-                //    //A12 = CircleRadius * Si1;
-                //    //A22 = CircleRadius * Co1;
-                //}
-                case BeamOnCL.Area.Figure.enEllipse:
-                    {
-                        plArea[0] = new Point((int)(A11 * Cos[0] + A12 * Sin[0] + bm.Ellipse.Centroid.X), (int)(-A21 * Cos[0] - A22 * Sin[0] + bm.Ellipse.Centroid.Y));
-                        for (i = 1; i < NUM_POINTS; i++)
-                        {
-                            plArea[i] = new Point((int)(A11 * Cos[i] + A12 * Sin[i] + bm.Ellipse.Centroid.X), (int)(-A21 * Cos[i] - A22 * Sin[i] + bm.Ellipse.Centroid.Y));
-                        }
-
-                        plArea[NUM_POINTS] = plArea[0];
-                    }
-                    break;
-            }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -258,13 +206,13 @@ namespace BeamOn_2K
             }
             else if (e.Button == System.Windows.Forms.MouseButtons.Right)
             {
-                if (bm.ImageRectangle == bm.MaxImageRectangle)
+                if (bm.ImageRectangle.Size == bm.MaxImageRectangle.Size)
                 {
-                    int iSizeX = (int)((bm.WorkingArea.Width > imageSplitContainer.Panel2.Width) ? bm.WorkingArea.Width : imageSplitContainer.Panel2.Width - 8);
-                    int iSizeY = (int)((bm.WorkingArea.Height > imageSplitContainer.Panel2.Height) ? bm.WorkingArea.Height : imageSplitContainer.Panel2.Height - 8);
+                    int iSizeX = (int)Math.Min(bm.MaxImageRectangle.Width, imageSplitContainer.Panel2.Width) - 8;
+                    int iSizeY = (int)Math.Min(bm.MaxImageRectangle.Height, imageSplitContainer.Panel2.Height) - 8;
 
-                    int iOffsetX = (int)bm.Ellipse.Centroid.X - (int)(iSizeX / 2);
-                    int iOffsetY = (int)bm.Ellipse.Centroid.Y - (int)(iSizeY / 2);
+                    int iOffsetX = (int)bm.PixelCentroid.X - (int)(iSizeX / 2);
+                    int iOffsetY = (int)bm.PixelCentroid.Y - (int)(iSizeY / 2);
 
                     bm.ImageRectangle = new Rectangle(iOffsetX, iOffsetY, iSizeX, iSizeY);
                 }
@@ -273,7 +221,7 @@ namespace BeamOn_2K
                     bm.ImageRectangle = bm.MaxImageRectangle;
                 }
 
-                pictureBoxImage.Size = new System.Drawing.Size((int)bm.ImageRectangle.Width, (int)bm.ImageRectangle.Height);
+                pictureBoxImage.Size = bm.ImageRectangle.Size;
 
                 m_bmp = new Bitmap(pictureBoxImage.Width, pictureBoxImage.Height, picturePaletteImage.Format);
 
@@ -287,17 +235,17 @@ namespace BeamOn_2K
 
             if (m_bMeasure == true)
             {
-                Point OldPoint = new Point((int)bm.Ellipse.Centroid.X - 20, (int)bm.Ellipse.Centroid.Y - 20);
-                Point NewPoint = new Point((int)bm.Ellipse.Centroid.X + 20, (int)bm.Ellipse.Centroid.Y + 20);
+                Point OldPoint = new Point((int)bm.PixelCentroid.X - 20, (int)bm.PixelCentroid.Y - 20);
+                Point NewPoint = new Point((int)bm.PixelCentroid.X + 20, (int)bm.PixelCentroid.Y + 20);
 
                 grfx.DrawLine(m_PenCentroid, OldPoint, NewPoint);
 
-                OldPoint = new Point((int)bm.Ellipse.Centroid.X - 20, (int)bm.Ellipse.Centroid.Y + 20);
-                NewPoint = new Point((int)bm.Ellipse.Centroid.X + 20, (int)bm.Ellipse.Centroid.Y - 20);
+                OldPoint = new Point((int)bm.PixelCentroid.X - 20, (int)bm.PixelCentroid.Y + 20);
+                NewPoint = new Point((int)bm.PixelCentroid.X + 20, (int)bm.PixelCentroid.Y - 20);
 
                 grfx.DrawLine(m_PenCentroid, OldPoint, NewPoint);
 
-                grfx.DrawLines(m_PenEllipse, plArea);
+                if (plArea != null) grfx.DrawLines(m_PenEllipse, plArea);
 
                 grfx.DrawRectangle(m_PenCentroid, bm.WorkingArea);
 
@@ -307,8 +255,8 @@ namespace BeamOn_2K
                     grfx.DrawLine(m_PenGrid, bm.lineProfileVerticalLeft, bm.lineProfileVerticalRight);
                 }
 
-                DrawProfile(bm.profileVertical, m_PenGrid, DrawOrientation.doVertical, grfx);
-                DrawProfile(bm.profileHorizontal, m_PenGrid, DrawOrientation.doHorizontal, grfx);
+                DrawProfile(m_profileVertical, m_PenGrid, DrawOrientation.doVertical, grfx);
+                DrawProfile(m_profileHorizontal, m_PenGrid, DrawOrientation.doHorizontal, grfx);
 
                 int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
 
@@ -346,86 +294,89 @@ namespace BeamOn_2K
             int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
             int iHeightProfile = (int)(iHeight / 3f);
 
-            Double MaxProfile = (m_bScaleProfile == true) ? dataProfile.MaxProfile : ((bm.pixelFormat == PixelFormat.Format8bppIndexed) ? (UInt16)255 : (UInt16)4095);
-            Double fCoeffAmpl = (MaxProfile > 0) ? iHeightProfile / MaxProfile : 0;
-            Double fCoeffStep = 0;
-
-            if (drawOrientation == DrawOrientation.doHorizontal)
+            if (dataProfile != null)
             {
-                fCoeffStep = pictureBoxData.Width / (float)dataProfile.DataProfile.Length;
+                Double MaxProfile = (m_bScaleProfile == true) ? dataProfile.MaxProfile : ((bm.pixelFormat == PixelFormat.Format8bppIndexed) ? (UInt16)255 : (UInt16)4095);
+                Double fCoeffAmpl = (MaxProfile > 0) ? iHeightProfile / MaxProfile : 0;
+                Double fCoeffStep = 0;
 
-                int iShiftY = 0;
-                if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
+                if (drawOrientation == DrawOrientation.doHorizontal)
                 {
-                    iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
-                    if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
-                }
+                    fCoeffStep = pictureBoxData.Width / (float)dataProfile.DataProfile.Length;
 
-                OldPoint = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftY);
-                if (m_bGaussian == true) OldPointGaussian = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftY);
-
-                for (int i = 1; i < dataProfile.DataProfile.Length; i++)
-                {
-                    NewPoint = new Point((int)Math.Ceiling(i * fCoeffStep), iHeight - (int)Math.Ceiling(dataProfile.DataProfile[i] * fCoeffAmpl) - iShiftY);
-                    grfx.DrawLine(pen, OldPoint, NewPoint);
-                    OldPoint = NewPoint;
-
-                    if (m_bGaussian == true)
+                    int iShiftY = 0;
+                    if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
                     {
-                        NewPointGaussian = new Point((int)Math.Ceiling(i * fCoeffStep), iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[i] * fCoeffAmpl) - iShiftY);
-                        grfx.DrawLine(m_PenGaussian, OldPointGaussian, NewPointGaussian);
-                        OldPointGaussian = NewPointGaussian;
+                        iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
+                        if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
+                    }
+
+                    OldPoint = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftY);
+                    if (m_bGaussian == true) OldPointGaussian = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftY);
+
+                    for (int i = 1; i < dataProfile.DataProfile.Length; i++)
+                    {
+                        NewPoint = new Point((int)Math.Ceiling(i * fCoeffStep), iHeight - (int)Math.Ceiling(dataProfile.DataProfile[i] * fCoeffAmpl) - iShiftY);
+                        grfx.DrawLine(pen, OldPoint, NewPoint);
+                        OldPoint = NewPoint;
+
+                        if (m_bGaussian == true)
+                        {
+                            NewPointGaussian = new Point((int)Math.Ceiling(i * fCoeffStep), iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[i] * fCoeffAmpl) - iShiftY);
+                            grfx.DrawLine(m_PenGaussian, OldPointGaussian, NewPointGaussian);
+                            OldPointGaussian = NewPointGaussian;
+                        }
+                    }
+
+                    if (m_bScaleProfile == true)
+                    {
+                        int iLineLevel1 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[0] / 100f) - iShiftY;
+                        int iLineLevel2 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[1] / 100f) - iShiftY;
+                        int iLineLevel3 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[2] / 100f) - iShiftY;
+
+                        for (int i = 0; i < pictureBoxData.Width; i += 6)
+                        {
+                            grfx.DrawLine(m_PenClipLevel1, i, iLineLevel1, i + 3, iLineLevel1);
+                            grfx.DrawLine(m_PenClipLevel2, i, iLineLevel2, i + 3, iLineLevel2);
+                            grfx.DrawLine(m_PenClipLevel3, i, iLineLevel3, i + 3, iLineLevel3);
+                        }
                     }
                 }
-
-                if (m_bScaleProfile == true)
+                else
                 {
-                    int iLineLevel1 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[0] / 100f) - iShiftY;
-                    int iLineLevel2 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[1] / 100f) - iShiftY;
-                    int iLineLevel3 = iHeight - (int)(iHeightProfile * m_fClipLevelArray[2] / 100f) - iShiftY;
+                    fCoeffStep = pictureBoxData.Height / (float)dataProfile.DataProfile.Length;
 
-                    for (int i = 0; i < pictureBoxData.Width; i += 6)
+                    int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
+
+                    OldPoint = new Point((int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftX, 0);
+                    if (m_bGaussian == true) OldPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftX, 0);
+
+                    for (int i = 1; i < dataProfile.DataProfile.Length; i++)
                     {
-                        grfx.DrawLine(m_PenClipLevel1, i, iLineLevel1, i + 3, iLineLevel1);
-                        grfx.DrawLine(m_PenClipLevel2, i, iLineLevel2, i + 3, iLineLevel2);
-                        grfx.DrawLine(m_PenClipLevel3, i, iLineLevel3, i + 3, iLineLevel3);
+                        NewPoint = new Point((int)Math.Ceiling(dataProfile.DataProfile[i] * fCoeffAmpl) - iShiftX, (int)Math.Ceiling(i * fCoeffStep));
+                        grfx.DrawLine(pen, OldPoint, NewPoint);
+                        OldPoint = NewPoint;
+
+                        if (m_bGaussian == true)
+                        {
+                            NewPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[i] * fCoeffAmpl) - iShiftX, (int)Math.Ceiling(i * fCoeffStep));
+                            grfx.DrawLine(m_PenGaussian, OldPointGaussian, NewPointGaussian);
+                            OldPointGaussian = NewPointGaussian;
+                        }
                     }
-                }
-            }
-            else
-            {
-                fCoeffStep = pictureBoxData.Height / (float)dataProfile.DataProfile.Length;
 
-                int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
-
-                OldPoint = new Point((int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftX, 0);
-                if (m_bGaussian == true) OldPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftX, 0);
-
-                for (int i = 1; i < dataProfile.DataProfile.Length; i++)
-                {
-                    NewPoint = new Point((int)Math.Ceiling(dataProfile.DataProfile[i] * fCoeffAmpl), (int)Math.Ceiling(i * fCoeffStep) - iShiftX);
-                    grfx.DrawLine(pen, OldPoint, NewPoint);
-                    OldPoint = NewPoint;
-
-                    if (m_bGaussian == true)
+                    if (m_bScaleProfile == true)
                     {
-                        NewPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[i] * fCoeffAmpl), (int)Math.Ceiling(i * fCoeffStep) - iShiftX);
-                        grfx.DrawLine(m_PenGaussian, OldPointGaussian, NewPointGaussian);
-                        OldPointGaussian = NewPointGaussian;
-                    }
-                }
+                        int iLineLevel1 = (int)(iHeightProfile * m_fClipLevelArray[0] / 100f - iShiftX);
+                        int iLineLevel2 = (int)(iHeightProfile * m_fClipLevelArray[1] / 100f - iShiftX);
+                        int iLineLevel3 = (int)(iHeightProfile * m_fClipLevelArray[2] / 100f - iShiftX);
 
-                if (m_bScaleProfile == true)
-                {
-                    int iLineLevel1 = (int)(iHeightProfile * m_fClipLevelArray[0] / 100f - iShiftX);
-                    int iLineLevel2 = (int)(iHeightProfile * m_fClipLevelArray[1] / 100f - iShiftX);
-                    int iLineLevel3 = (int)(iHeightProfile * m_fClipLevelArray[2] / 100f - iShiftX);
-
-                    for (int i = 0; i < pictureBoxData.Height; i += 6)
-                    {
-                        grfx.DrawLine(m_PenClipLevel1, iLineLevel1, i, iLineLevel1, i + 3);
-                        grfx.DrawLine(m_PenClipLevel2, iLineLevel2, i, iLineLevel2, i + 3);
-                        grfx.DrawLine(m_PenClipLevel3, iLineLevel3, i, iLineLevel3, i + 3);
+                        for (int i = 0; i < pictureBoxData.Height; i += 6)
+                        {
+                            grfx.DrawLine(m_PenClipLevel1, iLineLevel1, i, iLineLevel1, i + 3);
+                            grfx.DrawLine(m_PenClipLevel2, iLineLevel2, i, iLineLevel2, i + 3);
+                            grfx.DrawLine(m_PenClipLevel3, iLineLevel3, i, iLineLevel3, i + 3);
+                        }
                     }
                 }
             }
@@ -439,7 +390,6 @@ namespace BeamOn_2K
                 {
                     toolStripStatusLabelTimeStamp.Text = (1000f / (double)Timestamp).ToString("#.000") + " fps";
                 });
-
             }
             catch
             {
@@ -462,7 +412,7 @@ namespace BeamOn_2K
                 {
                     if (m_colorArray == null) m_colorArray = new System.Drawing.Color[value.Length];
 
-                    Array.Copy(value, m_colorArray, value.Length);
+                    value.CopyTo(m_colorArray, 0);
                 }
             }
         }
@@ -496,7 +446,7 @@ namespace BeamOn_2K
 
                 picturePaletteImage.Format = PixelFormat.Format8bppIndexed;
 
-                pictureBoxImage.Size = new System.Drawing.Size(bm.ImageRectangle.Width, bm.ImageRectangle.Height);
+                pictureBoxImage.Size = bm.ImageRectangle.Size;
 
                 m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, picturePaletteImage.Format);
 
@@ -573,12 +523,13 @@ namespace BeamOn_2K
 
             if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
 
-            pictureBoxImage.Size = new System.Drawing.Size(bm.ImageRectangle.Width, bm.ImageRectangle.Height);
+            pictureBoxImage.Size = bm.ImageRectangle.Size;
         }
 
         private void trackBarTransparency_Scroll(object sender, EventArgs e)
         {
-            this.pictureBoxData.BackColor = System.Drawing.Color.FromArgb(trackBarTransparency.Value, pictureBoxData.BackColor.R, pictureBoxData.BackColor.G, pictureBoxData.BackColor.B);
+            //            this.pictureBoxData.BackColor = System.Drawing.Color.FromArgb(trackBarTransparency.Value, pictureBoxData.BackColor.R, pictureBoxData.BackColor.G, pictureBoxData.BackColor.B);
+            this.pictureBoxData.BackColor = System.Drawing.Color.FromArgb(trackBarTransparency.Value, 0, 0, 0);
         }
 
         private void trackBarGain_Scroll(object sender, EventArgs e)
@@ -663,8 +614,8 @@ namespace BeamOn_2K
         {
             if (m_bMeasure == true)
             {
-                labelPositionXValue.Text = bm.Ellipse.Centroid.X.ToString();
-                labelPositionYValue.Text = bm.Ellipse.Centroid.Y.ToString();
+                labelPositionXValue.Text = bm.Centroid.X.ToString();
+                labelPositionYValue.Text = bm.Centroid.Y.ToString();
 
                 labelHorizontalValue1.Text = m_fWidthHorizontalClip[0].ToString();
                 labelHorizontalValue2.Text = m_fWidthHorizontalClip[1].ToString();

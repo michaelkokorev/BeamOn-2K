@@ -7,13 +7,36 @@ namespace BeamOnCL
 {
     public class Gaussian
     {
+        float m_fPixelSize = 5.86f;
+
         double[] m_dGaussian = null;
         float m_fCorrelation = 0f;
         Double m_dProfileMax = 0;
 
-        public Gaussian(int Lenght)
+        public Gaussian(Gaussian gaus)
+        {
+            m_dGaussian = new double[gaus.GaussianData.Length];
+            gaus.GaussianData.CopyTo(m_dGaussian, 0);
+
+            m_fCorrelation = gaus.Correlation;
+            m_dProfileMax = gaus.ProfileMax;
+            m_fPixelSize = gaus.PixelSize;
+        }
+
+        public Single PixelSize
+        {
+            get { return m_fPixelSize; }
+        }
+
+        public Double ProfileMax
+        {
+            get { return m_dProfileMax; }
+        }
+
+        public Gaussian(int Lenght, float fPixelSize = 5.86f)
         {
             m_dGaussian = new double[Lenght];
+            m_fPixelSize = fPixelSize;
         }
 
         public Double[] GaussianData
@@ -64,7 +87,7 @@ namespace BeamOnCL
             f_Right = iRight + (m_dGaussian[iRight] - f_Board) / (m_dGaussian[iRight] - m_dGaussian[iRight + 1]);
             //}
 
-            return (f_Right - f_Left);
+            return (f_Right - f_Left) * m_fPixelSize;
         }
 
         public void Create(Double[] profile, Double profileMax, int centroid, Double Sum)

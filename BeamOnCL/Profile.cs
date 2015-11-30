@@ -8,6 +8,8 @@ namespace BeamOnCL
 {
     public class Profile
     {
+        float m_fPixelSize = 5.86f;
+
         public Double[] m_sDataProfile = null;
         public Gaussian m_sGaussian = null;
 
@@ -40,10 +42,27 @@ namespace BeamOnCL
             get { return m_sDataProfile; }
         }
 
-        public Profile(Rectangle rArea)
+        public Single PixelSize
+        {
+            get { return m_fPixelSize; }
+        }
+
+        public Profile(Profile prf)
+        {
+            m_sDataProfile = new double[prf.DataProfile.Length];
+            prf.DataProfile.CopyTo(m_sDataProfile, 0);
+
+            m_sMaxProfile = prf.MaxProfile;
+
+            m_sGaussian = new Gaussian(prf.GaussianData);
+            m_fPixelSize = prf.PixelSize;
+        }
+
+        public Profile(Rectangle rArea, float fPixelSize = 5.86f)
         {
             m_rArea = rArea;
             Angle = 0;
+            m_fPixelSize = fPixelSize;
         }
 
         public Point CrossPoint
@@ -114,7 +133,7 @@ namespace BeamOnCL
             f_Right = iRight + (m_sDataProfile[iRight] - f_Board) / (m_sDataProfile[iRight] - m_sDataProfile[iRight + 1]);
             //}
 
-            return (f_Right - f_Left);
+            return (f_Right - f_Left) * m_fPixelSize;
         }
 
         public virtual void Create(SnapshotBase snapshot)
@@ -231,48 +250,42 @@ namespace BeamOnCL
 
         protected Double GetPixelColor(SnapshotBase snapshot, PointF point)
         {
+            return snapshot.GetPixelColor((int)Math.Floor(point.X) + (int)Math.Floor(point.Y) * (Int32)m_rArea.Width);
+
+//
             Double dColor = 0;
+            Int32 iAdress = (int)Math.Floor(point.X) + (int)Math.Floor(point.Y) * (Int32)m_rArea.Width;
             double deltaSum = 0;
             double deltaR = 0;
-
             Point sPoint = new Point((int)Math.Floor(point.X), (int)Math.Floor(point.Y));
-            Int32 iAdress = sPoint.X + sPoint.Y * (Int32)m_rArea.Width;
+            SizeF szf = new SizeF((float)(point.X - sPoint.X), (float)(point.Y - sPoint.Y));
 
-            if (true)
+            deltaR = szf.Width * szf.Width + szf.Height * szf.Height;
+
+            delta[0] = 1 - Math.Sqrt(deltaR);
+            delta[1] = 1 - Math.Sqrt(deltaR - 2 * szf.Width + 1);
+            delta[2] = 1 - Math.Sqrt(deltaR - 2 * (szf.Width - szf.Height + 1));
+            delta[3] = 1 - Math.Sqrt(deltaR - 2 * szf.Height + 1);
+
+            if (delta[0] < 0) delta[0] = 0f;
+            if (delta[1] < 0) delta[1] = 0f;
+            if (delta[2] < 0) delta[2] = 0f;
+            if (delta[3] < 0) delta[3] = 0f;
+
+            deltaSum = delta[0] + delta[1] + delta[2] + delta[3];
+
+            dColor = (delta[0] != 0) ? snapshot.GetPixelColor(iAdress) * delta[0] / deltaSum : 0;
+
+            if ((sPoint.X != (m_rArea.Width - 1)) && (sPoint.Y != (m_rArea.Height - 1)))
             {
-                dColor = snapshot.GetPixelColor(iAdress);
+                if (delta[1] != 0) dColor += snapshot.GetPixelColor(iAdress + 1) * delta[1] / deltaSum;
+                if (delta[2] != 0) dColor += snapshot.GetPixelColor(iAdress + 1 + (Int32)m_rArea.Width) * delta[2] / deltaSum;
+                if (delta[3] != 0) dColor += snapshot.GetPixelColor(iAdress + (Int32)m_rArea.Width) * delta[3] / deltaSum;
             }
-            else
-            {
-                SizeF szf = new SizeF((float)(point.X - sPoint.X), (float)(point.Y - sPoint.Y));
-
-                deltaR = szf.Width * szf.Width + szf.Height * szf.Height;
-
-                delta[0] = 1 - Math.Sqrt(deltaR);
-                delta[1] = 1 - Math.Sqrt(deltaR - 2 * szf.Width + 1);
-                delta[2] = 1 - Math.Sqrt(deltaR - 2 * (szf.Width - szf.Height + 1));
-                delta[3] = 1 - Math.Sqrt(deltaR - 2 * szf.Height + 1);
-
-                if (delta[0] < 0) delta[0] = 0f;
-                if (delta[1] < 0) delta[1] = 0f;
-                if (delta[2] < 0) delta[2] = 0f;
-                if (delta[3] < 0) delta[3] = 0f;
-
-                deltaSum = delta[0] + delta[1] + delta[2] + delta[3];
-
-                dColor = (delta[0] != 0) ? snapshot.GetPixelColor(iAdress) * delta[0] / deltaSum : 0;
-
-                if ((sPoint.X != (m_rArea.Width - 1)) && (sPoint.Y != (m_rArea.Height - 1)))
-                {
-                    if (delta[1] != 0) dColor += snapshot.GetPixelColor(iAdress + 1) * delta[1] / deltaSum;
-                    if (delta[2] != 0) dColor += snapshot.GetPixelColor(iAdress + 1 + (Int32)m_rArea.Width) * delta[2] / deltaSum;
-                    if (delta[3] != 0) dColor += snapshot.GetPixelColor(iAdress + (Int32)m_rArea.Width) * delta[3] / deltaSum;
-                }
-                else if ((delta[1] != 0) && (sPoint.X != (m_rArea.Width - 1)))
-                    dColor += snapshot.GetPixelColor(iAdress + 1) * delta[1] / deltaSum;
-                else if ((delta[3] != 0) && (sPoint.Y != (m_rArea.Height - 1)))
-                    dColor += snapshot.GetPixelColor(iAdress + (Int32)m_rArea.Width) * delta[3] / deltaSum;
-            }
+            else if ((delta[1] != 0) && (sPoint.X != (m_rArea.Width - 1)))
+                dColor += snapshot.GetPixelColor(iAdress + 1) * delta[1] / deltaSum;
+            else if ((delta[3] != 0) && (sPoint.Y != (m_rArea.Height - 1)))
+                dColor += snapshot.GetPixelColor(iAdress + (Int32)m_rArea.Width) * delta[3] / deltaSum;
 
             return dColor;
         }
