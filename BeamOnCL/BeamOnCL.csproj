@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Area.cs" />
     <Compile Include="BeamOnCL.cs" />
+    <Compile Include="CheckHardware.cs" />
     <Compile Include="Gaussian.cs" />
     <Compile Include="LineProfile.cs" />
     <Compile Include="MeasureCamera.cs" />

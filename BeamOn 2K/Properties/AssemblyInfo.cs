@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("BeamOn 2K")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Warning: This computer program is protected by copyright law and international treaties. Unauthorized reproduction or distribution of this program, or any portion of it, may result in severe civil and critical penalties, and will be prosecuted to the maximum extent possible under law.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Duma Optronics Ltd.")]
 [assembly: AssemblyProduct("BeamOn 2K")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("Copyright ©  2015 Duma Optronics Ltd., Israel")]
+[assembly: AssemblyTrademark("BeamOn Series")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

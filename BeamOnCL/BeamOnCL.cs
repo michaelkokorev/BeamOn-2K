@@ -115,7 +115,12 @@ namespace BeamOnCL
 
         public PointF Centroid
         {
-            get { return new PointF(m_pPositioning.Ellipse.Centroid.X * m_fPixelSize, m_pPositioning.Ellipse.Centroid.Y * m_fPixelSize); }
+            get
+            {
+                return new PointF(
+                    (mc.ImageRectangle.X + m_pPositioning.Ellipse.Centroid.X - mc.MaxImageRectangle.Width / 2f) * m_fPixelSize,
+                    (mc.ImageRectangle.Y + m_pPositioning.Ellipse.Centroid.Y - mc.MaxImageRectangle.Height / 2f) * m_fPixelSize);
+            }
         }
 
         public PointF PixelCentroid

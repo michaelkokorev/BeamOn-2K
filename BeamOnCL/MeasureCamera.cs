@@ -36,6 +36,7 @@ namespace BeamOnCL
         public event NewDataReceved OnNewDataReceved;
 
         SnapshotBase m_snapshot = null;
+        Rectangle m_rImageRectangle = new Rectangle();
 
 #if WATCHDOG
         static EventWaitHandle evHardwareFailure = new AutoResetEvent(false);
@@ -96,6 +97,12 @@ namespace BeamOnCL
                     m_camera.Parameters[PLCamera.OffsetX].SetValue(0);
                     m_camera.Parameters[PLCamera.OffsetY].SetValue(0);
 
+                    m_rImageRectangle = new Rectangle(
+                                                        (int)m_camera.Parameters[PLCamera.OffsetX].GetValue(),
+                                                        (int)m_camera.Parameters[PLCamera.OffsetY].GetValue(),
+                                                        (int)m_camera.Parameters[PLCamera.Width].GetValue(),
+                                                        (int)m_camera.Parameters[PLCamera.Height].GetValue()
+                                                      );
                     this.pixelFormat = pixelFormat;
 
                     //m_camera.Parameters[PLTransportLayer.HeartbeatTimeout].TrySetValue(1000, IntegerValueCorrection.Nearest);  // 1000 ms timeout
@@ -262,7 +269,7 @@ namespace BeamOnCL
 
         public Rectangle ImageRectangle
         {
-            get { return (m_snapshot != null) ? m_snapshot.ImageRectangle : new Rectangle(0, 0, 0, 0); }
+            get { return m_rImageRectangle; }
 
             set
             {
@@ -299,6 +306,12 @@ namespace BeamOnCL
 
                     m_camera.Parameters[PLCamera.OffsetY].SetValue(iOffsetY);
 
+                    m_rImageRectangle = new Rectangle(
+                                                        (int)m_camera.Parameters[PLCamera.OffsetX].GetValue(), 
+                                                        (int)m_camera.Parameters[PLCamera.OffsetY].GetValue(), 
+                                                        (int)m_camera.Parameters[PLCamera.Width].GetValue(), 
+                                                        (int)m_camera.Parameters[PLCamera.Height].GetValue()
+                                                      );
                     CreateSnapshot();
                 }
             }
@@ -341,6 +354,8 @@ namespace BeamOnCL
                     {
                         m_camera.Parameters[PLCamera.BinningHorizontal].SetValue(value);
                         m_camera.Parameters[PLCamera.BinningVertical].SetValue(value);
+
+                        ImageRectangle = MaxImageRectangle;
 
                         CreateSnapshot();
                     }

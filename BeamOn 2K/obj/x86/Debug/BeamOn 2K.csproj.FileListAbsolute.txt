@@ -10,3 +10,5 @@ C:\Users\Michael Kokorev\Documents\Visual Studio 2010\Projects\BeamOn 2K\BeamOn 
 C:\Users\Michael Kokorev\Documents\Visual Studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn 2K.csproj.GenerateResource.Cache
 C:\Users\Michael Kokorev\Documents\Visual Studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn 2K.exe
 C:\Users\Michael Kokorev\Documents\Visual Studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn 2K.pdb
+C:\Users\Michael Kokorev\Documents\Visual Studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn_2K.frmAboutBox.resources
+C:\Users\Michael Kokorev\Documents\Visual Studio 2010\Projects\BeamOn 2K\BeamOn 2K\obj\x86\Debug\BeamOn_2K.FormWellcome.resources

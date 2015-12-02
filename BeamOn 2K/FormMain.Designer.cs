@@ -31,6 +31,10 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuFilePrintWindow = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuFilePrintScreen = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuFilePageSetup = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
@@ -57,12 +61,8 @@
             this.toolStripStatusLabelPixelFormat = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelTypeProfile = new System.Windows.Forms.ToolStripStatusLabel();
             this.mainToolStrip = new System.Windows.Forms.ToolStrip();
-            this.toolStripButtonPixelFormat = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButtonTypeProfile = new System.Windows.Forms.ToolStripButton();
             this.mainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.imageSplitContainer = new System.Windows.Forms.SplitContainer();
-            this.pictureBoxImage = new System.Windows.Forms.PictureBox();
-            this.pictureBoxData = new System.Windows.Forms.PictureBox();
             this.dataSplitContainer = new System.Windows.Forms.SplitContainer();
             this.propertyGroupBox = new System.Windows.Forms.GroupBox();
             this.groupBoxBinning = new System.Windows.Forms.GroupBox();
@@ -113,7 +113,22 @@
             this.labelPositionYValue = new System.Windows.Forms.Label();
             this.labelPositionY = new System.Windows.Forms.Label();
             this.labelPositionX = new System.Windows.Forms.Label();
+            this.printDialog = new System.Windows.Forms.PrintDialog();
+            this.printDocument = new System.Drawing.Printing.PrintDocument();
+            this.printPreviewDialog = new System.Windows.Forms.PrintPreviewDialog();
+            this.pageSetupDialog = new System.Windows.Forms.PageSetupDialog();
             this.picturePaletteImage = new PaletteImage.PaletteImage();
+            this.pictureBoxImage = new System.Windows.Forms.PictureBox();
+            this.pictureBoxData = new System.Windows.Forms.PictureBox();
+            this.tbViewFile = new System.Windows.Forms.ToolStripButton();
+            this.tbFilePrint = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tbFilePrintText = new System.Windows.Forms.ToolStripMenuItem();
+            this.tbFilePrintBMP = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripButtonPixelFormat = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonTypeProfile = new System.Windows.Forms.ToolStripButton();
+            this.mnuFilePrint = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuFilePrintText = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuFilePrintBMP = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -125,9 +140,6 @@
             this.imageSplitContainer.Panel1.SuspendLayout();
             this.imageSplitContainer.Panel2.SuspendLayout();
             this.imageSplitContainer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).BeginInit();
-            this.pictureBoxImage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataSplitContainer)).BeginInit();
             this.dataSplitContainer.Panel1.SuspendLayout();
             this.dataSplitContainer.Panel2.SuspendLayout();
@@ -145,6 +157,9 @@
             this.ProfileGroupBox.SuspendLayout();
             this.groupBoxPosition.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).BeginInit();
+            this.pictureBoxImage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).BeginInit();
             this.SuspendLayout();
             // 
             // mainMenuStrip
@@ -163,16 +178,55 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuFilePrint,
+            this.mnuFilePrintWindow,
+            this.mnuFilePrintScreen,
+            this.mnuFilePageSetup,
+            this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
             // 
+            // mnuFilePrintWindow
+            // 
+            this.mnuFilePrintWindow.Enabled = false;
+            this.mnuFilePrintWindow.Name = "mnuFilePrintWindow";
+            this.mnuFilePrintWindow.ShortcutKeys = System.Windows.Forms.Keys.F12;
+            this.mnuFilePrintWindow.Size = new System.Drawing.Size(189, 22);
+            this.mnuFilePrintWindow.Text = "Print &Window";
+            this.mnuFilePrintWindow.ToolTipText = "Print Window";
+            this.mnuFilePrintWindow.Click += new System.EventHandler(this.mnuFilePrintWindow_Click);
+            // 
+            // mnuFilePrintScreen
+            // 
+            this.mnuFilePrintScreen.Enabled = false;
+            this.mnuFilePrintScreen.Name = "mnuFilePrintScreen";
+            this.mnuFilePrintScreen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F12)));
+            this.mnuFilePrintScreen.Size = new System.Drawing.Size(189, 22);
+            this.mnuFilePrintScreen.Text = "Print &Screen";
+            this.mnuFilePrintScreen.ToolTipText = "Print Screen";
+            this.mnuFilePrintScreen.Click += new System.EventHandler(this.mnuFilePrintWindow_Click);
+            // 
+            // mnuFilePageSetup
+            // 
+            this.mnuFilePageSetup.Enabled = false;
+            this.mnuFilePageSetup.Name = "mnuFilePageSetup";
+            this.mnuFilePageSetup.Size = new System.Drawing.Size(189, 22);
+            this.mnuFilePageSetup.Text = "P&age Setup...";
+            this.mnuFilePageSetup.ToolTipText = "Page Setup";
+            this.mnuFilePageSetup.Click += new System.EventHandler(this.mnuFilePageSetup_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(186, 6);
+            // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
             this.exitToolStripMenuItem.Text = "&Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -341,6 +395,7 @@
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "&About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // mainStatusStrip
             // 
@@ -388,6 +443,8 @@
             // mainToolStrip
             // 
             this.mainToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tbViewFile,
+            this.tbFilePrint,
             this.toolStripButtonPixelFormat,
             this.toolStripButtonTypeProfile});
             this.mainToolStrip.Location = new System.Drawing.Point(0, 24);
@@ -395,31 +452,6 @@
             this.mainToolStrip.Size = new System.Drawing.Size(1401, 39);
             this.mainToolStrip.TabIndex = 2;
             this.mainToolStrip.Text = "toolStrip1";
-            // 
-            // toolStripButtonPixelFormat
-            // 
-            this.toolStripButtonPixelFormat.AutoSize = false;
-            this.toolStripButtonPixelFormat.CheckOnClick = true;
-            this.toolStripButtonPixelFormat.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButtonPixelFormat.Image = global::BeamOn_2K.Properties.Resources.black_12bit_mode;
-            this.toolStripButtonPixelFormat.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.toolStripButtonPixelFormat.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonPixelFormat.Name = "toolStripButtonPixelFormat";
-            this.toolStripButtonPixelFormat.Size = new System.Drawing.Size(36, 36);
-            this.toolStripButtonPixelFormat.CheckedChanged += new System.EventHandler(this.toolStripButtonPixelFormat_CheckedChanged);
-            // 
-            // toolStripButtonTypeProfile
-            // 
-            this.toolStripButtonTypeProfile.AutoSize = false;
-            this.toolStripButtonTypeProfile.CheckOnClick = true;
-            this.toolStripButtonTypeProfile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButtonTypeProfile.Font = new System.Drawing.Font("Arial Rounded MT Bold", 9.75F);
-            this.toolStripButtonTypeProfile.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonTypeProfile.Image")));
-            this.toolStripButtonTypeProfile.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButtonTypeProfile.Name = "toolStripButtonTypeProfile";
-            this.toolStripButtonTypeProfile.Size = new System.Drawing.Size(36, 36);
-            this.toolStripButtonTypeProfile.Text = "Sum";
-            this.toolStripButtonTypeProfile.CheckedChanged += new System.EventHandler(this.toolStripButtonTypeProfile_CheckedChanged);
             // 
             // mainSplitContainer
             // 
@@ -463,30 +495,6 @@
             this.imageSplitContainer.SplitterDistance = 25;
             this.imageSplitContainer.TabIndex = 0;
             this.imageSplitContainer.TabStop = false;
-            // 
-            // pictureBoxImage
-            // 
-            this.pictureBoxImage.Controls.Add(this.pictureBoxData);
-            this.pictureBoxImage.Location = new System.Drawing.Point(0, 0);
-            this.pictureBoxImage.Name = "pictureBoxImage";
-            this.pictureBoxImage.Size = new System.Drawing.Size(901, 525);
-            this.pictureBoxImage.TabIndex = 4;
-            this.pictureBoxImage.TabStop = false;
-            this.pictureBoxImage.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxImage_Paint);
-            // 
-            // pictureBoxData
-            // 
-            this.pictureBoxData.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBoxData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBoxData.Location = new System.Drawing.Point(0, 0);
-            this.pictureBoxData.Name = "pictureBoxData";
-            this.pictureBoxData.Size = new System.Drawing.Size(901, 525);
-            this.pictureBoxData.TabIndex = 0;
-            this.pictureBoxData.TabStop = false;
-            this.pictureBoxData.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxData_Paint);
-            this.pictureBoxData.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBoxData_MouseDown);
-            this.pictureBoxData.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBoxData_MouseMove);
-            this.pictureBoxData.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBoxData_MouseUp);
             // 
             // dataSplitContainer
             // 
@@ -1057,6 +1065,31 @@
             this.labelPositionX.Text = "X";
             this.labelPositionX.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // printDialog
+            // 
+            this.printDialog.AllowSelection = true;
+            this.printDialog.AllowSomePages = true;
+            this.printDialog.Document = this.printDocument;
+            // 
+            // printDocument
+            // 
+            this.printDocument.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocument_PrintPage);
+            // 
+            // printPreviewDialog
+            // 
+            this.printPreviewDialog.AutoScrollMargin = new System.Drawing.Size(0, 0);
+            this.printPreviewDialog.AutoScrollMinSize = new System.Drawing.Size(0, 0);
+            this.printPreviewDialog.ClientSize = new System.Drawing.Size(400, 300);
+            this.printPreviewDialog.Document = this.printDocument;
+            this.printPreviewDialog.Enabled = true;
+            this.printPreviewDialog.Icon = ((System.Drawing.Icon)(resources.GetObject("printPreviewDialog.Icon")));
+            this.printPreviewDialog.Name = "printPreviewDialog";
+            this.printPreviewDialog.Visible = false;
+            // 
+            // pageSetupDialog
+            // 
+            this.pageSetupDialog.Document = this.printDocument;
+            // 
             // picturePaletteImage
             // 
             this.picturePaletteImage.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -1069,6 +1102,126 @@
             this.picturePaletteImage.TabStop = false;
             this.picturePaletteImage.OnChangePalette += new PaletteImage.PaletteImage.ChangePalette(this.picturePaletteImage_OnChangePalette);
             // 
+            // pictureBoxImage
+            // 
+            this.pictureBoxImage.Controls.Add(this.pictureBoxData);
+            this.pictureBoxImage.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxImage.Name = "pictureBoxImage";
+            this.pictureBoxImage.Size = new System.Drawing.Size(901, 525);
+            this.pictureBoxImage.TabIndex = 4;
+            this.pictureBoxImage.TabStop = false;
+            this.pictureBoxImage.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxImage_Paint);
+            // 
+            // pictureBoxData
+            // 
+            this.pictureBoxData.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBoxData.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBoxData.Location = new System.Drawing.Point(0, 0);
+            this.pictureBoxData.Name = "pictureBoxData";
+            this.pictureBoxData.Size = new System.Drawing.Size(901, 525);
+            this.pictureBoxData.TabIndex = 0;
+            this.pictureBoxData.TabStop = false;
+            this.pictureBoxData.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxData_Paint);
+            this.pictureBoxData.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBoxData_MouseDown);
+            this.pictureBoxData.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBoxData_MouseMove);
+            this.pictureBoxData.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBoxData_MouseUp);
+            // 
+            // tbViewFile
+            // 
+            this.tbViewFile.Image = global::BeamOn_2K.Properties.Resources.View;
+            this.tbViewFile.ImageTransparentColor = System.Drawing.Color.Silver;
+            this.tbViewFile.Name = "tbViewFile";
+            this.tbViewFile.Size = new System.Drawing.Size(45, 36);
+            this.tbViewFile.Text = "View...";
+            this.tbViewFile.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.tbViewFile.ToolTipText = "View File...";
+            this.tbViewFile.Click += new System.EventHandler(this.mnuFileView_Click);
+            // 
+            // tbFilePrint
+            // 
+            this.tbFilePrint.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tbFilePrintText,
+            this.tbFilePrintBMP});
+            this.tbFilePrint.Enabled = false;
+            this.tbFilePrint.Image = global::BeamOn_2K.Properties.Resources.Print;
+            this.tbFilePrint.ImageTransparentColor = System.Drawing.Color.Silver;
+            this.tbFilePrint.Name = "tbFilePrint";
+            this.tbFilePrint.Size = new System.Drawing.Size(54, 36);
+            this.tbFilePrint.Text = "Print...";
+            this.tbFilePrint.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            // 
+            // tbFilePrintText
+            // 
+            this.tbFilePrintText.Name = "tbFilePrintText";
+            this.tbFilePrintText.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+            this.tbFilePrintText.Size = new System.Drawing.Size(165, 22);
+            this.tbFilePrintText.Text = "&Text File";
+            this.tbFilePrintText.ToolTipText = "Print Text File ";
+            this.tbFilePrintText.Click += new System.EventHandler(this.mnuFilePrint_Click);
+            // 
+            // tbFilePrintBMP
+            // 
+            this.tbFilePrintBMP.Name = "tbFilePrintBMP";
+            this.tbFilePrintBMP.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
+            this.tbFilePrintBMP.Size = new System.Drawing.Size(165, 22);
+            this.tbFilePrintBMP.Text = "&Image File";
+            this.tbFilePrintBMP.Click += new System.EventHandler(this.mnuFilePrint_Click);
+            // 
+            // toolStripButtonPixelFormat
+            // 
+            this.toolStripButtonPixelFormat.AutoSize = false;
+            this.toolStripButtonPixelFormat.CheckOnClick = true;
+            this.toolStripButtonPixelFormat.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonPixelFormat.Image = global::BeamOn_2K.Properties.Resources.black_12bit_mode;
+            this.toolStripButtonPixelFormat.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripButtonPixelFormat.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonPixelFormat.Name = "toolStripButtonPixelFormat";
+            this.toolStripButtonPixelFormat.Size = new System.Drawing.Size(36, 36);
+            this.toolStripButtonPixelFormat.CheckedChanged += new System.EventHandler(this.toolStripButtonPixelFormat_CheckedChanged);
+            // 
+            // toolStripButtonTypeProfile
+            // 
+            this.toolStripButtonTypeProfile.AutoSize = false;
+            this.toolStripButtonTypeProfile.CheckOnClick = true;
+            this.toolStripButtonTypeProfile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButtonTypeProfile.Font = new System.Drawing.Font("Arial Rounded MT Bold", 9.75F);
+            this.toolStripButtonTypeProfile.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonTypeProfile.Image")));
+            this.toolStripButtonTypeProfile.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonTypeProfile.Name = "toolStripButtonTypeProfile";
+            this.toolStripButtonTypeProfile.Size = new System.Drawing.Size(36, 36);
+            this.toolStripButtonTypeProfile.Text = "Sum";
+            this.toolStripButtonTypeProfile.CheckedChanged += new System.EventHandler(this.toolStripButtonTypeProfile_CheckedChanged);
+            // 
+            // mnuFilePrint
+            // 
+            this.mnuFilePrint.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuFilePrintText,
+            this.mnuFilePrintBMP});
+            this.mnuFilePrint.Enabled = false;
+            this.mnuFilePrint.Image = global::BeamOn_2K.Properties.Resources.Print;
+            this.mnuFilePrint.ImageTransparentColor = System.Drawing.Color.Silver;
+            this.mnuFilePrint.Name = "mnuFilePrint";
+            this.mnuFilePrint.Size = new System.Drawing.Size(189, 22);
+            this.mnuFilePrint.Text = "&Print...";
+            // 
+            // mnuFilePrintText
+            // 
+            this.mnuFilePrintText.Name = "mnuFilePrintText";
+            this.mnuFilePrintText.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+            this.mnuFilePrintText.Size = new System.Drawing.Size(165, 22);
+            this.mnuFilePrintText.Text = "&Text File";
+            this.mnuFilePrintText.ToolTipText = "Print Text File";
+            this.mnuFilePrintText.Click += new System.EventHandler(this.mnuFilePrint_Click);
+            // 
+            // mnuFilePrintBMP
+            // 
+            this.mnuFilePrintBMP.Name = "mnuFilePrintBMP";
+            this.mnuFilePrintBMP.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
+            this.mnuFilePrintBMP.Size = new System.Drawing.Size(165, 22);
+            this.mnuFilePrintBMP.Text = "&Image File";
+            this.mnuFilePrintBMP.ToolTipText = "Print Image File";
+            this.mnuFilePrintBMP.Click += new System.EventHandler(this.mnuFilePrint_Click);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1078,6 +1231,7 @@
             this.Controls.Add(this.mainToolStrip);
             this.Controls.Add(this.mainStatusStrip);
             this.Controls.Add(this.mainMenuStrip);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainMenuStrip;
             this.Name = "FormMain";
             this.Text = "BeamOn 2K";
@@ -1097,9 +1251,6 @@
             this.imageSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.imageSplitContainer)).EndInit();
             this.imageSplitContainer.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).EndInit();
-            this.pictureBoxImage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).EndInit();
             this.dataSplitContainer.Panel1.ResumeLayout(false);
             this.dataSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataSplitContainer)).EndInit();
@@ -1124,6 +1275,9 @@
             this.groupBoxPosition.ResumeLayout(false);
             this.groupBoxPosition.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).EndInit();
+            this.pictureBoxImage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1216,6 +1370,21 @@
         private System.Windows.Forms.ToolStripButton toolStripButtonTypeProfile;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelTypeProfile;
         private System.Windows.Forms.ToolStripMenuItem gaussianToolStripMenuItem;
+        public System.Windows.Forms.PrintDialog printDialog;
+        public System.Drawing.Printing.PrintDocument printDocument;
+        private System.Windows.Forms.PrintPreviewDialog printPreviewDialog;
+        private System.Windows.Forms.PageSetupDialog pageSetupDialog;
+        private System.Windows.Forms.ToolStripMenuItem mnuFilePrint;
+        private System.Windows.Forms.ToolStripMenuItem mnuFilePrintText;
+        private System.Windows.Forms.ToolStripMenuItem mnuFilePrintBMP;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem mnuFilePrintWindow;
+        private System.Windows.Forms.ToolStripMenuItem mnuFilePrintScreen;
+        private System.Windows.Forms.ToolStripMenuItem mnuFilePageSetup;
+        private System.Windows.Forms.ToolStripButton tbViewFile;
+        private System.Windows.Forms.ToolStripDropDownButton tbFilePrint;
+        private System.Windows.Forms.ToolStripMenuItem tbFilePrintText;
+        private System.Windows.Forms.ToolStripMenuItem tbFilePrintBMP;
     }
 }
 

@@ -8,6 +8,9 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
 using System.Diagnostics;
+using System.Threading;
+using System.IO;
+using System.Reflection;
 
 namespace BeamOn_2K
 {
@@ -56,9 +59,77 @@ namespace BeamOn_2K
         BeamOnCL.Profile m_profileVertical = null;
         Point[] plArea = null;
 
-        public FormMain()
+        Boolean m_bCalibr = false;
+        Boolean m_bDebug = false;
+
+        Image printImage = null;
+        Font printFont = new Font("Arial", 10);
+
+        public enum ePrinterType { ePrintText, ePrintImage };
+        public struct PrinterData
+        {
+            public ePrinterType printerType;
+            public int iPagePrint;
+            public String strFileName;
+        }
+
+        PrinterData m_printerData;
+        StreamReader streamToPrint = null;
+
+        String m_strMyDataDir;
+        String m_strMyCurrentDir;
+        String m_strMyTempDir;
+        String m_strMyAppDir;
+
+        public FormMain(String strArgument)
         {
             InitializeComponent();
+
+            if (strArgument != null)
+            {
+                if (strArgument.Length >= 6)
+                {
+                    m_bCalibr = ((strArgument.Substring(0, 6)).ToUpper() == "CALIBR");
+                }
+                else if (strArgument.Length >= 5)
+                {
+                    m_bDebug = ((strArgument.Substring(0, 5)).ToUpper() == "DEBUG");
+                }
+            }
+
+            printDialog.PrinterSettings.FromPage = 1;
+            printDialog.PrinterSettings.ToPage = printDialog.PrinterSettings.MaximumPage;
+
+            string strProgramDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            string strProgramFilePath = Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles);
+            string strPath = Directory.GetCurrentDirectory().Substring(strProgramFilePath.Length + 1);
+
+            string strNewPath;
+            string strCompanyName = "";
+
+            object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
+
+            if (attributes.Length != 0)
+            {
+                strCompanyName = ((AssemblyCompanyAttribute)attributes[0]).Company;
+                int pos = strCompanyName.IndexOf("Ltd");
+                if (pos > -1) strCompanyName = strCompanyName.Substring(0, pos);
+
+                strNewPath = Path.Combine(strProgramDataPath, strCompanyName, strPath);
+            }
+            else
+                strNewPath = Path.Combine(strProgramDataPath, strPath);
+
+
+            m_strMyAppDir = Application.StartupPath;
+
+            m_strMyCurrentDir = strNewPath;
+
+            m_strMyDataDir = strNewPath + "\\Data";
+            if (Directory.Exists(m_strMyDataDir) == false) Directory.CreateDirectory(m_strMyDataDir);
+
+            m_strMyTempDir = strNewPath + "\\Temp";
+            if (Directory.Exists(m_strMyTempDir) == false) Directory.CreateDirectory(m_strMyTempDir);
 
             bm = new BeamOnCL.BeamOnCL();
             bm.OnImageReceved += new BeamOnCL.BeamOnCL.ImageReceved(bm_OnImageReceved);
@@ -508,6 +579,8 @@ namespace BeamOn_2K
 
                 this.Close();
             }
+
+            MenuToolEnabled();
         }
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -639,6 +712,397 @@ namespace BeamOn_2K
                     labelGaussianCorrelationVerticalValue.Text = m_fGaussianVerticalCorrelation.ToString();
                 }
             }
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmAboutBox aboutBox = new frmAboutBox();
+            aboutBox.ShowDialog();
+        }
+
+        private void mnuFilePrint_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem tsm = (ToolStripMenuItem)sender;
+
+            OpenFileDialog openPrintFile = new OpenFileDialog();
+
+            if ((String.CompareOrdinal(tsm.Name, "tbFilePrintBMP") == 0) || (String.CompareOrdinal(tsm.Name, "mnuFilePrintBMP") == 0))
+            {
+                openPrintFile.Title = "Print Image File";
+                openPrintFile.Filter = "Bitmap files (*.bmp)|*.bmp|JPEG files Interchange Format (*.jpg)|*.jpg|All files (*.*)|*.*";
+            }
+            else if ((String.CompareOrdinal(tsm.Name, "tbFilePrintText") == 0) || (String.CompareOrdinal(tsm.Name, "mnuFilePrintText") == 0))
+            {
+                openPrintFile.Title = "Print Text File";
+                openPrintFile.Filter = "Log files (*.log)|*.log|XML files (*.xml)|*.xml|HTM files (*.htm)|*.htm|Config files (*.ini)|*.ini|Plot files (*.plt)|*.plt|Chart files (*.cht)|*.cht|Text files (*.txt)|*.txt|Snapshot files (*.snp)|*.snp|Power Scope Data files (*.psd)|*.psd|M2 Data files (*.m2d)|*.m2d|All files (*.*)|*.*";
+            }
+            openPrintFile.FileName = "";
+
+            openPrintFile.AddExtension = true;
+            openPrintFile.CheckPathExists = true;
+            openPrintFile.CheckFileExists = true;
+            openPrintFile.InitialDirectory = m_strMyDataDir;
+            openPrintFile.RestoreDirectory = true;
+            //openPrintFile.FileOk += new CancelEventHandler(openView_FileOk);
+
+            if (openPrintFile.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    if ((String.CompareOrdinal(tsm.Name, "tbFilePrintBMP") == 0) || (String.CompareOrdinal(tsm.Name, "mnuFilePrintBMP") == 0))
+                    {
+                        printImage = Image.FromFile(openPrintFile.FileName);
+
+                        if (printDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            printDocument.DocumentName = Text;
+
+                            m_printerData.printerType = ePrinterType.ePrintImage;
+                            m_printerData.strFileName = openPrintFile.FileName;
+                            m_printerData.iPagePrint = 1;
+
+                            printDocument.Print();
+                        }
+                    }
+                    else if ((String.CompareOrdinal(tsm.Name, "tbFilePrintText") == 0) || (String.CompareOrdinal(tsm.Name, "mnuFilePrintText") == 0))
+                    {
+                        streamToPrint = new StreamReader(openPrintFile.FileName);
+
+                        try
+                        {
+                            if (printDialog.ShowDialog() == DialogResult.OK)
+                            {
+                                printDocument.DocumentName = Text;
+
+                                m_printerData.printerType = ePrinterType.ePrintText;
+                                m_printerData.strFileName = openPrintFile.FileName;
+                                m_printerData.iPagePrint = 1;
+
+                                printDocument.Print();
+                            }
+                        }
+                        finally
+                        {
+                            streamToPrint.Close();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CustomMessageBox.Show(ex.Message, "Print Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void printDocument_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs ev)
+        {
+            float linesPerPage = 0;
+            float yPos = 0;
+            int count = 0;
+            string line = null;
+            float coeffExpandW;
+            float coeffExpandH;
+            float coeffExpand;
+
+            Graphics graph = ev.Graphics;
+            float HeightFont = printFont.GetHeight(graph);
+            RectangleF rectanglefFull, rectanglefText;
+            StringFormat stringformat = new StringFormat();
+
+            if (graph.VisibleClipBounds.X < 0)
+                rectanglefFull = ev.MarginBounds;
+            else
+                rectanglefFull = new RectangleF(
+                    ev.MarginBounds.Left - (ev.PageBounds.Width - graph.VisibleClipBounds.Width) / 2,
+                    ev.MarginBounds.Top - (ev.PageBounds.Height - graph.VisibleClipBounds.Height) / 2,
+                    ev.MarginBounds.Width,
+                    ev.MarginBounds.Height);
+
+            rectanglefText = RectangleF.Inflate(rectanglefFull, 0, -2 * HeightFont);
+
+            if (m_printerData.printerType == ePrinterType.ePrintText)
+            {
+                stringformat.Trimming = StringTrimming.EllipsisCharacter;
+                stringformat.FormatFlags |= StringFormatFlags.NoWrap;
+
+                linesPerPage = (int)Math.Floor(rectanglefText.Height / HeightFont);
+                rectanglefText.Height = linesPerPage * HeightFont;
+
+                // Print each line of the file.
+                while (count < linesPerPage && ((line = streamToPrint.ReadLine()) != null))
+                {
+                    yPos = rectanglefText.Top + (count * HeightFont);
+                    graph.DrawString(line, printFont, Brushes.Black, rectanglefText.Left, yPos, stringformat);
+                    count++;
+                }
+
+                stringformat = new StringFormat();
+
+                stringformat.Alignment = StringAlignment.Far;
+                graph.DrawString("Page " + m_printerData.iPagePrint.ToString(), printFont, Brushes.Black, rectanglefFull, stringformat);
+                m_printerData.iPagePrint++;
+
+                // If more lines exist, print another page.
+                if (line != null)
+                    ev.HasMorePages = true;
+                else
+                {
+                    ev.HasMorePages = false;
+                    m_printerData.iPagePrint = 1;
+                }
+            }
+            else
+            {
+                if (rectanglefText.Width < printImage.Size.Width)
+                {
+                    if (rectanglefText.Height < printImage.Size.Height)
+                    {
+                        coeffExpandW = rectanglefText.Width / printImage.Size.Width;
+                        coeffExpandH = rectanglefText.Height / printImage.Size.Height;
+                        coeffExpand = (coeffExpandH < coeffExpandW) ? coeffExpandH : coeffExpandW;
+                    }
+                    else
+                    {
+                        coeffExpand = rectanglefText.Width / printImage.Size.Width;
+                    }
+                }
+                else if (rectanglefText.Height < printImage.Size.Height)
+                {
+                    coeffExpand = rectanglefText.Height / printImage.Size.Height;
+                }
+                else
+                {
+                    coeffExpand = 1f;
+                }
+
+                graph.DrawImage(printImage, rectanglefText.Left, rectanglefText.Top, printImage.Size.Width * coeffExpand, printImage.Size.Height * coeffExpand);
+            }
+        }
+
+        private void PrintCaptureWindowImage(object rect)
+        {
+            Thread.Sleep(500);
+
+            try
+            {
+                printImage = GetImageForm((Rectangle)rect);
+
+                if (printDialog.ShowDialog() == DialogResult.OK)
+                {
+                    printDocument.DocumentName = Text;
+                    m_printerData.printerType = ePrinterType.ePrintImage;
+
+                    printDocument.Print();
+                }
+            }
+            catch (Exception ex)
+            {
+                CustomMessageBox.Show(ex.Message, "Print Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void CaptureWindowImage(object rect)
+        {
+            Thread.Sleep(500);
+
+            SaveImageFile(GetImageForm((Rectangle)rect));
+        }
+
+        private Image GetImageForm(Rectangle scrR)
+        {
+            Bitmap MyImage = new Bitmap(scrR.Width, scrR.Height);
+            using (Graphics g = Graphics.FromImage(MyImage))
+                g.CopyFromScreen(new Point(scrR.Left, scrR.Top), Point.Empty, new Size(scrR.Width, scrR.Height));
+
+            //m_SystemMessage |= (Byte)SystemStatus.M_SS_SAVEDATA;
+
+            return MyImage;
+        }
+
+        private void SaveImageFile(Image img)
+        {
+            SaveFileDialog saveImageFile = new SaveFileDialog();
+
+            saveImageFile.Filter = "Bitmap files (*.bmp)|*.bmp|JPEG files Interchange Format (*.jpg)|*.jpg|All files (*.*)|*.*";
+            saveImageFile.FileName = "";
+
+            saveImageFile.AddExtension = true;
+            saveImageFile.CheckPathExists = true;
+            saveImageFile.CheckFileExists = false;
+            saveImageFile.InitialDirectory = m_strMyDataDir;
+            saveImageFile.RestoreDirectory = true;
+            //saveImageFile.FileOk += new CancelEventHandler(ImageFileDialog_FileOk);
+            saveImageFile.Title = "Save Image File";
+
+            if (saveImageFile.ShowDialog() == DialogResult.OK)
+            {
+                FileInfo fi = new FileInfo(saveImageFile.FileName);
+
+                if (fi.Extension == ".bmp")
+                {
+                    img.Save(saveImageFile.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
+                }
+                else if (fi.Extension == ".jpg")
+                {
+                    img.Save(saveImageFile.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+            }
+        }
+
+        void ImageFileDialog_FileOk(object sender, CancelEventArgs e)
+        {
+            FileDialog ImageFileDialog = (FileDialog)sender;
+
+            FileInfo fi = new FileInfo(ImageFileDialog.FileName);
+
+            if ((fi.Extension != ".bmp") && (fi.Extension != ".jpg"))
+            {
+                CustomMessageBox.Show("Extension of the Image File should be 'BMP' or 'JPG'",
+                                ImageFileDialog.Title, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+                e.Cancel = true;
+            }
+        }
+
+        private void mnuFilePrintWindow_Click(object sender, EventArgs e)
+        {
+            Rectangle rect = new Rectangle();
+
+            ToolStripMenuItem tsm = (ToolStripMenuItem)sender;
+
+            if (String.CompareOrdinal(tsm.Name, "mnuFilePrintScreen") == 0)
+            {
+                rect = this.Bounds;
+            }
+            else if (String.CompareOrdinal(tsm.Name, "mnuFilePrintWindow") == 0)
+            {
+                rect = this.ActiveMdiChild.Parent.RectangleToScreen(this.ActiveMdiChild.Bounds);
+            }
+
+            Thread PrintCaptureImage = new Thread(PrintCaptureWindowImage);
+            PrintCaptureImage.TrySetApartmentState(ApartmentState.STA);
+
+            PrintCaptureImage.Start(rect);
+            //PrintCaptureImage.Start(this.RectangleToClient(rect));
+        }
+
+        private void mnuFilePageSetup_Click(object sender, EventArgs e)
+        {
+            if (PrinterExist() == true) pageSetupDialog.ShowDialog();
+        }
+
+        static bool PrinterExist()
+        {
+            return System.Drawing.Printing.PrinterSettings.InstalledPrinters.Count > 0 ? true : false;
+        }
+
+        private void MenuToolEnabled()
+        {
+            if (PrinterExist() == true)
+            {
+                mnuFilePrint.Enabled = true;
+                mnuFilePrintWindow.Enabled = true;
+                mnuFilePrintScreen.Enabled = true;
+                mnuFilePageSetup.Enabled = true;
+                tbFilePrint.Enabled = true;
+            }
+        }
+
+        private void mnuFileView_Click(object sender, EventArgs e)
+        {
+            String strFilter;
+            String strViewExt = "";
+
+            ToolStripItem tsmi = (ToolStripItem)sender;
+            OpenFileDialog openView = new OpenFileDialog();
+
+            strFilter = "All files (*.*)|*.*|";
+
+            if (DataExcel.CheckExcelInst() == true) strFilter += (DataExcel.Version < 12) ? "Excel files (*.xls)|*.xls|" : "Excel files (*.xlsx)|*.xlsx|";
+
+            strFilter += "Config files (*.ini)|*.ini|Plot files (*.plt)|*.plt|Chart files (*.cht)|*.cht|Test files (*.tst)|*.tst|Bitmap files (*.bmp)|*.bmp|JPEG files Interchange Format (*.jpg)|*.jpg|Text files (*.txt)|*.txt|Snapshot files (*.snp)|*.snp|";
+            strFilter += "XML files (*.xml)|*.xml|HTM files (*.htm)|*.htm|Power Scope Data files (*.psd)|*.psd|M2 Data files (*.m2d)|*.m2d|All files (*.*)|*.*";
+
+            openView.Filter = strFilter;
+
+            if ((strViewExt == ".log") || (strViewExt == "")) openView.FilterIndex = 1;
+            else if ((strViewExt == ".xls") || (strViewExt == ".xlsx")) openView.FilterIndex = 2;
+            else if (strViewExt == ".ini") openView.FilterIndex = 3;
+            else if (strViewExt == ".plt") openView.FilterIndex = 4;
+            else if (strViewExt == ".cht") openView.FilterIndex = 5;
+            else if (strViewExt == ".tst") openView.FilterIndex = 6;
+            else if (strViewExt == ".bmp") openView.FilterIndex = 7;
+            else if (strViewExt == ".jpg") openView.FilterIndex = 8;
+            else if (strViewExt == ".txt") openView.FilterIndex = 9;
+            else if (strViewExt == ".snp") openView.FilterIndex = 10;
+            else if (strViewExt == ".xml") openView.FilterIndex = 11;
+            else if (strViewExt == ".htm") openView.FilterIndex = 12;
+            else if (strViewExt == ".psd") openView.FilterIndex = 13;
+            else if (strViewExt == ".m2d") openView.FilterIndex = 14;
+            else openView.FilterIndex = 15;
+
+            openView.CheckPathExists = true;
+            openView.CheckFileExists = true;
+            openView.InitialDirectory = m_strMyDataDir;
+            openView.RestoreDirectory = true;
+            openView.Title = tsmi.ToolTipText;
+            //openView.FileOk += new CancelEventHandler(openView_FileOk);
+
+            if (openView.ShowDialog() == DialogResult.OK)
+            {
+                FileInfo fi = new FileInfo(openView.FileName);
+                strViewExt = fi.Extension;
+
+                try
+                {
+                    if ((fi.Extension == ".bmp") || (fi.Extension == ".jpg"))
+                    {
+                        System.Diagnostics.Process.Start(openView.FileName);
+                        //frmViewImage FormViewImage = new frmViewImage(openView.FileName);
+                        //FormViewImage.Show();
+                    }
+                    else if (fi.Extension == ".snp")
+                    {
+                        //StartSnapshot(openView.FileName);
+                    }
+                    else if ((fi.Extension == ".xml") || (fi.Extension == ".htm"))
+                    {
+                        System.Diagnostics.Process.Start(openView.FileName);
+                    }
+                    else if (fi.Extension == ".xls")
+                    {
+                        System.Diagnostics.Process.Start(openView.FileName);
+                    }
+                    else if ((fi.Extension == ".xlsx") && (DataExcel.Version >= 12))
+                    {
+                        System.Diagnostics.Process.Start(openView.FileName);
+                    }
+                    else if (fi.Extension == ".log")
+                    {
+                        System.Diagnostics.Process.Start("wordpad.exe", '"' + openView.FileName + '"');
+                    }
+                    else
+                    {
+                        System.Diagnostics.Process.Start("notepad", openView.FileName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CustomMessageBox.Show(ex + "Unable to open file " + fi.Name + " .", openView.Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        void openView_FileOk(object sender, CancelEventArgs e)
+        {
+            //OpenFileDialog openView = (OpenFileDialog)sender;
+
+            //DirectoryInfo dInfo = new DirectoryInfo(Path.GetDirectoryName(openView.FileName));
+
+            //if ((((UInt64)dInfo.Attributes & FILE_ATTRIBUTE_VIRTUAL) == FILE_ATTRIBUTE_VIRTUAL) && (Environment.OSVersion.Version.Major >= 6))
+            //{
+            //    openView.FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VirtualStore", openView.FileName.Substring((Path.GetPathRoot(openView.FileName).Length)));
+            //}
         }
     }
 }

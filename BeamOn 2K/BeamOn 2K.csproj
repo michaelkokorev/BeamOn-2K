@@ -33,6 +33,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>CCDPositioning.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Basler.Pylon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=e389355f398382ab, processorArchitecture=x86" />
     <Reference Include="System" />
@@ -47,6 +50,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataExcel.cs" />
+    <Compile Include="FormWellcome.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormWellcome.Designer.cs">
+      <DependentUpon>FormWellcome.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmAboutBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAboutBox.Designer.cs">
+      <DependentUpon>frmAboutBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomMessageBox.cs" />
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
@@ -56,6 +72,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FormWellcome.resx">
+      <DependentUpon>FormWellcome.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAboutBox.resx">
+      <DependentUpon>frmAboutBox.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -94,6 +116,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\black_8bit_mode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\WELCOME.BMP" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\View.bmp" />
+    <None Include="Resources\Print.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
