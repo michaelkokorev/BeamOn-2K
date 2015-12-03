@@ -32,6 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>CCDPositioning.ico</ApplicationIcon>
@@ -122,6 +123,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\Data_new.bmp" />
+    <None Include="Resources\Prof_line.bmp" />
+    <None Include="Resources\Profile.bmp" />
+    <None Include="Resources\Projection3d.bmp" />
+    <None Include="Resources\Help.bmp" />
     <None Include="Resources\View.bmp" />
     <None Include="Resources\Print.bmp" />
   </ItemGroup>

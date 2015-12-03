@@ -16,6 +16,7 @@ namespace BeamOn_2K
 {
     public partial class FormMain : Form
     {
+        private delegate void AsyncChangeAngle(Double dAngle);
         private delegate void AsyncChangePalette(ColorPalette cpValue, PixelFormat pixelFormat, System.Drawing.Color[] color);
         private delegate void AsyncTimeStamp(Int64 iValue);
 
@@ -533,10 +534,13 @@ namespace BeamOn_2K
 
                 bm.pixelFormat = picturePaletteImage.Format;
 
-                toolStripButtonTypeProfile.Checked = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum);
-                lineProfileToolStripMenuItem.Checked = !toolStripButtonTypeProfile.Checked;
-                sumProfileToolStripMenuItem.Checked = toolStripButtonTypeProfile.Checked;
-                toolStripStatusLabelTypeProfile.Text = (toolStripButtonTypeProfile.Checked == true) ? "Sum" : "Line";
+                lineProfileToolStripMenuItem.Checked = !sumProfileToolStripMenuItem.Checked;
+                sumProfileToolStripMenuItem.Checked = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum);
+
+                lineProfileToolStripButton.Checked = lineProfileToolStripMenuItem.Checked;
+                sumProfileToolStripButton.Checked = sumProfileToolStripMenuItem.Checked;
+
+                toolStripStatusLabelTypeProfile.Text = (sumProfileToolStripMenuItem.Checked) ? "Sum" : "Line";
 
                 trackBarBinning.Maximum = bm.MaxBinning;
                 trackBarBinning.Minimum = bm.MinBinning;
@@ -560,7 +564,10 @@ namespace BeamOn_2K
 
                 scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
                 typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
-                toolStripButtonTypeProfile.Enabled = measuringToolStripMenuItem.Checked;
+                sumProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
+                lineProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
+                tbLabelAngle.Enabled = measuringToolStripMenuItem.Checked && lineProfileToolStripButton.Checked;
+                numericUpDownAngle.Enabled = measuringToolStripMenuItem.Checked && lineProfileToolStripButton.Checked;
                 gaussianToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
 
                 groupBoxPosition.Enabled = m_bMeasure;
@@ -615,20 +622,6 @@ namespace BeamOn_2K
             bm.Exposure = trackBarExposure.Value;
         }
 
-        private void measuringToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
-        {
-            m_bMeasure = measuringToolStripMenuItem.Checked;
-
-            groupBoxPosition.Enabled = m_bMeasure;
-            ProfileGroupBox.Enabled = m_bMeasure;
-            gaussGroupBox.Enabled = m_bMeasure && m_bGaussian;
-
-            scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
-            typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
-            toolStripButtonTypeProfile.Enabled = measuringToolStripMenuItem.Checked;
-            gaussianToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
-        }
-
         private void scaleProfileToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             m_bScaleProfile = scaleProfileToolStripMenuItem.Checked;
@@ -658,22 +651,19 @@ namespace BeamOn_2K
 
         private void typeProfileToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ToolStripMenuItem tsb = (ToolStripMenuItem)sender;
+            ToolStripItem tsb = (ToolStripItem)sender;
 
-            toolStripButtonTypeProfile.Checked = ((tsb.Name.Contains("sum") == true) && (bm.typeProfile != BeamOnCL.BeamOnCL.TypeProfile.tpSum));
-        }
+            sumProfileToolStripMenuItem.Checked = ((tsb.Name.Contains("sum") == true) && (bm.typeProfile != BeamOnCL.BeamOnCL.TypeProfile.tpSum));
+            lineProfileToolStripMenuItem.Checked = !sumProfileToolStripMenuItem.Checked;
 
-        private void toolStripButtonTypeProfile_CheckedChanged(object sender, EventArgs e)
-        {
-            ToolStripButton tsb = (ToolStripButton)sender;
+            sumProfileToolStripButton.Checked = sumProfileToolStripMenuItem.Checked;
+            lineProfileToolStripButton.Checked = lineProfileToolStripMenuItem.Checked;
 
-            bm.typeProfile = (toolStripButtonTypeProfile.Checked == true) ? BeamOnCL.BeamOnCL.TypeProfile.tpSum : BeamOnCL.BeamOnCL.TypeProfile.tpLIne;
-
-            lineProfileToolStripMenuItem.Checked = !toolStripButtonTypeProfile.Checked;
-            sumProfileToolStripMenuItem.Checked = toolStripButtonTypeProfile.Checked;
-
-            toolStripButtonTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpLIne) ? "Sum" : "Line";
+            bm.typeProfile = (sumProfileToolStripMenuItem.Checked == true) ? BeamOnCL.BeamOnCL.TypeProfile.tpSum : BeamOnCL.BeamOnCL.TypeProfile.tpLIne;
             toolStripStatusLabelTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum) ? "Sum" : "Line";
+
+            tbLabelAngle.Enabled = lineProfileToolStripButton.Checked;
+            numericUpDownAngle.Enabled = lineProfileToolStripButton.Checked;
         }
 
         private void gaussianToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1103,6 +1093,66 @@ namespace BeamOn_2K
             //{
             //    openView.FileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\VirtualStore", openView.FileName.Substring((Path.GetPathRoot(openView.FileName).Length)));
             //}
+        }
+
+        private void tbHelpActiveWindow_Click(object sender, EventArgs e)
+        {
+            Form activeChild = this.ActiveMdiChild;
+
+            if (activeChild != null)
+                Help.ShowHelp(this, ProductName + ".chm", HelpNavigator.KeywordIndex, activeChild.Tag);
+            else
+                Help.ShowHelp(this, ProductName + ".chm", HelpNavigator.KeywordIndex, ProductName);
+        }
+
+        private void measuringToolStrip_Click(object sender, EventArgs e)
+        {
+            if (sender.GetType() == typeof(ToolStripButton))
+                m_bMeasure = ((ToolStripButton)sender).Checked;
+            else if (sender.GetType() == typeof(ToolStripMenuItem))
+                m_bMeasure = ((ToolStripMenuItem)sender).Checked;
+
+            measuringToolStripMenuItem.Checked = m_bMeasure;
+            measuringToolStripButton.Checked = m_bMeasure;
+
+            groupBoxPosition.Enabled = m_bMeasure;
+            ProfileGroupBox.Enabled = m_bMeasure;
+            gaussGroupBox.Enabled = m_bMeasure && m_bGaussian;
+
+            scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
+            typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
+            sumProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
+            lineProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
+            tbLabelAngle.Enabled = measuringToolStripMenuItem.Checked && lineProfileToolStripButton.Checked;
+            numericUpDownAngle.Enabled = measuringToolStripMenuItem.Checked && lineProfileToolStripButton.Checked;
+
+            gaussianToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
+        }
+
+        private void measuringToolStrip_CheckedChanged(object sender, EventArgs e)
+        {
+            measuringToolStripButton.Checked = measuringToolStripMenuItem.Checked;
+        }
+
+        private void numericUpDownAngle_ValueChanged(object sender, EventArgs e)
+        {
+            AsyncChangeAngle asyncChangeAngle = new AsyncChangeAngle(UpdateAngleProfile);
+            asyncChangeAngle.BeginInvoke(Convert.ToDouble(numericUpDownAngle.Value), null, null);
+        }
+
+        private void UpdateAngleProfile(Double Angle)
+        {
+            try
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    bm.lineProfileAngle = Angle * Math.PI / 180f;
+                });
+
+            }
+            catch
+            {
+            }
         }
     }
 }

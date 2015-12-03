@@ -146,6 +146,16 @@ namespace BeamOnCL
             }
         }
 
+        public Double lineProfileAngle
+        {
+            get { return m_lpHorizontal.Angle; }
+            set
+            {
+                m_lpHorizontal.Angle = value;
+                m_lpVertical.Angle = value + Math.PI / 2f;
+            }
+        }
+
         public PointF lineProfileHorizontalLeft
         {
             get { return m_lpHorizontal.LeftPoint; }
