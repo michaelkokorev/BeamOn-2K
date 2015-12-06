@@ -52,6 +52,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataExcel.cs" />
+    <Compile Include="FormSetupLog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSetupLog.Designer.cs">
+      <DependentUpon>FormSetupLog.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormWellcome.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -73,6 +79,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SystemData.cs" />
+    <EmbeddedResource Include="FormSetupLog.resx">
+      <DependentUpon>FormSetupLog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormWellcome.resx">
       <DependentUpon>FormWellcome.cs</DependentUpon>
     </EmbeddedResource>
@@ -123,6 +133,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\Hand.bmp" />
+    <None Include="Resources\Setup.bmp" />
+    <None Include="Resources\Start.bmp" />
     <None Include="Resources\Data_new.bmp" />
     <None Include="Resources\Prof_line.bmp" />
     <None Include="Resources\Profile.bmp" />

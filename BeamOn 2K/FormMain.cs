@@ -19,6 +19,7 @@ namespace BeamOn_2K
         private delegate void AsyncChangeAngle(Double dAngle);
         private delegate void AsyncChangePalette(ColorPalette cpValue, PixelFormat pixelFormat, System.Drawing.Color[] color);
         private delegate void AsyncTimeStamp(Int64 iValue);
+        private delegate void AddItemAsyncDelegate();
 
         Object m_lLockBMP = new Object();
         Bitmap m_bmp = null;
@@ -28,7 +29,7 @@ namespace BeamOn_2K
 
         private BeamOnCL.BeamOnCL bm = null;
 
-        Pen m_PenCentroid = new Pen(System.Drawing.Color.Black, 0.2f);
+        Pen m_PenCentroid = new Pen(System.Drawing.Color.Blue, 0.2f);
         Pen m_PenEllipse = new Pen(System.Drawing.Color.Green, 2f);
         Pen m_PenGaussian = new Pen(System.Drawing.Color.Red, 0.2f);
         Font myFont = new Font("Arial", 10, FontStyle.Bold);
@@ -44,6 +45,10 @@ namespace BeamOn_2K
         Boolean m_bScaleProfile = false;
         Boolean m_bGaussian = false;
         Boolean m_bMeasure = false;
+
+        public const UInt16 DELTA = 1;
+        private int iLevelSelected = -1;
+        private int iLevelCurrent = -1;
 
         float[] m_fClipLevelArray = new float[] { 13.5f, 50f, 80f };
 
@@ -156,17 +161,6 @@ namespace BeamOn_2K
 
                         m_bmp.UnlockBits(bmpData);
 
-                        //// Assign a temporary variable to dispose the bitmap after assigning the new bitmap to the display control.
-                        //Bitmap bitmapOld = pictureBoxImage.Image as Bitmap;
-                        // Provide the display control with the new bitmap. This action automatically updates the display.
-                        //pictureBoxImage.Image = m_bmp;
-                        //if (bitmapOld != null)
-                        //{
-                        //    // Dispose the bitmap.
-                        //    bitmapOld.Dispose();
-                        //}
-
-
                         if (m_bMeasure == true)
                         {
                             bm.GetMeasure(e.Snapshot);
@@ -198,6 +192,8 @@ namespace BeamOn_2K
                     catch { }
                 }
             }
+
+            Thread.Sleep(0);
 
             m_sw.Stop();
 
@@ -258,22 +254,82 @@ namespace BeamOn_2K
 
         void pictureBoxData_MouseUp(object sender, MouseEventArgs e)
         {
+            iLevelSelected = -1;
+            iLevelCurrent = -1;
         }
 
         void pictureBoxData_MouseMove(object sender, MouseEventArgs e)
         {
+            int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
+            int iHeightProfile = (int)(iHeight / 3f);
+
+            int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
+            int iShiftY = 0;
+
+            if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
+            {
+                iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
+                if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
+            }
+
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                bm.CrossPosition = new Point(e.X, e.Y);
+                if (iLevelSelected == -1)
+                    bm.CrossPosition = new Point(e.X, e.Y);
+                else
+                {
+                    if (this.Cursor == Cursors.SizeNS)
+                        SetClipLevel(iLevelSelected,(float)((iHeight - e.Y - iShiftY) * 100f / iHeightProfile));
+                    else if (this.Cursor == Cursors.SizeWE)
+                        SetClipLevel(iLevelSelected, (float)((e.X + iShiftX) * 100f / iHeightProfile));
+                }
+
                 pictureBoxData.Invalidate();
             }
+            else
+            {
+                int iLevelHorizontal = 0, iLevelVertical = 0;
+
+                iLevelCurrent = -1;
+
+                for (int i = 0; i < m_fClipLevelArray.Length; i++)
+                {
+                    iLevelHorizontal = iHeight - (int)(iHeightProfile * m_fClipLevelArray[i] / 100f) - iShiftY;
+                    iLevelVertical = (int)(iHeightProfile * m_fClipLevelArray[i] / 100f - iShiftX);
+
+                    if ((Math.Abs(e.Y - iLevelHorizontal) < DELTA) || (Math.Abs(e.X - iLevelVertical) < DELTA))
+                    {
+                        iLevelCurrent = i;
+                        break;
+                    }
+                }
+
+                this.Cursor = (iLevelCurrent != -1) ? ((Math.Abs(e.Y - iLevelHorizontal) < DELTA) ? Cursors.SizeNS : Cursors.SizeWE) : Cursors.Default;
+            }
+        }
+
+        private void SetClipLevel(int iIndex, float fValue)
+        {
+            float fTopLevel = (iIndex < (m_fClipLevelArray.Length - 1)) ? m_fClipLevelArray[iIndex + 1] - 0.5f : 99.5f;
+            float fBottomLevel = (iIndex > 0) ? m_fClipLevelArray[iIndex - 1] + 0.5f : 0.5f;
+            float fDelta = fTopLevel - fBottomLevel;
+
+            m_fClipLevelArray[iIndex] = ((fValue >= fBottomLevel) && (fValue <= fTopLevel)) ? fValue : (fValue < fBottomLevel) ? fBottomLevel : fTopLevel;
         }
 
         void pictureBoxData_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                bm.CrossPosition = new Point(e.X, e.Y);
+                if (iLevelCurrent == -1)
+                {
+                    bm.CrossPosition = new Point(e.X, e.Y);
+                }
+                else
+                {
+                    iLevelSelected = iLevelCurrent;
+                }
+
                 pictureBoxData.Invalidate();
             }
             else if (e.Button == System.Windows.Forms.MouseButtons.Right)
@@ -677,31 +733,55 @@ namespace BeamOn_2K
         {
             if (m_bMeasure == true)
             {
-                labelPositionXValue.Text = bm.Centroid.X.ToString();
-                labelPositionYValue.Text = bm.Centroid.Y.ToString();
+                labelPositionXValue.Text = GetStringFormat(bm.Centroid.X);
+                labelPositionYValue.Text = GetStringFormat(bm.Centroid.Y);
 
-                labelHorizontalValue1.Text = m_fWidthHorizontalClip[0].ToString();
-                labelHorizontalValue2.Text = m_fWidthHorizontalClip[1].ToString();
-                labelHorizontalValue3.Text = m_fWidthHorizontalClip[2].ToString();
+                labelHorizontalValue1.Text = GetStringFormat(m_fWidthHorizontalClip[0]);
+                labelHorizontalValue2.Text = GetStringFormat(m_fWidthHorizontalClip[1]);
+                labelHorizontalValue3.Text = GetStringFormat(m_fWidthHorizontalClip[2]);
 
-                labelVerticalValue1.Text = m_fWidthVerticalClip[0].ToString();
-                labelVerticalValue2.Text = m_fWidthVerticalClip[1].ToString();
-                labelVerticalValue3.Text = m_fWidthVerticalClip[2].ToString();
+                labelVerticalValue1.Text = GetStringFormat(m_fWidthVerticalClip[0]);
+                labelVerticalValue2.Text = GetStringFormat(m_fWidthVerticalClip[1]);
+                labelVerticalValue3.Text = GetStringFormat(m_fWidthVerticalClip[2]);
 
                 if (m_bGaussian == true)
                 {
-                    labelGaussianHorizontalValue1.Text = m_fWidthGaussianHorizontalClip[0].ToString();
-                    labelGaussianHorizontalValue2.Text = m_fWidthGaussianHorizontalClip[1].ToString();
-                    labelGaussianHorizontalValue3.Text = m_fWidthGaussianHorizontalClip[2].ToString();
+                    labelGaussianHorizontalValue1.Text = GetStringFormat(m_fWidthGaussianHorizontalClip[0]);
+                    labelGaussianHorizontalValue2.Text = GetStringFormat(m_fWidthGaussianHorizontalClip[1]);
+                    labelGaussianHorizontalValue3.Text = GetStringFormat(m_fWidthGaussianHorizontalClip[2]);
 
-                    labelGaussianVerticalValue1.Text = m_fWidthGaussianVerticalClip[0].ToString();
-                    labelGaussianVerticalValue2.Text = m_fWidthGaussianVerticalClip[1].ToString();
-                    labelGaussianVerticalValue3.Text = m_fWidthGaussianVerticalClip[2].ToString();
+                    labelGaussianVerticalValue1.Text = GetStringFormat(m_fWidthGaussianVerticalClip[0]);
+                    labelGaussianVerticalValue2.Text = GetStringFormat(m_fWidthGaussianVerticalClip[1]);
+                    labelGaussianVerticalValue3.Text = GetStringFormat(m_fWidthGaussianVerticalClip[2]);
 
-                    labelGaussianCorrelationHorizontalValue.Text = m_fGaussianHorizontalCorrelation.ToString();
-                    labelGaussianCorrelationVerticalValue.Text = m_fGaussianVerticalCorrelation.ToString();
+                    labelGaussianCorrelationHorizontalValue.Text = GetStringFormat(m_fGaussianHorizontalCorrelation);
+                    labelGaussianCorrelationVerticalValue.Text = GetStringFormat(m_fGaussianVerticalCorrelation);
                 }
+
+                labelClipLevel3.Text = m_fClipLevelArray[2].ToString("F1") + "%";
+                labelClipLevel2.Text = m_fClipLevelArray[1].ToString("F1") + "%";
+                labelClipLevel1.Text = m_fClipLevelArray[0].ToString("F1") + "%";
+
+                labelGaussianClipLevel3.Text = labelClipLevel3.Text;
+                labelGaussianClipLevel2.Text = labelClipLevel2.Text;
+                labelGaussianClipLevel1.Text = labelClipLevel1.Text;
             }
+        }
+
+        private String GetStringFormat(float fData)
+        {
+            String strFormat;
+
+            if (Math.Abs(fData) >= 1000f)
+                strFormat = "{0:F0}";
+            else if (Math.Abs(fData) >= 100f)
+                strFormat = "{0:F1}";
+            else if (Math.Abs(fData) >= 10f)
+                strFormat = "{0:F2}";
+            else
+                strFormat = "{0:F3}";
+
+            return String.Format(strFormat, fData);
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1152,6 +1232,163 @@ namespace BeamOn_2K
             }
             catch
             {
+            }
+        }
+
+        private void mnuOptionsStartDataCollection_Click(object sender, EventArgs e)
+        {
+            if ((m_sysData.logData.strFileName == null) || (m_sysData.logData.strFileName.Equals("") == true))
+            {
+                CustomMessageBox.Show("Not specified the name and path for the Log file.",
+                                                        "Save Log File",
+                                                        MessageBoxButtons.OK,
+                                                        MessageBoxIcon.Error);
+                return;
+            }
+
+            FileInfo fi = new FileInfo(m_sysData.logData.strFileName);
+
+            if (sender.ToString().Contains("Start") == true)
+            {
+
+                if (File.Exists(m_sysData.logData.strFileName))
+                {
+                    if (CustomMessageBox.Show("This file '" + fi.Name + "' already exists. \nDo you want to replace it?",
+                                        "Save Log File",
+                                        MessageBoxButtons.YesNo,
+                                        MessageBoxIcon.Question) == DialogResult.No)
+                        return;
+                    else
+                        File.Delete(m_sysData.logData.strFileName);
+                }
+            }
+
+            EnableLogFile(sender.ToString().Contains("Start"));
+        }
+
+        private void EnableLogFile(Boolean bEnable)
+        {
+            if (bEnable == true)
+            {
+                mnuFileStartDataCollection.Checked = true;
+                mnuFileStartDataCollection.Image = global::BeamOn_2K.Properties.Resources.Hand;
+                mnuFileStartDataCollection.Text = "&Stop Log File";
+                mnuFileStartDataCollection.ToolTipText = "Stop Log File";
+
+                m_fldLog = new FileLogData();
+                m_fldLog.OnStopLogFile += new FileLogData.StopLogFile(m_fldLog_OnStopLogFile);
+                m_fldLog.CreateHeader();
+
+                m_SystemMessage |= (Byte)SystemStatus.M_SS_LOG;
+            }
+            else
+            {
+                mnuFileStartDataCollection.Checked = false;
+                mnuFileStartDataCollection.Image = global::BeamOn_2K.Properties.Resources.Start;
+                mnuFileStartDataCollection.Text = "&Start Log File";
+                mnuFileStartDataCollection.ToolTipText = "Start Log File";
+
+                if ((m_fldLog != null) && (m_fldLog.IsOpen() == true)) m_fldLog.CloseLog();
+
+                m_fldLog = null;
+
+                m_SystemMessage = (Byte)(m_SystemMessage & (~(int)SystemStatus.M_SS_LOG));
+            }
+
+            m_sysData.logData.bStart = bEnable;
+
+            AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
+            asyncSM.BeginInvoke(null, null);
+
+            tbOptionsStartDataCollection.ToolTipText = mnuFileStartDataCollection.ToolTipText;
+            tbOptionsStartDataCollection.Image = mnuFileStartDataCollection.Image;
+            tbOptionsStartDataCollection.Text = mnuFileStartDataCollection.Text;
+            tbOptionsStartDataCollection.Checked = mnuFileStartDataCollection.Checked;
+
+            mnuFileSetupDataCollection.Enabled = !mnuFileStartDataCollection.Checked;
+            tbOptionsSetupDataCollection.Enabled = mnuFileSetupDataCollection.Enabled;
+        }
+
+        private void CloseLogFile()
+        {
+            if (this.InvokeRequired)
+            {
+                SetEndLogCallback d = new SetEndLogCallback(CloseLogFile);
+                this.Invoke(d, null);
+            }
+            else
+            {
+                this.mnuFileStartDataCollection.Checked = false;
+                this.mnuFileStartDataCollection.Image = global::BeamBA_project.Properties.Resources.Start;
+                this.mnuFileStartDataCollection.Text = "Start Lo&g";
+                this.mnuFileStartDataCollection.ToolTipText = "Start Log";
+
+                this.tbOptionsStartDataCollection.ToolTipText = this.mnuFileStartDataCollection.ToolTipText;
+                this.tbOptionsStartDataCollection.Image = this.mnuFileStartDataCollection.Image;
+                this.tbOptionsStartDataCollection.Text = this.mnuFileStartDataCollection.Text;
+                this.tbOptionsStartDataCollection.Checked = this.mnuFileStartDataCollection.Checked;
+
+                this.mnuFileSetupDataCollection.Enabled = !this.mnuFileStartDataCollection.Checked;
+                this.tbOptionsSetupDataCollection.Enabled = this.mnuFileSetupDataCollection.Enabled;
+
+                m_SystemMessage = (Byte)(m_SystemMessage & (~(int)SystemStatus.M_SS_LOG));
+
+                AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
+                asyncSM.BeginInvoke(null, null);
+            }
+        }
+
+        void m_fldLog_OnStopLogFile(object sender, EventArgs e)
+        {
+            this.CloseLogFile();
+        }
+
+        private void UpdateSystemMessage()
+        {
+            try
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    tslblErrorStatus.SystemMessage = m_SystemMessage;
+                    m_sysData.applicationData.m_FormErrorMessage.SystemMessage = m_SystemMessage;
+
+                    tslblErrorStatus.LogTypeMessage = (Byte)m_sysData.logData.ftFile;
+                    m_sysData.applicationData.m_FormErrorMessage.LogTypeMessage = (Byte)m_sysData.logData.ftFile;
+
+                    tslblErrorStatus.PortName = (m_sysData.linkData.ptPortType == PortType.ptTCP) ? "TCP/IP" : m_sysData.linkData._comPort.currPortName;
+                    m_sysData.applicationData.m_FormErrorMessage.PortName = (m_sysData.linkData.ptPortType == PortType.ptTCP) ? "TCP/IP" : m_sysData.linkData._comPort.currPortName;
+
+                    if (((m_sysData.applicationData.m_FormErrorMessage.SystemMessage != 0) || (m_sysData.applicationData.m_FormErrorMessage.ErrorMessage != ErrorStatus.BA_OK) || (m_sysData.applicationData.m_FormErrorMessage.DemoVersion == true)) && (toolStrip.Visible == false))
+                    {
+                        m_sysData.applicationData.m_FormErrorMessage.Show();
+                        m_sysData.applicationData.m_FormErrorMessage.Focus();
+                    }
+                    else
+                        m_sysData.applicationData.m_FormErrorMessage.Hide();
+
+                    if (m_sysData.sa_Data.m_FormViewSA_Start != null)
+                    {
+                        m_sysData.sa_Data.m_FormViewSA_Start.SystemMessage = m_SystemMessage;
+                        m_sysData.sa_Data.m_FormViewSA_Start.LogTypeMessage = (Byte)m_sysData.logData.ftFile;
+
+                        m_sysData.sa_Data.m_FormViewSA_Start.PortName = (m_sysData.linkData.ptPortType == PortType.ptTCP) ? "TCP/IP" : m_sysData.linkData._comPort.currPortName;
+                    }
+                });
+
+            }
+            catch
+            {
+            }
+        }
+
+        private void mnuOptionsSetupDataCollection_Click(object sender, EventArgs e)
+        {
+            frmSetupLog FormSetupLog = new frmSetupLog();
+
+            if (FormSetupLog.ShowDialog() == DialogResult.OK)
+            {
+                mnuFileStartDataCollection.Enabled = true;
+                tbOptionsStartDataCollection.Enabled = true;
             }
         }
     }
