@@ -52,6 +52,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataExcel.cs" />
+    <Compile Include="FormErrorMessage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormErrorMessage.Designer.cs">
+      <DependentUpon>FormErrorMessage.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormSetupLog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,9 +83,16 @@
     <Compile Include="FormMain.Designer.cs">
       <DependentUpon>FormMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="LogData.cs" />
+    <Compile Include="MyToolStripLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemData.cs" />
+    <EmbeddedResource Include="FormErrorMessage.resx">
+      <DependentUpon>FormErrorMessage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormSetupLog.resx">
       <DependentUpon>FormSetupLog.cs</DependentUpon>
     </EmbeddedResource>

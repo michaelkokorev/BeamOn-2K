@@ -192,27 +192,31 @@ namespace BeamOn_2K
 
             NumPointsUpDown.Value = m_sysData.logData.LogNumPoints;
 
-            //Data
-            chkPower.Checked = m_sysData.logData.bPower;
-            chkPositionX.Checked = m_sysData.logData.bPositionX;
-            chkPositionY.Checked = m_sysData.logData.bPositionY;
-            chkWidthW1.Checked = m_sysData.logData.bWidthW1;
-            chkWidthW2.Checked = m_sysData.logData.bWidthW2;
-            chkWidthW3.Checked = m_sysData.logData.bWidthW3;
-            chkWidthV1.Checked = m_sysData.logData.bWidthV1;
-            chkWidthV2.Checked = m_sysData.logData.bWidthV2;
-            chkWidthV3.Checked = m_sysData.logData.bWidthV3;
-            chkGausfitV.Checked = m_sysData.logData.bGaussfitV;
-            chkGausfitW.Checked = m_sysData.logData.bGaussfitW;
-            chkGaussWidthW1.Checked = m_sysData.logData.bGaussWidthW1;
-            chkGaussWidthW2.Checked = m_sysData.logData.bGaussWidthW2;
-            chkGaussWidthW3.Checked = m_sysData.logData.bGaussWidthW3;
-            chkGaussWidthV1.Checked = m_sysData.logData.bGaussWidthV1;
-            chkGaussWidthV2.Checked = m_sysData.logData.bGaussWidthV2;
-            chkGaussWidthV3.Checked = m_sysData.logData.bGaussWidthV3;
-            chkMajor.Checked = m_sysData.logData.bMajor;
-            chkMinor.Checked = m_sysData.logData.bMinor;
-            chkOrientation.Checked = m_sysData.logData.bOrientation;
+            for (int i = 0; i < checkedListBoxDataLog.Items.Count; i++)
+            {
+                string s = checkedListBoxDataLog.GetItemText(checkedListBoxDataLog.Items[i]);
+
+                if (((s.Contains("Horizontal Profile Width Level 1") == true) && (m_sysData.logData.bHorizontalProfileWidthLevel1 == true)) ||
+                    ((s.Contains("Horizontal Profile Width Level 2") == true) && (m_sysData.logData.bHorizontalProfileWidthLevel2 == true)) ||
+                    ((s.Contains("Horizontal Profile Width Level 3") == true) && (m_sysData.logData.bHorizontalProfileWidthLevel3 == true)) ||
+                    ((s.Contains("Vertical Profile Width Level 1") == true) && (m_sysData.logData.bVerticalProfileWidthLevel1 == true)) ||
+                    ((s.Contains("Vertical Profile Width Level 2") == true) && (m_sysData.logData.bVerticalProfileWidthLevel2 == true)) ||
+                    ((s.Contains("Vertical Profile Width Level 3") == true) && (m_sysData.logData.bVerticalProfileWidthLevel3 == true)) ||
+                    ((s.Contains("Horizontal Gaussian Width Level 1") == true) && (m_sysData.logData.bHorizontalGaussianWidthLevel1 == true)) ||
+                    ((s.Contains("Horizontal Gaussian Width Level 2") == true) && (m_sysData.logData.bHorizontalGaussianWidthLevel2 == true)) ||
+                    ((s.Contains("Horizontal Gaussian Width Level 3") == true) && (m_sysData.logData.bHorizontalGaussianWidthLevel3 == true)) ||
+                    ((s.Contains("Vertical Gaussian Width Level 1") == true) && (m_sysData.logData.bVerticalGaussianWidthLevel1 == true)) ||
+                    ((s.Contains("Vertical Gaussian Width Level 2") == true) && (m_sysData.logData.bVerticalGaussianWidthLevel2 == true)) ||
+                    ((s.Contains("Vertical Gaussian Width Level 3") == true) && (m_sysData.logData.bVerticalGaussianWidthLevel3 == true)) ||
+                    ((s.Contains("Horizontal Gaussian fit") == true) && (m_sysData.logData.bHorizontalGaussianFit == true)) ||
+                    ((s.Contains("Vertical Gaussian fit") == true) && (m_sysData.logData.bVerticalGaussianFit == true)) ||
+                    ((s.Contains("Power") == true) && (m_sysData.logData.bPower == true)) ||
+                    ((s.Contains("Major") == true) && (m_sysData.logData.bMajor == true)) ||
+                    ((s.Contains("Minor") == true) && (m_sysData.logData.bMinor == true)) ||
+                    ((s.Contains("Orientation") == true) && (m_sysData.logData.bOrientation == true)) ||
+                    ((s.Contains("Position X") == true) && (m_sysData.logData.bPositionX == true)) ||
+                    ((s.Contains("Position Y") == true) && (m_sysData.logData.bPositionY == true))) checkedListBoxDataLog.SetItemChecked(i, true);
+            }
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -316,76 +320,52 @@ namespace BeamOn_2K
             m_sysData.logData.LogNumPoints = Decimal.ToUInt32(NumPointsUpDown.Value);
 
             //Data
-            m_sysData.logData.bPower = chkPower.Checked;
-            m_sysData.logData.bPositionX = chkPositionX.Checked;
-            m_sysData.logData.bPositionY = chkPositionY.Checked;
-            m_sysData.logData.bWidthW1 = chkWidthW1.Checked;
-            m_sysData.logData.bWidthW2 = chkWidthW2.Checked;
-            m_sysData.logData.bWidthW3 = chkWidthW3.Checked;
-            m_sysData.logData.bWidthV1 = chkWidthV1.Checked;
-            m_sysData.logData.bWidthV2 = chkWidthV2.Checked;
-            m_sysData.logData.bWidthV3 = chkWidthV3.Checked;
-            m_sysData.logData.bGaussfitV = chkGausfitV.Checked;
-            m_sysData.logData.bGaussfitW = chkGausfitW.Checked;
-            m_sysData.logData.bGaussWidthW1 = chkGaussWidthW1.Checked;
-            m_sysData.logData.bGaussWidthW2 = chkGaussWidthW2.Checked;
-            m_sysData.logData.bGaussWidthW3 = chkGaussWidthW3.Checked;
-            m_sysData.logData.bGaussWidthV1 = chkGaussWidthV1.Checked;
-            m_sysData.logData.bGaussWidthV2 = chkGaussWidthV2.Checked;
-            m_sysData.logData.bGaussWidthV3 = chkGaussWidthV3.Checked;
-            m_sysData.logData.bMajor = chkMajor.Checked;
-            m_sysData.logData.bMinor = chkMinor.Checked;
-            m_sysData.logData.bOrientation = chkOrientation.Checked;
+            m_sysData.logData.bPower = false;
+            m_sysData.logData.bPositionX = false;
+            m_sysData.logData.bPositionY = false;
+            m_sysData.logData.bHorizontalProfileWidthLevel1 = false;
+            m_sysData.logData.bHorizontalProfileWidthLevel2 = false;
+            m_sysData.logData.bHorizontalProfileWidthLevel3 = false;
+            m_sysData.logData.bVerticalProfileWidthLevel1 = false;
+            m_sysData.logData.bVerticalProfileWidthLevel2 = false;
+            m_sysData.logData.bVerticalProfileWidthLevel3 = false;
+            m_sysData.logData.bVerticalGaussianFit = false;
+            m_sysData.logData.bHorizontalGaussianFit = false;
+            m_sysData.logData.bHorizontalGaussianWidthLevel1 = false;
+            m_sysData.logData.bHorizontalGaussianWidthLevel2 = false;
+            m_sysData.logData.bHorizontalGaussianWidthLevel3 = false;
+            m_sysData.logData.bVerticalGaussianWidthLevel1 = false;
+            m_sysData.logData.bVerticalGaussianWidthLevel2 = false;
+            m_sysData.logData.bVerticalGaussianWidthLevel3 = false;
+            m_sysData.logData.bMajor = false;
+            m_sysData.logData.bMinor = false;
+            m_sysData.logData.bOrientation = false;
+
+            foreach (string s in checkedListBoxDataLog.CheckedItems)
+            {
+                if (s.Contains("Horizontal Profile Width Level 1") == true) m_sysData.logData.bHorizontalProfileWidthLevel1 = true;
+                if (s.Contains("Horizontal Profile Width Level 2") == true) m_sysData.logData.bHorizontalProfileWidthLevel2 = true;
+                if (s.Contains("Horizontal Profile Width Level 3") == true) m_sysData.logData.bHorizontalProfileWidthLevel3 = true;
+                if (s.Contains("Vertical Profile Width Level 1") == true) m_sysData.logData.bVerticalProfileWidthLevel1 = true;
+                if (s.Contains("Vertical Profile Width Level 2") == true) m_sysData.logData.bVerticalProfileWidthLevel2 = true;
+                if (s.Contains("Vertical Profile Width Level 3") == true) m_sysData.logData.bVerticalProfileWidthLevel3 = true;
+                if (s.Contains("Horizontal Gaussian Width Level 1") == true) m_sysData.logData.bHorizontalGaussianWidthLevel1 = true;
+                if (s.Contains("Horizontal Gaussian Width Level 2") == true) m_sysData.logData.bHorizontalGaussianWidthLevel2 = true;
+                if (s.Contains("Horizontal Gaussian Width Level 3") == true) m_sysData.logData.bHorizontalGaussianWidthLevel3 = true;
+                if (s.Contains("Vertical Gaussian Width Level 1") == true) m_sysData.logData.bVerticalGaussianWidthLevel1 = true;
+                if (s.Contains("Vertical Gaussian Width Level 2") == true) m_sysData.logData.bVerticalGaussianWidthLevel2 = true;
+                if (s.Contains("Vertical Gaussian Width Level 3") == true) m_sysData.logData.bVerticalGaussianWidthLevel3 = true;
+                if (s.Contains("Horizontal Gaussian fit") == true) m_sysData.logData.bHorizontalGaussianFit = true;
+                if (s.Contains("Vertical Gaussian fit") == true) m_sysData.logData.bVerticalGaussianFit = true;
+                if (s.Contains("Power") == true) m_sysData.logData.bPower = true;
+                if (s.Contains("Major") == true) m_sysData.logData.bMajor = true;
+                if (s.Contains("Minor") == true) m_sysData.logData.bMinor = true;
+                if (s.Contains("Orientation") == true) m_sysData.logData.bOrientation = true;
+                if (s.Contains("Position X") == true) m_sysData.logData.bPositionX = true;
+                if (s.Contains("Position Y") == true) m_sysData.logData.bPositionY = true;
+            }
 
             this.DialogResult = DialogResult.OK;
-        }
-
-        private void btnBrowse_Click(object sender, EventArgs e)
-        {
-            SaveFileDialog saveConfig = new SaveFileDialog();
-
-            if (rbFileLog.Checked == true)
-            {
-                saveConfig.Filter = "Log files (*.log)|*.log";
-                saveConfig.FileName = "*.log";
-                saveConfig.DefaultExt = "log";
-            }
-            else if (rbFileExcel.Checked == true)
-            {
-                if (DataExcel.Version < 12)
-                {
-                    saveConfig.Filter = "Excel files (*.xls)|*.xls";
-                    saveConfig.FileName = "*.xls";
-                    saveConfig.DefaultExt = "xls";
-                }
-                else
-                {
-                    saveConfig.Filter = "Excel files (*.xlsx)|*.xlsx";
-                    saveConfig.FileName = "*.xlsx";
-                    saveConfig.DefaultExt = "xlsx";
-                }
-            }
-            else
-            {
-                saveConfig.Filter = "XML files (*.xml)|*.xml";
-                saveConfig.FileName = "*.xml";
-                saveConfig.DefaultExt = "xml";
-            }
-
-            saveConfig.FilterIndex = 1;
-
-            saveConfig.AddExtension = true;
-            saveConfig.CheckPathExists = true;
-            saveConfig.CheckFileExists = false;
-            saveConfig.InitialDirectory = m_sysData.applicationData.m_strMyDataDir;
-            saveConfig.RestoreDirectory = true;
-            saveConfig.Title = "Save Log File";
-            saveConfig.FileOk += new CancelEventHandler(saveConfig_FileOk);
-
-            if (saveConfig.ShowDialog() == DialogResult.OK)
-            {
-                txtFileName.Text = saveConfig.FileName;
-            }
         }
 
         private void rbMode_CheckedChanged(object sender, EventArgs e)

@@ -12,6 +12,7 @@ namespace BeamOnCL
         double[] m_dGaussian = null;
         float m_fCorrelation = 0f;
         Double m_dProfileMax = 0;
+        Double m_fDiffSigma = 0f;
 
         public Gaussian(Gaussian gaus)
         {
@@ -21,6 +22,12 @@ namespace BeamOnCL
             m_fCorrelation = gaus.Correlation;
             m_dProfileMax = gaus.ProfileMax;
             m_fPixelSize = gaus.PixelSize;
+            m_fDiffSigma = gaus.Sigma;
+        }
+
+        public Double Sigma
+        {
+            get { return m_fDiffSigma; }
         }
 
         public Single PixelSize
@@ -51,43 +58,16 @@ namespace BeamOnCL
 
         public double GetWidth(float iLevel)
         {
-            double f_Board;
-            int iLeft, iRight;
-            double f_Left;
-            double f_Right;
+            double dValue = 0f;
 
-            if (iLevel >= 100) return (0);
+            if (iLevel == 0)
+                dValue = (double)m_dGaussian.Length;
+            else if (iLevel >= 100)
+                dValue = 0f;
+            else
+                dValue = 2 * m_fDiffSigma * Math.Sqrt(-2 * Math.Log(iLevel / 100f));
 
-            f_Board = m_dProfileMax * iLevel / 100f;
-
-            if (f_Board <= 0) return (0);
-
-            //if(m_wWidthMetod == M_METOD_DIFF_INS)
-            //{
-            ////Inside
-            //    for (iLeft = iStart; ((iLeft > 0) && (plProf[iLeft] > f_Board)); iLeft--);
-            //    for (iRight = iStart; ((iRight < plProf.Length) && (plProf[iRight] > f_Board)); iRight++) ;
-
-            //    if (plProf[iLeft + 1] <= plProf[iLeft]) return (0);
-            //    f_Left = iLeft + (f_Board - plProf[iLeft]) / (plProf[iLeft + 1] - plProf[iLeft]);
-
-            //    if (plProf[iRight - 1] <= plProf[iRight]) return (0);
-            //    f_Right = iRight - (f_Board - plProf[iRight]) / (plProf[iRight - 1] - plProf[iRight]);
-            //}
-            //else
-            //{
-            // Outside
-            for (iLeft = 0; ((iLeft < m_dGaussian.Length) && (m_dGaussian[iLeft] < f_Board)); iLeft++) ;
-            for (iRight = m_dGaussian.Length - 1; ((iRight > 0) && (m_dGaussian[iRight] < f_Board)); iRight--) ;
-
-            if ((iLeft == 0) || (m_dGaussian[iLeft - 1] >= m_dGaussian[iLeft])) return (0);
-            f_Left = iLeft - (m_dGaussian[iLeft] - f_Board) / (m_dGaussian[iLeft] - m_dGaussian[iLeft - 1]);
-
-            if ((iRight == m_dGaussian.Length - 1) || (m_dGaussian[iRight + 1] >= m_dGaussian[iRight])) return (0);
-            f_Right = iRight + (m_dGaussian[iRight] - f_Board) / (m_dGaussian[iRight] - m_dGaussian[iRight + 1]);
-            //}
-
-            return (f_Right - f_Left) * m_fPixelSize;
+            return dValue * m_fPixelSize;
         }
 
         public void Create(Double[] profile, Double profileMax, int centroid, Double Sum)
@@ -98,15 +78,15 @@ namespace BeamOnCL
 
             m_dProfileMax = profileMax;
 
-            double fSigma = (float)(Sum / 0.926 / (float)m_dProfileMax / Math.Sqrt(Math.PI * 2));
+            m_fDiffSigma = (float)(Sum / 0.926 / (float)m_dProfileMax / Math.Sqrt(Math.PI * 2));
 
-            if (fSigma > 0)
+            if (m_fDiffSigma > 0)
             {
                 l_Sum = l_Sum0 = 0;
 
                 for (int i = 0; i < profile.Length; i++)
                 {
-                    f_Coeff = (i - centroid) / fSigma;
+                    f_Coeff = (i - centroid) / m_fDiffSigma;
                     m_dGaussian[i] = m_dProfileMax * Math.Exp(-f_Coeff * f_Coeff / 2);
 
                     f_Coeff = m_dGaussian[i];
