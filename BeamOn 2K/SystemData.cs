@@ -7,6 +7,8 @@ using System.IO;
 using System.Windows.Forms;
 using System.Globalization;
 using System.Drawing;
+using System.Runtime.Serialization;
+using System.Drawing.Imaging;
 
 namespace BeamOn_2K
 {
@@ -15,90 +17,285 @@ namespace BeamOn_2K
 
     public sealed class SystemData
     {
-        public ProfileData[] profData = new ProfileData[2];
-        public PositionData positionData;
-        public LevelsData ldLevels = new LevelsData();
-        public LogData logData;
-        public PowerData powerData;
-        public ApplicationData applicationData;
-        public Boolean m_bDemo = false;
-        public Boolean m_bDebug = false;
-        public Boolean m_bCalibr = false;
-        public UInt16 iAverage = 2;
-        public Boolean bAverageOn = false;
+        [DataContract(Name = "Setup")]
+        private class Data
+        {
+            [DataMember(Name = "PixelFormat")]
+            public PixelFormat m_pixelFormat = PixelFormat.Format8bppIndexed;
+            [DataMember(Name = "ScaleProfile")]
+            public Boolean m_bScaleProfile = false;
+            [DataMember(Name = "Gaussian")]
+            public Boolean m_bGaussian = false;
+            [DataMember(Name = "Measure")]
+            public Boolean m_bMeasure = false;
+            [DataMember(Name = "ProfileDataHorizontal")]
+            public ProfileData m_profDataHorizontal = new ProfileData();
+            [DataMember(Name = "ProfileDataVertical")]
+            public ProfileData m_profDataVertical = new ProfileData();
+            [DataMember(Name = "PositionData")]
+            public PositionData m_positionData = new PositionData();
+            [DataMember(Name = "ProjectionData")]
+            public ProjectionData m_projectionData = new ProjectionData();
+            [DataMember(Name = "Levels")]
+            public LevelsData m_ldLevels = new LevelsData();
+            [DataMember(Name = "LogData")]
+            public LogData m_logData = new LogData();
+            [DataMember(Name = "PowerData")]
+            public PowerData m_powerData = new PowerData();
+            [DataMember(Name = "ApplicationData")]
+            public ApplicationData m_applicationData = new ApplicationData();
+            public Boolean m_bDemo = false;
+            public Boolean m_bDebug = false;
+            public Boolean m_bCalibr = false;
+            [DataMember(Name = "Average")]
+            public UInt16 m_iAverage = 2;
+            [DataMember(Name = "AverageOn")]
+            public Boolean m_bAverageOn = false;
+            public Single m_sFocalLens = 1f;
+            [DataMember(Name = "UnitsCoeff")]
+            public Single m_sUnitsCoeff = 1f;
+            [DataMember(Name = "OpticalFactor")]
+            public Single m_sOpticalFactor = 1f;
+            [DataMember(Name = "Units")]
+            public MeasureUnits m_muUnits = MeasureUnits.muMicro;
 
-        static readonly SystemData myInstance = new SystemData();
+            public Data()
+            {
+                InitializeComponent();
+            }
 
-        private Single m_sFocalLens = 1f;
-        private Single m_sUnitsCoeff = 1f;
-        private Single m_sOpticalFactor = 1f;
-        private MeasureUnits m_muUnits = MeasureUnits.muMicro;
+            public void InitializeComponent()
+            {
+                m_profDataHorizontal.InitializeComponent();
+                m_profDataVertical.InitializeComponent();
+                m_positionData.InitializeComponent();
+                m_ldLevels.InitializeComponent();
+                m_logData.InitializeComponent();
+                m_powerData.InitializeComponent();
+                m_applicationData.InitializeComponent();
+                m_projectionData.InitializeComponent();
 
-        static SystemData() { }
+                string strProgramDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                string strProgramFilePath = Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles);
+                string strPath = Directory.GetCurrentDirectory().Substring(strProgramFilePath.Length + 1);
+
+                string strNewPath;
+                string strCompanyName = "";
+
+                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
+
+                if (attributes.Length != 0)
+                {
+                    strCompanyName = ((AssemblyCompanyAttribute)attributes[0]).Company;
+                    int pos = strCompanyName.IndexOf("Ltd");
+                    if (pos > -1) strCompanyName = strCompanyName.Substring(0, pos);
+
+                    strNewPath = Path.Combine(strProgramDataPath, strCompanyName, strPath);
+                }
+                else
+                    strNewPath = Path.Combine(strProgramDataPath, strPath);
+
+                m_applicationData.m_strMyAppDir = Application.StartupPath;
+
+                m_applicationData.m_strMyCurrentDir = strNewPath;
+
+                m_applicationData.m_strMyDataDir = strNewPath + "\\Data";
+                if (Directory.Exists(m_applicationData.m_strMyDataDir) == false) Directory.CreateDirectory(m_applicationData.m_strMyDataDir);
+
+                m_applicationData.m_strMyTempDir = strNewPath + "\\Temp";
+                if (Directory.Exists(m_applicationData.m_strMyTempDir) == false) Directory.CreateDirectory(m_applicationData.m_strMyTempDir);
+            }
+
+            public MeasureUnits UnitMeasure
+            {
+                get { return m_muUnits; }
+                set
+                {
+                    m_muUnits = value;
+                    m_positionData.UnitMeasure = m_muUnits;
+                    //                projectionData.UnitMeasure = m_muUnits;
+
+                    m_profDataHorizontal.UnitMeasure = m_muUnits;
+                    m_profDataVertical.UnitMeasure = m_muUnits;
+
+                    m_sUnitsCoeff = (m_muUnits == MeasureUnits.muMiliRad) ? 1f / (m_sFocalLens * m_sOpticalFactor) : 1f / m_sOpticalFactor;
+                }
+            }
+
+            public Single FocalLens
+            {
+                get { return m_sFocalLens; }
+                set
+                {
+                    m_sFocalLens = value;
+                    m_sUnitsCoeff = (m_muUnits == MeasureUnits.muMiliRad) ? 1f / (m_sFocalLens * m_sOpticalFactor) : 1f / m_sOpticalFactor;
+
+                    m_positionData.FocalLens = m_sFocalLens;
+                    //projectionData.FocalLens = m_sFocalLens;
+
+                    m_profDataHorizontal.FocalLens = m_sFocalLens;
+                    m_profDataVertical.FocalLens = m_sFocalLens;
+                }
+            }
+        }
+
+        public PixelFormat FormatPixel
+        {
+            get { return m_data.m_pixelFormat; }
+            set { m_data.m_pixelFormat = value; }
+        }
+
+        public Boolean ViewGaussian
+        {
+            get { return m_data.m_bGaussian; }
+            set { m_data.m_bGaussian = value; }
+        }
+
+        public Boolean ScaleProfile
+        {
+            get { return m_data.m_bScaleProfile; }
+            set { m_data.m_bScaleProfile = value; }
+        }
+
+        public Boolean Measure
+        {
+            get { return m_data.m_bMeasure; }
+            set { m_data.m_bMeasure = value; }
+        }
+
+        public Boolean Calibr
+        {
+            get { return m_data.m_bCalibr; }
+            set { m_data.m_bCalibr = value; }
+        }
+
+        public Boolean Debug
+        {
+            get { return m_data.m_bDebug; }
+            set { m_data.m_bDebug = value; }
+        }
+
+        public Boolean AverageOn
+        {
+            get { return m_data.m_bAverageOn; }
+            set { m_data.m_bAverageOn = value; }
+        }
+
+        public UInt16 Average
+        {
+            get { return m_data.m_iAverage; }
+            set { m_data.m_iAverage = value; }
+        }
+
+        public Boolean Demo
+        {
+            get { return m_data.m_bDemo; }
+            set { m_data.m_bDemo = value; }
+        }
+
+        public ProfileData HorizontalProfile
+        {
+            get { return m_data.m_profDataHorizontal; }
+        }
+
+        public ProfileData VerticalProfile
+        {
+            get { return m_data.m_profDataVertical; }
+        }
+
+        public ProjectionData projectionData
+        {
+            get { return m_data.m_projectionData; }
+        }
+
+        public PositionData positionData
+        {
+            get { return m_data.m_positionData; }
+        }
+
+        public LevelsData ClipLevels
+        {
+            get { return m_data.m_ldLevels; }
+        }
+
+        public PowerData powerData
+        {
+            get { return m_data.m_powerData; }
+        }
+
+        public ApplicationData applicationData
+        {
+            get { return m_data.m_applicationData; }
+        }
+
+        public LogData logData
+        {
+            get { return m_data.m_logData; }
+        }
+
+        private Data m_data = null;
+
+        private static readonly SystemData myInstance = new SystemData();
+
+        private SystemData()
+        {
+            m_data = new Data();
+        }
 
         public static SystemData MyInstance
         {
             get { return myInstance; }
         }
 
-        SystemData()
+        public void SerializeAppData(String strPath)
         {
-            applicationData = new ApplicationData();
-            logData = new LogData();
-            powerData = new PowerData();
-            positionData = new PositionData();
-            profData[0] = new ProfileData();
-            profData[1] = new ProfileData();
+            var ds = new DataContractSerializer(typeof(Data));
+            using (Stream s = File.Create(strPath))
+                ds.WriteObject(s, m_data); // Сериализация
+        }
+
+        public void DeserializeAppData(String strPath)
+        {
+            var ds = new DataContractSerializer(typeof(Data));
+            using (Stream s = File.OpenRead(strPath))
+                m_data = (Data)ds.ReadObject(s); // Десериализация
+
+            m_data.InitializeComponent();
         }
 
         public Single UnitsCoeff
         {
-            get { return m_sUnitsCoeff; }
+            get { return m_data.m_sUnitsCoeff; }
         }
 
         public MeasureUnits UnitMeasure
         {
-            get { return m_muUnits; }
-            set
-            {
-                m_muUnits = value;
-                positionData.UnitMeasure = m_muUnits;
-                //                projectionData.UnitMeasure = m_muUnits;
-
-                for (int i = 0; i < profData.Length; i++)
-                {
-                    profData[i].UnitMeasure = m_muUnits;
-                }
-
-                m_sUnitsCoeff = (m_muUnits == MeasureUnits.muMiliRad) ? 1f / (m_sFocalLens * m_sOpticalFactor) : 1f / m_sOpticalFactor;
-            }
+            get { return m_data.UnitMeasure; }
+            set { m_data.UnitMeasure = value; }
         }
 
         public Single FocalLens
         {
-            get { return m_sFocalLens; }
-            set
-            {
-                m_sFocalLens = value;
-                m_sUnitsCoeff = (m_muUnits == MeasureUnits.muMiliRad) ? 1f / (m_sFocalLens * m_sOpticalFactor) : 1f / m_sOpticalFactor;
-
-                positionData.FocalLens = m_sFocalLens;
-                //projectionData.FocalLens = m_sFocalLens;
-
-                for (int i = 0; i < profData.Length; i++)
-                {
-                    profData[i].FocalLens = m_sFocalLens;
-                }
-            }
+            get { return m_data.FocalLens; }
+            set { m_data.FocalLens = value; }
         }
     }
 
+    [DataContract(Name = "Setup")]
     public class ApplicationData
     {
+        [DataMember(Name = "ToolBar")]
         public Boolean bViewToolbar = true;
+
+        [DataMember(Name = "StatusBar")]
         public Boolean bViewStatusBar = true;
+
+        [DataMember(Name = "SaveExit")]
         public Boolean bSaveExit = true;
+
+        [DataMember(Name = "ViewPower")]
         public Boolean bStatusViewPower;
+
         public String m_strMyDataDir;
         public String m_strMySADataDir;
         public String m_strMyCurrentDir;
@@ -224,12 +421,7 @@ namespace BeamOn_2K
         }
         #endregion
 
-        public String HelpNamespace
-        {
-            get { return m_strHelpNamespace; ;}
-        }
-
-        public ApplicationData()
+        public void InitializeComponent()
         {
             ProductName = AssemblyProduct;
             ProductVersion = AssemblyVersion;
@@ -237,48 +429,88 @@ namespace BeamOn_2K
             CompanyName = AssemblyCompany;
             ProductTrademark = AssemblyTrademark;
         }
+
+        public String HelpNamespace
+        {
+            get { return m_strHelpNamespace; ;}
+        }
+
+        public ApplicationData()
+        {
+            InitializeComponent();
+        }
     }
 
+    [DataContract]
     public class LogData
     {
         //Status
         public Boolean bStart = false;
 
         //File
+        [DataMember]
         public FileType ftFile = FileType.ftLog;
         public String strFileName;
 
         //Data
+        [DataMember]
         public LogType ltMode = LogType.ltTime;
+        [DataMember]
         public UInt32 LogInterval = 0;
+        [DataMember]
         public UInt32 LogDuration = 5;
+        [DataMember]
         public UInt32 LogNumPoints = 1;
 
         //Last Time
-        public Double LastMeasureTime = 0;
+        public long LastMeasureTime = 0;
 
         //Data
+        [DataMember]
         public Boolean bPower = true;
+        [DataMember]
         public Boolean bPositionX = true;
+        [DataMember]
         public Boolean bPositionY = true;
+        [DataMember]
         public Boolean bHorizontalProfileWidthLevel1 = true;
+        [DataMember]
         public Boolean bHorizontalProfileWidthLevel2 = true;
+        [DataMember]
         public Boolean bHorizontalProfileWidthLevel3 = true;
+        [DataMember]
         public Boolean bVerticalProfileWidthLevel1 = true;
+        [DataMember]
         public Boolean bVerticalProfileWidthLevel2 = true;
+        [DataMember]
         public Boolean bVerticalProfileWidthLevel3 = true;
+        [DataMember]
         public Boolean bVerticalGaussianFit = false;
+        [DataMember]
         public Boolean bHorizontalGaussianFit = false;
+        [DataMember]
         public Boolean bHorizontalGaussianWidthLevel1 = false;
+        [DataMember]
         public Boolean bHorizontalGaussianWidthLevel2 = false;
+        [DataMember]
         public Boolean bHorizontalGaussianWidthLevel3 = false;
+        [DataMember]
         public Boolean bVerticalGaussianWidthLevel1 = false;
+        [DataMember]
         public Boolean bVerticalGaussianWidthLevel2 = false;
+        [DataMember]
         public Boolean bVerticalGaussianWidthLevel3 = false;
 
+        [DataMember]
         public Boolean bMajor = false;
+        [DataMember]
         public Boolean bMinor = false;
+        [DataMember]
         public Boolean bOrientation = false;
+
+        public void InitializeComponent()
+        {
+        }
     }
 
     public struct FilterData
@@ -287,6 +519,7 @@ namespace BeamOn_2K
         public Single Sensitivity;
     }
 
+    [DataContract(Name = "Power")]
     public class PowerData
     {
         public float fSensFactor = 1.0f;                                             /* Sensitivity factor */
@@ -298,7 +531,10 @@ namespace BeamOn_2K
         public Boolean bIndFilter = false;
         public Boolean bIndSAM = false;
         public Boolean bIndOffset = false;
+
+        [DataMember(Name = "Wavelenght")]
         public UInt16 uiWavelenght;
+
         public UInt16 uiWavelenghtMin;
         public UInt16 uiWavelenghtMax;
         public String strFilterName;
@@ -794,11 +1030,16 @@ namespace BeamOn_2K
 
             return bRet;
         }
+
+        internal void InitializeComponent()
+        {
+        }
     }
 
-
+    [DataContract(Name = "Clip")]
     public class LevelsData
     {
+        [DataMember]
         LevelData[] m_ld = null;
 
         public LevelsData()
@@ -806,12 +1047,18 @@ namespace BeamOn_2K
             NumberLevels = 3;
 
             m_ld[0].Level = 13.5M;
+            m_ld[1].Level = 50M;
+            m_ld[2].Level = 80M;
+
+            InitializeComponent();
+        }
+
+        public void InitializeComponent()
+        {
             m_ld[0].LevelBrush = new SolidBrush(Color.Red);
             m_ld[0].LevelPen = new Pen(m_ld[0].LevelBrush, 0.1f);
-            m_ld[1].Level = 50M;
             m_ld[1].LevelBrush = new SolidBrush(Color.Blue);
             m_ld[1].LevelPen = new Pen(m_ld[1].LevelBrush, 0.1f);
-            m_ld[2].Level = 80M;
             m_ld[2].LevelBrush = new SolidBrush(Color.Green);
             m_ld[2].LevelPen = new Pen(m_ld[2].LevelBrush, 0.1f);
         }
@@ -838,13 +1085,7 @@ namespace BeamOn_2K
 
         public UInt16 NumberLevels
         {
-            get
-            {
-                if (m_ld != null)
-                    return (UInt16)m_ld.Length;
-                else
-                    return 0;
-            }
+            get { return (m_ld != null) ? (UInt16)m_ld.Length : (UInt16)0; }
 
             set
             {
@@ -865,8 +1106,10 @@ namespace BeamOn_2K
         }
     }
 
+    [DataContract]
     public class LevelData
     {
+        [DataMember]
         Decimal LevelValue;
         public Brush LevelBrush;
         public Pen LevelPen;
@@ -918,6 +1161,7 @@ namespace BeamOn_2K
         public bool EllipseError { get; set; }
     }
 
+    [DataContract]
     public class PositionData
     {
         private PointF m_realPosition = new PointF();
@@ -944,6 +1188,29 @@ namespace BeamOn_2K
         private Single m_sUnitsCoeff = 1f;
         private Single m_sOpticalFactor = 1f;
         private EllipseData m_edEllipse = new EllipseData();
+
+        public void InitializeComponent()
+        {
+            m_realPosition = new PointF();
+            PositionWidth = new Single[7];
+            strPrX = "0.0";
+            strPrY = "0.0";
+            strRadPrX = "0.0";
+            strRadPrY = "0.0";
+            strFormatX = "{0:F1}";
+            strFormatY = "{0:F1}";
+            strRadFormatX = "{0:F1}";
+            strRadFormatY = "{0:F1}";
+
+            BackgroundColor = Color.DarkBlue;
+            ForegroundColor = Color.White;
+            PlotColor = Color.GreenYellow;
+            m_muUnits = MeasureUnits.muMicro;
+            m_sFocalLens = 1f;
+            m_sUnitsCoeff = 1f;
+            m_sOpticalFactor = 1f;
+            m_edEllipse = new EllipseData();
+        }
 
         public EllipseData Ellipse
         {
@@ -1081,6 +1348,7 @@ namespace BeamOn_2K
         }
     }
 
+    [DataContract]
     public class ProfileData
     {
         private MeasureUnits m_muUnits = MeasureUnits.muMicro;
@@ -1102,6 +1370,23 @@ namespace BeamOn_2K
         String[] m_strGaussWidth = new String[NUM_LEVELS];
         String[] m_strRadGaussFormat = new String[NUM_LEVELS];
         String[] m_strRadGaussWidth = new String[NUM_LEVELS];
+
+        public void InitializeComponent()
+        {
+            m_sUnitsCoeff = 1f;
+
+            m_fWidth = new double[NUM_LEVELS];
+            m_strWidth = new String[NUM_LEVELS];
+            m_strRadWidth = new String[NUM_LEVELS];
+            m_strFormat = new String[NUM_LEVELS];
+            m_strRadFormat = new String[NUM_LEVELS];
+
+            m_fGaussWidth = new double[NUM_LEVELS];
+            m_strGaussFormat = new String[NUM_LEVELS];
+            m_strGaussWidth = new String[NUM_LEVELS];
+            m_strRadGaussFormat = new String[NUM_LEVELS];
+            m_strRadGaussWidth = new String[NUM_LEVELS];
+        }
 
         public double[] Width
         {
@@ -1194,6 +1479,56 @@ namespace BeamOn_2K
                 strFormat = "{0:F0}";
 
             return strFormat;
+        }
+    }
+
+    [DataContract]
+    public class ProjectionData
+    {
+        [DataMember]
+        public Boolean bViewGrid = false;
+        [DataMember]
+        public Int16 StepRotation = 5;
+        [DataMember]
+        public Int16 m_iAngleRotation = 30;
+        [DataMember]
+        public Int16 m_iAngleTilt = 30;
+        [DataMember]
+        public OpenGLControl.TypeGrid m_eResolution3D = OpenGLControl.TypeGrid.Low;
+        [DataMember]
+        public Boolean bAutoRot = false;
+        [DataMember]
+        public Boolean bProjection = false;
+        [DataMember]
+        public OpenGLControl.TypeProjection Projection = OpenGLControl.TypeProjection.NoneProjection;
+
+        public Int16 AngleTilt
+        {
+            get { return m_iAngleTilt; }
+            set 
+            { 
+                m_iAngleTilt = value;
+                while (m_iAngleTilt > 359) m_iAngleTilt -= 360;
+                while (m_iAngleTilt < 0) m_iAngleTilt += 360;
+            }
+        }
+
+        public Int16 AngleRotation
+        {
+            get { return m_iAngleRotation; }
+            set
+            {
+                m_iAngleRotation = value;
+                while (m_iAngleRotation > 359) m_iAngleRotation -= 360;
+                while (m_iAngleRotation < 0) m_iAngleRotation += 360;
+            }
+        }
+
+        public Rectangle m_rectImage;
+        public Byte[][] m_pbImageData = null;
+
+        public void InitializeComponent()
+        {
         }
     }
 }

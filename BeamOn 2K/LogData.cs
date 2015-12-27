@@ -132,7 +132,7 @@ namespace BeamOn_2K
                 writer.WriteStartElement("Header");
 
                 writer.WriteStartElement("Version");
-                writer.WriteValue(m_sysData.applicationData.ProductName + " Measurement system, Version " + m_sysData.applicationData.ProductVersion + (m_sysData.m_bDemo ? " Demo Version" : ""));
+                writer.WriteValue(m_sysData.applicationData.ProductName + " Measurement system, Version " + m_sysData.applicationData.ProductVersion + (m_sysData.Demo ? " Demo Version" : ""));
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Date");
@@ -155,7 +155,7 @@ namespace BeamOn_2K
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Average");
-                writer.WriteValue((m_sysData.bAverageOn == true) ? m_sysData.iAverage.ToString() : "OFF");
+                writer.WriteValue((m_sysData.AverageOn == true) ? m_sysData.Average.ToString() : "OFF");
                 writer.WriteEndElement();
 
                 writer.WriteStartElement("Wavelength");
@@ -197,10 +197,10 @@ namespace BeamOn_2K
 
                 writer.WriteStartElement("Levels");
 
-                for (int i = 0; i < m_sysData.ldLevels.NumberLevels; i++)
+                for (int i = 0; i < m_sysData.ClipLevels.NumberLevels; i++)
                 {
                     writer.WriteStartElement("L" + (i + 1).ToString());
-                    writer.WriteValue(m_sysData.ldLevels.Level(i));
+                    writer.WriteValue(m_sysData.ClipLevels.Level(i));
                     writer.WriteEndElement();
                 }
 
@@ -286,21 +286,21 @@ namespace BeamOn_2K
                                 if (m_sysData.logData.bHorizontalProfileWidthLevel1 == true)
                                 {
                                     writer.WriteStartElement("W1");
-                                    writer.WriteValue(m_sysData.profData[0].strWidth[0]);
+                                    writer.WriteValue(m_sysData.HorizontalProfile.strWidth[0]);
                                     writer.WriteEndElement();
                                 }
 
                                 if (m_sysData.logData.bHorizontalProfileWidthLevel2 == true)
                                 {
                                     writer.WriteStartElement("W2");
-                                    writer.WriteValue(m_sysData.profData[0].strWidth[1]);
+                                    writer.WriteValue(m_sysData.HorizontalProfile.strWidth[1]);
                                     writer.WriteEndElement();
                                 }
 
                                 if (m_sysData.logData.bHorizontalProfileWidthLevel3 == true)
                                 {
                                     writer.WriteStartElement("W3");
-                                    writer.WriteValue(m_sysData.profData[0].strWidth[2]);
+                                    writer.WriteValue(m_sysData.HorizontalProfile.strWidth[2]);
                                     writer.WriteEndElement();
                                 }
                             }
@@ -314,21 +314,21 @@ namespace BeamOn_2K
                                 if (m_sysData.logData.bVerticalProfileWidthLevel1 == true)
                                 {
                                     writer.WriteStartElement("V1");
-                                    writer.WriteValue(m_sysData.profData[1].strWidth[0]);
+                                    writer.WriteValue(m_sysData.VerticalProfile.strWidth[0]);
                                     writer.WriteEndElement();
                                 }
 
                                 if (m_sysData.logData.bVerticalProfileWidthLevel2 == true)
                                 {
                                     writer.WriteStartElement("V2");
-                                    writer.WriteValue(m_sysData.profData[1].strWidth[1]);
+                                    writer.WriteValue(m_sysData.VerticalProfile.strWidth[1]);
                                     writer.WriteEndElement();
                                 }
 
                                 if (m_sysData.logData.bVerticalProfileWidthLevel3 == true)
                                 {
                                     writer.WriteStartElement("V3");
-                                    writer.WriteValue(m_sysData.profData[1].strWidth[2]);
+                                    writer.WriteValue(m_sysData.VerticalProfile.strWidth[2]);
                                     writer.WriteEndElement();
                                 }
                             }
@@ -387,14 +387,14 @@ namespace BeamOn_2K
                             if (m_sysData.logData.bHorizontalGaussianFit == true)
                             {
                                 writer.WriteStartElement("W");
-                                writer.WriteValue(String.Format("{0:#0.000}", m_sysData.profData[0].m_fCorrelation));
+                                writer.WriteValue(String.Format("{0:#0.000}", m_sysData.HorizontalProfile.m_fCorrelation));
                                 writer.WriteEndElement();
                             }
 
                             if (m_sysData.logData.bVerticalGaussianFit == true)
                             {
                                 writer.WriteStartElement("V");
-                                writer.WriteValue(String.Format("{0:#0.000}", m_sysData.profData[1].m_fCorrelation));
+                                writer.WriteValue(String.Format("{0:#0.000}", m_sysData.VerticalProfile.m_fCorrelation));
                                 writer.WriteEndElement();
                             }
                         }
@@ -412,21 +412,21 @@ namespace BeamOn_2K
                                 if (m_sysData.logData.bHorizontalGaussianWidthLevel1 == true)
                                 {
                                     writer.WriteStartElement("W1");
-                                    writer.WriteValue(m_sysData.profData[0].strGaussWidth[0]);
+                                    writer.WriteValue(m_sysData.HorizontalProfile.strGaussWidth[0]);
                                     writer.WriteEndElement();
                                 }
 
                                 if (m_sysData.logData.bHorizontalGaussianWidthLevel2 == true)
                                 {
                                     writer.WriteStartElement("W2");
-                                    writer.WriteValue(m_sysData.profData[0].strGaussWidth[1]);
+                                    writer.WriteValue(m_sysData.HorizontalProfile.strGaussWidth[1]);
                                     writer.WriteEndElement();
                                 }
 
                                 if (m_sysData.logData.bHorizontalGaussianWidthLevel3 == true)
                                 {
                                     writer.WriteStartElement("W3");
-                                    writer.WriteValue(m_sysData.profData[0].strGaussWidth[2]);
+                                    writer.WriteValue(m_sysData.HorizontalProfile.strGaussWidth[2]);
                                     writer.WriteEndElement();
                                 }
                             }
@@ -440,21 +440,21 @@ namespace BeamOn_2K
                                 if (m_sysData.logData.bVerticalGaussianWidthLevel1 == true)
                                 {
                                     writer.WriteStartElement("V1");
-                                    writer.WriteValue(m_sysData.profData[1].strGaussWidth[0]);
+                                    writer.WriteValue(m_sysData.VerticalProfile.strGaussWidth[0]);
                                     writer.WriteEndElement();
                                 }
 
                                 if (m_sysData.logData.bVerticalGaussianWidthLevel2 == true)
                                 {
                                     writer.WriteStartElement("V2");
-                                    writer.WriteValue(m_sysData.profData[1].strGaussWidth[1]);
+                                    writer.WriteValue(m_sysData.VerticalProfile.strGaussWidth[1]);
                                     writer.WriteEndElement();
                                 }
 
                                 if (m_sysData.logData.bVerticalGaussianWidthLevel3 == true)
                                 {
                                     writer.WriteStartElement("V3");
-                                    writer.WriteValue(m_sysData.profData[1].strGaussWidth[2]);
+                                    writer.WriteValue(m_sysData.VerticalProfile.strGaussWidth[2]);
                                     writer.WriteEndElement();
                                 }
                             }
@@ -1725,12 +1725,12 @@ namespace BeamOn_2K
             //                               PowerData.GetValueStringFormat(m_sysData.powerData.mwPower, 0),//m_sysData.powerData.PowerUnits),
             //                               String.Format("{0:#0.000}", m_sysData.positionData.PrX),
             //                               String.Format("{0:#0.000}", m_sysData.positionData.PrY),
-            //                               String.Format("{0:#0.000}", m_sysData.profData[0].Width[0]),
-            //                               String.Format("{0:#0.000}", m_sysData.profData[0].Width[1]),
-            //                               String.Format("{0:#0.000}", m_sysData.profData[0].Width[2]),
-            //                               String.Format("{0:#0.000}", m_sysData.profData[1].Width[0]),
-            //                               String.Format("{0:#0.000}", m_sysData.profData[1].Width[1]),
-            //                               String.Format("{0:#0.000}", m_sysData.profData[1].Width[2])
+            //                               String.Format("{0:#0.000}", m_sysData.HorizontalProfile.Width[0]),
+            //                               String.Format("{0:#0.000}", m_sysData.HorizontalProfile.Width[1]),
+            //                               String.Format("{0:#0.000}", m_sysData.HorizontalProfile.Width[2]),
+            //                               String.Format("{0:#0.000}", m_sysData.VerticalProfile.Width[0]),
+            //                               String.Format("{0:#0.000}", m_sysData.VerticalProfile.Width[1]),
+            //                               String.Format("{0:#0.000}", m_sysData.VerticalProfile.Width[2])
             //                               ));
             //    w.Close();
             //}
@@ -1742,12 +1742,12 @@ namespace BeamOn_2K
                 if (m_sysData.logData.bPower == true) w.Write("{0, 10}", PowerData.GetValueStringFormat(m_sysData.powerData.mwPower, 0));
                 if (m_sysData.logData.bPositionX == true) w.Write("{0, 13}", m_sysData.positionData.strPositionX);
                 if (m_sysData.logData.bPositionY == true) w.Write("{0, 13}", m_sysData.positionData.strPositionY);
-                if (m_sysData.logData.bHorizontalProfileWidthLevel1 == true) w.Write("{0, 13}", m_sysData.profData[0].strWidth[0]);
-                if (m_sysData.logData.bHorizontalProfileWidthLevel2 == true) w.Write("{0, 13}", m_sysData.profData[0].strWidth[1]);
-                if (m_sysData.logData.bHorizontalProfileWidthLevel3 == true) w.Write("{0, 13}", m_sysData.profData[0].strWidth[2]);
-                if (m_sysData.logData.bVerticalProfileWidthLevel1 == true) w.Write("{0, 13}", m_sysData.profData[1].strWidth[0]);
-                if (m_sysData.logData.bVerticalProfileWidthLevel2 == true) w.Write("{0, 13}", m_sysData.profData[1].strWidth[1]);
-                if (m_sysData.logData.bVerticalProfileWidthLevel3 == true) w.Write("{0, 13}", m_sysData.profData[1].strWidth[2]);
+                if (m_sysData.logData.bHorizontalProfileWidthLevel1 == true) w.Write("{0, 13}", m_sysData.HorizontalProfile.strWidth[0]);
+                if (m_sysData.logData.bHorizontalProfileWidthLevel2 == true) w.Write("{0, 13}", m_sysData.HorizontalProfile.strWidth[1]);
+                if (m_sysData.logData.bHorizontalProfileWidthLevel3 == true) w.Write("{0, 13}", m_sysData.HorizontalProfile.strWidth[2]);
+                if (m_sysData.logData.bVerticalProfileWidthLevel1 == true) w.Write("{0, 13}", m_sysData.VerticalProfile.strWidth[0]);
+                if (m_sysData.logData.bVerticalProfileWidthLevel2 == true) w.Write("{0, 13}", m_sysData.VerticalProfile.strWidth[1]);
+                if (m_sysData.logData.bVerticalProfileWidthLevel3 == true) w.Write("{0, 13}", m_sysData.VerticalProfile.strWidth[2]);
 
                 if (m_sysData.logData.bMajor == true)
                 {
@@ -1773,14 +1773,14 @@ namespace BeamOn_2K
                         w.Write("{0, 13}", "-----");
                 }
 
-                if (m_sysData.logData.bHorizontalGaussianFit == true) w.Write("{0, 16}", String.Format("{0:#0.000}", m_sysData.profData[0].m_fCorrelation));
-                if (m_sysData.logData.bVerticalGaussianFit == true) w.Write("{0, 16}", String.Format("{0:#0.000}", m_sysData.profData[1].m_fCorrelation));
-                if (m_sysData.logData.bHorizontalGaussianWidthLevel1 == true) w.Write("{0, 16}", m_sysData.profData[0].strGaussWidth[0]);
-                if (m_sysData.logData.bHorizontalGaussianWidthLevel2 == true) w.Write("{0, 16}", m_sysData.profData[0].strGaussWidth[1]);
-                if (m_sysData.logData.bHorizontalGaussianWidthLevel3 == true) w.Write("{0, 16}", m_sysData.profData[0].strGaussWidth[2]);
-                if (m_sysData.logData.bVerticalGaussianWidthLevel1 == true) w.Write("{0, 16}", m_sysData.profData[1].strGaussWidth[0]);
-                if (m_sysData.logData.bVerticalGaussianWidthLevel2 == true) w.Write("{0, 16}", m_sysData.profData[1].strGaussWidth[1]);
-                if (m_sysData.logData.bVerticalGaussianWidthLevel3 == true) w.Write("{0, 16}", m_sysData.profData[1].strGaussWidth[2]);
+                if (m_sysData.logData.bHorizontalGaussianFit == true) w.Write("{0, 16}", String.Format("{0:#0.000}", m_sysData.HorizontalProfile.m_fCorrelation));
+                if (m_sysData.logData.bVerticalGaussianFit == true) w.Write("{0, 16}", String.Format("{0:#0.000}", m_sysData.VerticalProfile.m_fCorrelation));
+                if (m_sysData.logData.bHorizontalGaussianWidthLevel1 == true) w.Write("{0, 16}", m_sysData.HorizontalProfile.strGaussWidth[0]);
+                if (m_sysData.logData.bHorizontalGaussianWidthLevel2 == true) w.Write("{0, 16}", m_sysData.HorizontalProfile.strGaussWidth[1]);
+                if (m_sysData.logData.bHorizontalGaussianWidthLevel3 == true) w.Write("{0, 16}", m_sysData.HorizontalProfile.strGaussWidth[2]);
+                if (m_sysData.logData.bVerticalGaussianWidthLevel1 == true) w.Write("{0, 16}", m_sysData.VerticalProfile.strGaussWidth[0]);
+                if (m_sysData.logData.bVerticalGaussianWidthLevel2 == true) w.Write("{0, 16}", m_sysData.VerticalProfile.strGaussWidth[1]);
+                if (m_sysData.logData.bVerticalGaussianWidthLevel3 == true) w.Write("{0, 16}", m_sysData.VerticalProfile.strGaussWidth[2]);
 
                 w.WriteLine();
 
@@ -1794,7 +1794,7 @@ namespace BeamOn_2K
 
             using (StreamWriter sw = File.CreateText(m_sysData.logData.strFileName))
             {
-                sw.WriteLine("*** " + m_sysData.applicationData.ProductName + " Measurement system, Version " + m_sysData.applicationData.ProductVersion + (m_sysData.m_bDemo ? " Demo Version" : "") + " ***");
+                sw.WriteLine("*** " + m_sysData.applicationData.ProductName + " Measurement system, Version " + m_sysData.applicationData.ProductVersion + (m_sysData.Demo ? " Demo Version" : "") + " ***");
                 sw.WriteLine();
 
                 sw.WriteLine("File:  " + fi.Name.ToString());
@@ -1822,7 +1822,7 @@ namespace BeamOn_2K
                 //}
                 //sw.WriteLine();
 
-                sw.Write("Average: " + ((m_sysData.bAverageOn == true) ? m_sysData.iAverage.ToString() : "OFF"));
+                sw.Write("Average: " + ((m_sysData.AverageOn == true) ? m_sysData.Average.ToString() : "OFF"));
                 sw.WriteLine();
 
                 sw.WriteLine("Wavelength: " + m_sysData.powerData.uiWavelenght.ToString() + " (nm)");
@@ -1831,9 +1831,9 @@ namespace BeamOn_2K
                 sw.WriteLine("HeadTilt: " + m_sysData.positionData.iHeadTilt.ToString() + " (grad)");
                 sw.WriteLine();
 
-                sw.WriteLine("Level I: " + String.Format("{0:F1}", m_sysData.ldLevels.Level(0)) + "%");
-                sw.WriteLine("Level II: " + String.Format("{0:F1}", m_sysData.ldLevels.Level(1)) + "%");
-                sw.WriteLine("Level III: " + String.Format("{0:F1}", m_sysData.ldLevels.Level(2)) + "%");
+                sw.WriteLine("Level I: " + String.Format("{0:F1}", m_sysData.ClipLevels.Level(0)) + "%");
+                sw.WriteLine("Level II: " + String.Format("{0:F1}", m_sysData.ClipLevels.Level(1)) + "%");
+                sw.WriteLine("Level III: " + String.Format("{0:F1}", m_sysData.ClipLevels.Level(2)) + "%");
 
                 sw.Write("Null: " + ((m_sysData.powerData.bIndOffset == true) ? "Yes" : "No"));
 
@@ -2024,12 +2024,12 @@ namespace BeamOn_2K
             if (m_sysData.logData.bPower == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), PowerData.GetValueStringFormat(m_sysData.powerData.mwPower, 0));//, m_sysData.powerData.PowerUnits));
             if (m_sysData.logData.bPositionX == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.positionData.strPositionX);
             if (m_sysData.logData.bPositionY == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.positionData.strPositionY);
-            if (m_sysData.logData.bHorizontalProfileWidthLevel1 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[0].strWidth[0]);
-            if (m_sysData.logData.bHorizontalProfileWidthLevel2 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[0].strWidth[1]);
-            if (m_sysData.logData.bHorizontalProfileWidthLevel3 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[0].strWidth[2]);
-            if (m_sysData.logData.bVerticalProfileWidthLevel1 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[1].strWidth[0]);
-            if (m_sysData.logData.bVerticalProfileWidthLevel2 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[1].strWidth[1]);
-            if (m_sysData.logData.bVerticalProfileWidthLevel3 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[1].strWidth[2]);
+            if (m_sysData.logData.bHorizontalProfileWidthLevel1 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.HorizontalProfile.strWidth[0]);
+            if (m_sysData.logData.bHorizontalProfileWidthLevel2 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.HorizontalProfile.strWidth[1]);
+            if (m_sysData.logData.bHorizontalProfileWidthLevel3 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.HorizontalProfile.strWidth[2]);
+            if (m_sysData.logData.bVerticalProfileWidthLevel1 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.VerticalProfile.strWidth[0]);
+            if (m_sysData.logData.bVerticalProfileWidthLevel2 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.VerticalProfile.strWidth[1]);
+            if (m_sysData.logData.bVerticalProfileWidthLevel3 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.VerticalProfile.strWidth[2]);
 
             if (m_sysData.logData.bMajor == true)
             {
@@ -2054,14 +2054,14 @@ namespace BeamOn_2K
                     m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), "-----");
             }
 
-            if (m_sysData.logData.bHorizontalGaussianFit == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), String.Format("{0:#0.000}", m_sysData.profData[0].m_fCorrelation));
-            if (m_sysData.logData.bVerticalGaussianFit == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), String.Format("{0:#0.000}", m_sysData.profData[1].m_fCorrelation));
-            if (m_sysData.logData.bHorizontalGaussianWidthLevel1 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[0].strGaussWidth[0]);
-            if (m_sysData.logData.bHorizontalGaussianWidthLevel2 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[0].strGaussWidth[1]);
-            if (m_sysData.logData.bHorizontalGaussianWidthLevel3 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[0].strGaussWidth[2]);
-            if (m_sysData.logData.bVerticalGaussianWidthLevel1 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[1].strGaussWidth[0]);
-            if (m_sysData.logData.bVerticalGaussianWidthLevel2 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[1].strGaussWidth[1]);
-            if (m_sysData.logData.bVerticalGaussianWidthLevel3 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.profData[1].strGaussWidth[2]);
+            if (m_sysData.logData.bHorizontalGaussianFit == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), String.Format("{0:#0.000}", m_sysData.HorizontalProfile.m_fCorrelation));
+            if (m_sysData.logData.bVerticalGaussianFit == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), String.Format("{0:#0.000}", m_sysData.VerticalProfile.m_fCorrelation));
+            if (m_sysData.logData.bHorizontalGaussianWidthLevel1 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.HorizontalProfile.strGaussWidth[0]);
+            if (m_sysData.logData.bHorizontalGaussianWidthLevel2 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.HorizontalProfile.strGaussWidth[1]);
+            if (m_sysData.logData.bHorizontalGaussianWidthLevel3 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.HorizontalProfile.strGaussWidth[2]);
+            if (m_sysData.logData.bVerticalGaussianWidthLevel1 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.VerticalProfile.strGaussWidth[0]);
+            if (m_sysData.logData.bVerticalGaussianWidthLevel2 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.VerticalProfile.strGaussWidth[1]);
+            if (m_sysData.logData.bVerticalGaussianWidthLevel3 == true) m_de.SetData(Convert.ToChar(++cColumnLeter) + m_uiCurrentRowNumber.ToString(), m_sysData.VerticalProfile.strGaussWidth[2]);
 
             m_uiCurrentRowNumber++;
         }
@@ -2087,7 +2087,7 @@ namespace BeamOn_2K
             m_de.GetWorksheets();
             m_de.GetWorksheet();
 
-            m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "*** " + m_sysData.applicationData.ProductName + " Measurement system, Version " + m_sysData.applicationData.ProductVersion + (m_sysData.m_bDemo ? " Demo Version" : "") + " ***");
+            m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "*** " + m_sysData.applicationData.ProductName + " Measurement system, Version " + m_sysData.applicationData.ProductVersion + (m_sysData.Demo ? " Demo Version" : "") + " ***");
             m_uiCurrentRowNumber++;
             m_uiCurrentRowNumber++;
             m_uiCurrentRowNumber++;
@@ -2119,9 +2119,9 @@ namespace BeamOn_2K
             m_uiCurrentRowNumber++;
 
             m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "Average:");
-            if (m_sysData.bAverageOn == true)
+            if (m_sysData.AverageOn == true)
             {
-                m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), m_sysData.iAverage.ToString());
+                m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), m_sysData.Average.ToString());
             }
             else
             {
@@ -2141,13 +2141,13 @@ namespace BeamOn_2K
             m_uiCurrentRowNumber++;
 
             m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "Level I:");
-            m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), String.Format("{0:F1}", m_sysData.ldLevels.Level(0)) + "%");
+            m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), String.Format("{0:F1}", m_sysData.ClipLevels.Level(0)) + "%");
             m_uiCurrentRowNumber++;
             m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "Level II:");
-            m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), String.Format("{0:F1}", m_sysData.ldLevels.Level(1)) + "%");
+            m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), String.Format("{0:F1}", m_sysData.ClipLevels.Level(1)) + "%");
             m_uiCurrentRowNumber++;
             m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "Level III:");
-            m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), String.Format("{0:F1}", m_sysData.ldLevels.Level(2)) + "%");
+            m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), String.Format("{0:F1}", m_sysData.ClipLevels.Level(2)) + "%");
             m_uiCurrentRowNumber++;
             m_uiCurrentRowNumber++;
 
@@ -2341,14 +2341,14 @@ namespace BeamOn_2K
 
             for (int i = 0; i < m_lsWidthV.Length; i++)
             {
-                m_lsWidthV[i].AddData(m_sysData.profData[0].Width[i]);
-                m_lsWidthW[i].AddData(m_sysData.profData[1].Width[i]);
-                m_lsGaussWidthV[i].AddData(m_sysData.profData[0].GaussWidth[i]);
-                m_lsGaussWidthW[i].AddData(m_sysData.profData[1].GaussWidth[i]);
+                m_lsWidthV[i].AddData(m_sysData.HorizontalProfile.Width[i]);
+                m_lsWidthW[i].AddData(m_sysData.VerticalProfile.Width[i]);
+                m_lsGaussWidthV[i].AddData(m_sysData.HorizontalProfile.GaussWidth[i]);
+                m_lsGaussWidthW[i].AddData(m_sysData.VerticalProfile.GaussWidth[i]);
             }
 
-            m_lsCorrelationV.AddData(m_sysData.profData[0].m_fCorrelation);
-            m_lsCorrelationW.AddData(m_sysData.profData[1].m_fCorrelation);
+            m_lsCorrelationV.AddData(m_sysData.HorizontalProfile.m_fCorrelation);
+            m_lsCorrelationW.AddData(m_sysData.VerticalProfile.m_fCorrelation);
         }
 
         public UInt64 NumMeasure
@@ -2372,8 +2372,8 @@ namespace BeamOn_2K
         LogDataSample m_LogData = null;
         SystemData m_sysData = SystemData.MyInstance;
 
-        Double m_dStartTime = 0;
-        Double m_dLastTime = 0;
+        long m_dStartTime = 0;
+        long m_dLastTime = 0;
 
         public FileLogData()
         {
@@ -2428,8 +2428,8 @@ namespace BeamOn_2K
                     m_dLastTime = m_dStartTime;
                 }
 
-                dDuration = m_sysData.logData.LastMeasureTime - m_dStartTime;
-                dInterval = m_sysData.logData.LastMeasureTime - m_dLastTime;
+                dDuration = (m_sysData.logData.LastMeasureTime - m_dStartTime) / 1000000000f;
+                dInterval = (m_sysData.logData.LastMeasureTime - m_dLastTime) / 1000000000f;
 
                 if (((m_sysData.logData.ltMode == LogType.ltTime) && ((m_sysData.logData.LogInterval <= dInterval) || (m_LogData.NumMeasure == 0))) ||
                     (m_sysData.logData.ltMode == LogType.ltPoints) || (m_sysData.logData.ltMode == LogType.ltManual))

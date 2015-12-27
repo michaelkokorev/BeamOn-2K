@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Xml;
 
 namespace BeamOn_2K
 {
@@ -38,6 +40,7 @@ namespace BeamOn_2K
         private delegate void AsyncChangePalette(ColorPalette cpValue, PixelFormat pixelFormat, System.Drawing.Color[] color);
         private delegate void AsyncTimeStamp(Int64 iValue);
         private delegate void AddItemAsyncDelegate();
+        private delegate void CloseLogAsyncDelegate();
 
         private delegate void SetEndLogCallback();
 
@@ -57,14 +60,7 @@ namespace BeamOn_2K
         StringFormat m_strfrm = new StringFormat();
         Pen m_PenGrid = new Pen(System.Drawing.Color.DarkGray, 0.1f);
 
-        Pen m_PenClipLevel1 = new Pen(System.Drawing.Color.Red, 0.1f);
-        Pen m_PenClipLevel2 = new Pen(System.Drawing.Color.Blue, 0.1f);
-        Pen m_PenClipLevel3 = new Pen(System.Drawing.Color.Yellow, 0.1f);
-
         public enum DrawOrientation { doHorizontal, doVertical };
-        Boolean m_bScaleProfile = false;
-        Boolean m_bGaussian = false;
-        Boolean m_bMeasure = false;
 
         public const UInt16 DELTA = 1;
         private int iLevelSelected = -1;
@@ -92,6 +88,7 @@ namespace BeamOn_2K
         FileLogData m_fldLog = null;
 
         Byte m_SystemMessage = 0;
+        Form3DProjection m_frm3D = null;
 
         public FormMain(String strArgument)
         {
@@ -101,47 +98,16 @@ namespace BeamOn_2K
             {
                 if (strArgument.Length >= 6)
                 {
-                    m_sysData.m_bCalibr = ((strArgument.Substring(0, 6)).ToUpper() == "CALIBR");
+                    m_sysData.Calibr = ((strArgument.Substring(0, 6)).ToUpper() == "CALIBR");
                 }
                 else if (strArgument.Length >= 5)
                 {
-                    m_sysData.m_bDebug = ((strArgument.Substring(0, 5)).ToUpper() == "DEBUG");
+                    m_sysData.Debug = ((strArgument.Substring(0, 5)).ToUpper() == "DEBUG");
                 }
             }
 
             printDialog.PrinterSettings.FromPage = 1;
             printDialog.PrinterSettings.ToPage = printDialog.PrinterSettings.MaximumPage;
-
-            string strProgramDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-            string strProgramFilePath = Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles);
-            string strPath = Directory.GetCurrentDirectory().Substring(strProgramFilePath.Length + 1);
-
-            string strNewPath;
-            string strCompanyName = "";
-
-            object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
-
-            if (attributes.Length != 0)
-            {
-                strCompanyName = ((AssemblyCompanyAttribute)attributes[0]).Company;
-                int pos = strCompanyName.IndexOf("Ltd");
-                if (pos > -1) strCompanyName = strCompanyName.Substring(0, pos);
-
-                strNewPath = Path.Combine(strProgramDataPath, strCompanyName, strPath);
-            }
-            else
-                strNewPath = Path.Combine(strProgramDataPath, strPath);
-
-
-           m_sysData.applicationData.m_strMyAppDir = Application.StartupPath;
-
-           m_sysData.applicationData.m_strMyCurrentDir = strNewPath;
-
-           m_sysData.applicationData.m_strMyDataDir = strNewPath + "\\Data";
-           if (Directory.Exists(m_sysData.applicationData.m_strMyDataDir) == false) Directory.CreateDirectory(m_sysData.applicationData.m_strMyDataDir);
-
-           m_sysData.applicationData.m_strMyTempDir = strNewPath + "\\Temp";
-           if (Directory.Exists(m_sysData.applicationData.m_strMyTempDir) == false) Directory.CreateDirectory(m_sysData.applicationData.m_strMyTempDir);
 
             bm = new BeamOnCL.BeamOnCL();
             bm.OnImageReceved += new BeamOnCL.BeamOnCL.ImageReceved(bm_OnImageReceved);
@@ -149,6 +115,15 @@ namespace BeamOn_2K
 
         void bm_OnImageReceved(object sender, BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e)
         {
+            //if (InvokeRequired)
+            //{
+            //    // If called from a different thread, we must use the Invoke method to marshal the call to the proper GUI thread.
+            //    // The grab result will be disposed after the event call. Clone the event arguments for marshaling to the GUI thread. 
+            //    BeginInvoke(new EventHandler<BeamOnCL.MeasureCamera.NewDataRecevedEventArgs>(bm_OnImageReceved), sender, e.Clone());
+            //    return;
+            //}
+            //BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e = ee.Clone();
+
             BitmapData bmpData = null;
 
             if (m_bmp != null)
@@ -167,7 +142,12 @@ namespace BeamOn_2K
 
                         m_bmp.UnlockBits(bmpData);
 
-                        if (m_bMeasure == true)
+                        if (m_frm3D != null)
+                        {
+                            m_frm3D.ImageData = e.Snapshot;
+                        }
+
+                        if (m_sysData.Measure == true)
                         {
                             bm.GetMeasure(e.Snapshot);
 
@@ -181,47 +161,57 @@ namespace BeamOn_2K
                             m_profileHorizontal = new BeamOnCL.Profile(bm.profileHorizontal);
                             m_profileVertical = new BeamOnCL.Profile(bm.profileVertical);
 
-                            for (int i = 0; i < m_sysData.ldLevels.NumberLevels; i++)
+                            for (int i = 0; i < m_sysData.ClipLevels.NumberLevels; i++)
                             {
-                                m_sysData.profData[0].SetWidthProfile(i, m_profileHorizontal.GetWidth(Decimal.ToSingle(m_sysData.ldLevels.Level(i))));
-                                m_sysData.profData[1].SetWidthProfile(i, m_profileVertical.GetWidth(Decimal.ToSingle(m_sysData.ldLevels.Level(i))));
+                                m_sysData.HorizontalProfile.SetWidthProfile(i, m_profileHorizontal.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
+                                m_sysData.VerticalProfile.SetWidthProfile(i, m_profileVertical.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
                             }
 
-                            if (m_bGaussian == true)
+                            if (m_sysData.ViewGaussian == true)
                             {
-                                for (int i = 0; i < m_sysData.ldLevels.NumberLevels; i++)
+                                for (int i = 0; i < m_sysData.ClipLevels.NumberLevels; i++)
                                 {
-                                    m_sysData.profData[0].SetWidthGauss(i, m_profileHorizontal.GaussianData.GetWidth(Decimal.ToSingle(m_sysData.ldLevels.Level(i))));
-                                    m_sysData.profData[1].SetWidthGauss(i, m_profileVertical.GaussianData.GetWidth(Decimal.ToSingle(m_sysData.ldLevels.Level(i))));
+                                    m_sysData.HorizontalProfile.SetWidthGauss(i, m_profileHorizontal.GaussianData.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
+                                    m_sysData.VerticalProfile.SetWidthGauss(i, m_profileVertical.GaussianData.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
                                 }
 
-                                m_sysData.profData[0].m_fCorrelation = m_profileHorizontal.GaussianData.Correlation;
-                                m_sysData.profData[1].m_fCorrelation = m_profileVertical.GaussianData.Correlation;
+                                m_sysData.HorizontalProfile.m_fCorrelation = m_profileHorizontal.GaussianData.Correlation;
+                                m_sysData.VerticalProfile.m_fCorrelation = m_profileVertical.GaussianData.Correlation;
                             }
 
-                            if ((m_fldLog != null) && (m_fldLog.IsOpen() == true)) m_fldLog.AddData();
+                            if ((m_fldLog != null) && (m_fldLog.IsOpen() == true))
+                            {
+                                m_sysData.logData.LastMeasureTime = e.Timestamp;
+                                m_fldLog.AddData();
+                            }
                         }
                     }
                     catch { }
+                    finally
+                    {
+                        // Dispose the DataReceved result if needed for returning it to the grab loop.
+                        e.DisposeDataRecevedIfClone();
+                    }
                 }
             }
 
-            Thread.Sleep(0);
+            //Thread.Sleep(0);
 
             m_sw.Stop();
 
             AsyncTimeStamp asyncTimeStamp = new AsyncTimeStamp(UpdateVisibleAsync);
             asyncTimeStamp.BeginInvoke(m_sw.ElapsedMilliseconds, null, null);
 
+            System.Threading.Thread.Sleep(100);
+
             m_sw = Stopwatch.StartNew();
             m_sw.Start();
-
-            this.Invalidate();
-            dataSplitContainer.Panel2.Invalidate();
-            //            pictureBoxImage.Invalidate();
-            pictureBoxData.Invalidate();
-
-            System.Threading.Thread.Sleep(10);
+            /*
+                        this.Invalidate();
+                        dataSplitContainer.Panel2.Invalidate();
+                        //            pictureBoxImage.Invalidate();
+                        pictureBoxData.Invalidate();
+            */
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -241,7 +231,23 @@ namespace BeamOn_2K
 
         private void toolBarToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            mainToolStrip.Visible = !toolBarToolStripMenuItem.Checked;
+            m_sysData.applicationData.bViewToolbar = toolBarToolStripMenuItem.Checked;
+
+            ViewToolStrip(m_sysData.applicationData.bViewToolbar);
+        }
+
+        private void ViewToolStrip(Boolean bValue)
+        {
+            mainToolStrip.Visible = bValue;
+            toolBarToolStripMenuItem.Checked = bValue;
+
+            if (m_sysData.applicationData.m_FormErrorMessage != null)
+            {
+                if (bValue == true)
+                    m_sysData.applicationData.m_FormErrorMessage.Hide();
+                else
+                    m_sysData.applicationData.m_FormErrorMessage.Show();
+            }
         }
 
         private void statusBarToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
@@ -305,10 +311,10 @@ namespace BeamOn_2K
 
                 iLevelCurrent = -1;
 
-                for (int i = 0; i < m_sysData.ldLevels.NumberLevels; i++)
+                for (int i = 0; i < m_sysData.ClipLevels.NumberLevels; i++)
                 {
-                    iLevelHorizontal = iHeight - (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ldLevels.Level(i)) / 100f) - iShiftY;
-                    iLevelVertical = (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ldLevels.Level(i)) / 100f - iShiftX);
+                    iLevelHorizontal = iHeight - (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ClipLevels.Level(i)) / 100f) - iShiftY;
+                    iLevelVertical = (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ClipLevels.Level(i)) / 100f - iShiftX);
 
                     if ((Math.Abs(e.Y - iLevelHorizontal) < DELTA) || (Math.Abs(e.X - iLevelVertical) < DELTA))
                     {
@@ -332,23 +338,23 @@ namespace BeamOn_2K
             m_sysData.applicationData.bViewToolbar = true;
 
             //Profile
-            m_sysData.ldLevels.SetLevel(0, 13.5M);
-            m_sysData.ldLevels.SetLevel(1, 50M);
-            m_sysData.ldLevels.SetLevel(2, 80M);
+            m_sysData.ClipLevels.SetLevel(0, 13.5M);
+            m_sysData.ClipLevels.SetLevel(1, 50M);
+            m_sysData.ClipLevels.SetLevel(2, 80M);
         }
 
         private void SetClipLevel(int iIndex, float fValue)
         {
-            float fTopLevel = (iIndex < (m_sysData.ldLevels.NumberLevels - 1)) ? Decimal.ToSingle(m_sysData.ldLevels.Level(iIndex + 1)) - 0.5f : 99.5f;
-            float fBottomLevel = (iIndex > 0) ? Decimal.ToSingle(m_sysData.ldLevels.Level(iIndex - 1)) + 0.5f : 0.5f;
+            float fTopLevel = (iIndex < (m_sysData.ClipLevels.NumberLevels - 1)) ? Decimal.ToSingle(m_sysData.ClipLevels.Level(iIndex + 1)) - 0.5f : 99.5f;
+            float fBottomLevel = (iIndex > 0) ? Decimal.ToSingle(m_sysData.ClipLevels.Level(iIndex - 1)) + 0.5f : 0.5f;
             float fDelta = fTopLevel - fBottomLevel;
 
-            m_sysData.ldLevels.SetLevel(iIndex, Convert.ToDecimal(((fValue >= fBottomLevel) && (fValue <= fTopLevel)) ? fValue : (fValue < fBottomLevel) ? fBottomLevel : fTopLevel));
+            m_sysData.ClipLevels.SetLevel(iIndex, Convert.ToDecimal(((fValue >= fBottomLevel) && (fValue <= fTopLevel)) ? fValue : (fValue < fBottomLevel) ? fBottomLevel : fTopLevel));
         }
 
         public void ChangeStatusLabel()
         {
-            toolStripStatuslblClip.Text = "Clip Level: " + m_sysData.ldLevels.Level(0) + "%";
+            toolStripStatuslblClip.Text = "Clip Level: " + m_sysData.ClipLevels.Level(0) + "%";
         }
 
         void pictureBoxData_MouseDown(object sender, MouseEventArgs e)
@@ -395,7 +401,7 @@ namespace BeamOn_2K
         {
             Graphics grfx = e.Graphics;
 
-            if (m_bMeasure == true)
+            if (m_sysData.Measure == true)
             {
                 Point OldPoint = new Point((int)bm.PixelCentroid.X - 20, (int)bm.PixelCentroid.Y - 20);
                 Point NewPoint = new Point((int)bm.PixelCentroid.X + 20, (int)bm.PixelCentroid.Y + 20);
@@ -432,16 +438,16 @@ namespace BeamOn_2K
                 int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
 
                 grfx.DrawString("Horizontal Profile", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 100 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ldLevels.Level(2))) + "%" + " Width: " + m_sysData.profData[0].strWidth[2] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 80 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ldLevels.Level(1))) + "%" + " Width: " + m_sysData.profData[0].strWidth[1] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 60 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ldLevels.Level(0))) + "%" + " Width: " + m_sysData.profData[0].strWidth[0] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 40 - iShiftY), m_strfrm);
-                if (m_bGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_sysData.profData[0].m_fCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 20 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(2))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[2] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 80 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(1))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[1] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 60 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(0))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[0] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 40 - iShiftY), m_strfrm);
+                if (m_sysData.ViewGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_sysData.HorizontalProfile.m_fCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 20 - iShiftY), m_strfrm);
 
                 grfx.DrawString("Vertical Profile", myFont, PaletteBrush, new PointF(20 - iShiftX, 20 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ldLevels.Level(2))) + "%" + " Width: " + m_sysData.profData[1].strWidth[2] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 40 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ldLevels.Level(1))) + "%" + " Width: " + m_sysData.profData[1].strWidth[1] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 60 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ldLevels.Level(0))) + "%" + " Width: " + m_sysData.profData[1].strWidth[0] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 80 - iShiftY), m_strfrm);
-                if (m_bGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_sysData.profData[1].m_fCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, 100 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(2))) + "%" + " Width: " + m_sysData.VerticalProfile.strWidth[2] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 40 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(1))) + "%" + " Width: " + m_sysData.VerticalProfile.strWidth[1] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 60 - iShiftY), m_strfrm);
+                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(0))) + "%" + " Width: " + m_sysData.VerticalProfile.strWidth[0] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 80 - iShiftY), m_strfrm);
+                if (m_sysData.ViewGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_sysData.VerticalProfile.m_fCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, 100 - iShiftY), m_strfrm);
             }
         }
 
@@ -458,7 +464,7 @@ namespace BeamOn_2K
 
             if (dataProfile != null)
             {
-                Double MaxProfile = (m_bScaleProfile == true) ? dataProfile.MaxProfile : ((bm.pixelFormat == PixelFormat.Format8bppIndexed) ? (UInt16)255 : (UInt16)4095);
+                Double MaxProfile = (m_sysData.ScaleProfile == true) ? dataProfile.MaxProfile : ((bm.pixelFormat == PixelFormat.Format8bppIndexed) ? (UInt16)255 : (UInt16)4095);
                 Double fCoeffAmpl = (MaxProfile > 0) ? iHeightProfile / MaxProfile : 0;
                 Double fCoeffStep = 0;
 
@@ -474,7 +480,7 @@ namespace BeamOn_2K
                     }
 
                     OldPoint = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftY);
-                    if (m_bGaussian == true) OldPointGaussian = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftY);
+                    if (m_sysData.ViewGaussian == true) OldPointGaussian = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftY);
 
                     for (int i = 1; i < dataProfile.DataProfile.Length; i++)
                     {
@@ -482,7 +488,7 @@ namespace BeamOn_2K
                         grfx.DrawLine(pen, OldPoint, NewPoint);
                         OldPoint = NewPoint;
 
-                        if (m_bGaussian == true)
+                        if (m_sysData.ViewGaussian == true)
                         {
                             NewPointGaussian = new Point((int)Math.Ceiling(i * fCoeffStep), iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[i] * fCoeffAmpl) - iShiftY);
                             grfx.DrawLine(m_PenGaussian, OldPointGaussian, NewPointGaussian);
@@ -490,17 +496,17 @@ namespace BeamOn_2K
                         }
                     }
 
-                    if (m_bScaleProfile == true)
+                    if (m_sysData.ScaleProfile == true)
                     {
-                        int iLineLevel1 = iHeight - (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ldLevels.Level(0)) / 100f) - iShiftY;
-                        int iLineLevel2 = iHeight - (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ldLevels.Level(1)) / 100f) - iShiftY;
-                        int iLineLevel3 = iHeight - (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ldLevels.Level(2)) / 100f) - iShiftY;
+                        int iLineLevel1 = iHeight - (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ClipLevels.Level(0)) / 100f) - iShiftY;
+                        int iLineLevel2 = iHeight - (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ClipLevels.Level(1)) / 100f) - iShiftY;
+                        int iLineLevel3 = iHeight - (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ClipLevels.Level(2)) / 100f) - iShiftY;
 
                         for (int i = 0; i < pictureBoxData.Width; i += 6)
                         {
-                            grfx.DrawLine(m_PenClipLevel1, i, iLineLevel1, i + 3, iLineLevel1);
-                            grfx.DrawLine(m_PenClipLevel2, i, iLineLevel2, i + 3, iLineLevel2);
-                            grfx.DrawLine(m_PenClipLevel3, i, iLineLevel3, i + 3, iLineLevel3);
+                            grfx.DrawLine(m_sysData.ClipLevels.LevelPen(0), i, iLineLevel1, i + 3, iLineLevel1);
+                            grfx.DrawLine(m_sysData.ClipLevels.LevelPen(1), i, iLineLevel2, i + 3, iLineLevel2);
+                            grfx.DrawLine(m_sysData.ClipLevels.LevelPen(2), i, iLineLevel3, i + 3, iLineLevel3);
                         }
                     }
                 }
@@ -511,7 +517,7 @@ namespace BeamOn_2K
                     int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
 
                     OldPoint = new Point((int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftX, 0);
-                    if (m_bGaussian == true) OldPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftX, 0);
+                    if (m_sysData.ViewGaussian == true) OldPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftX, 0);
 
                     for (int i = 1; i < dataProfile.DataProfile.Length; i++)
                     {
@@ -519,7 +525,7 @@ namespace BeamOn_2K
                         grfx.DrawLine(pen, OldPoint, NewPoint);
                         OldPoint = NewPoint;
 
-                        if (m_bGaussian == true)
+                        if (m_sysData.ViewGaussian == true)
                         {
                             NewPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[i] * fCoeffAmpl) - iShiftX, (int)Math.Ceiling(i * fCoeffStep));
                             grfx.DrawLine(m_PenGaussian, OldPointGaussian, NewPointGaussian);
@@ -527,17 +533,17 @@ namespace BeamOn_2K
                         }
                     }
 
-                    if (m_bScaleProfile == true)
+                    if (m_sysData.ScaleProfile == true)
                     {
-                        int iLineLevel1 = (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ldLevels.Level(0)) / 100f - iShiftX);
-                        int iLineLevel2 = (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ldLevels.Level(1)) / 100f - iShiftX);
-                        int iLineLevel3 = (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ldLevels.Level(2)) / 100f - iShiftX);
+                        int iLineLevel1 = (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ClipLevels.Level(0)) / 100f - iShiftX);
+                        int iLineLevel2 = (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ClipLevels.Level(1)) / 100f - iShiftX);
+                        int iLineLevel3 = (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ClipLevels.Level(2)) / 100f - iShiftX);
 
                         for (int i = 0; i < pictureBoxData.Height; i += 6)
                         {
-                            grfx.DrawLine(m_PenClipLevel1, iLineLevel1, i, iLineLevel1, i + 3);
-                            grfx.DrawLine(m_PenClipLevel2, iLineLevel2, i, iLineLevel2, i + 3);
-                            grfx.DrawLine(m_PenClipLevel3, iLineLevel3, i, iLineLevel3, i + 3);
+                            grfx.DrawLine(m_sysData.ClipLevels.LevelPen(0), iLineLevel1, i, iLineLevel1, i + 3);
+                            grfx.DrawLine(m_sysData.ClipLevels.LevelPen(1), iLineLevel2, i, iLineLevel2, i + 3);
+                            grfx.DrawLine(m_sysData.ClipLevels.LevelPen(2), iLineLevel3, i, iLineLevel3, i + 3);
                         }
                     }
                 }
@@ -550,6 +556,10 @@ namespace BeamOn_2K
             {
                 this.Invoke((MethodInvoker)delegate
                 {
+                    this.Invalidate();
+                    dataSplitContainer.Panel2.Invalidate();
+                    //            pictureBoxImage.Invalidate();
+                    pictureBoxData.Invalidate();
                     toolStripStatusLabelTimeStamp.Text = (1000f / (double)Timestamp).ToString("#.000") + " fps";
                 });
             }
@@ -593,6 +603,8 @@ namespace BeamOn_2K
                         Color = color;
 
                     bm.pixelFormat = pixelFormat;
+
+                    if (m_frm3D != null) m_frm3D.SetColorPalette(color);
                 });
             }
             catch
@@ -602,6 +614,8 @@ namespace BeamOn_2K
 
         private void FormMain_Load(object sender, EventArgs e)
         {
+            m_sysData.DeserializeAppData(m_sysData.applicationData.m_strMyDataDir + "\\$$$.ini");
+
             m_sysData.applicationData.m_FormErrorMessage = new FormErrorMessage();
             m_sysData.applicationData.m_FormErrorMessage.Location = new Point(0, 0);
             m_sysData.applicationData.m_FormErrorMessage.ErrorMessage = ErrorStatus.BA_OK;
@@ -622,10 +636,9 @@ namespace BeamOn_2K
                 else
                     Color = picturePaletteImage.colorArray;
 
-                toolStripButtonPixelFormat.Checked = (picturePaletteImage.Format == PixelFormat.Format24bppRgb);
-                bitsPerPixel12ToolStripMenuItem.Checked = toolStripButtonPixelFormat.Checked;
-                bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
-                toolStripStatusLabelPixelFormat.Text = (toolStripButtonPixelFormat.Checked == true) ? "12 bpp" : "8 bpp";
+                bitsPerPixel8ToolStripMenuItem.Checked = (m_sysData.FormatPixel == PixelFormat.Format8bppIndexed);
+                bitsPerPixel12ToolStripMenuItem.Checked = !bitsPerPixel8ToolStripMenuItem.Checked;
+                toolStripStatusLabelPixelFormat.Text = (bitsPerPixel12ToolStripMenuItem.Checked == true) ? "12 bpp" : "8 bpp";
 
                 bm.pixelFormat = picturePaletteImage.Format;
 
@@ -655,19 +668,17 @@ namespace BeamOn_2K
                 labelExposureMin.Text = trackBarExposure.Minimum.ToString();
                 labelExposureMax.Text = trackBarExposure.Maximum.ToString();
 
-                measuringToolStripMenuItem.Checked = m_bMeasure;
+                measuringToolStripMenuItem.Checked = m_sysData.Measure;
 
                 scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
                 typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
                 sumProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
                 lineProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
-                tbLabelAngle.Enabled = measuringToolStripMenuItem.Checked && lineProfileToolStripButton.Checked;
-                numericUpDownAngle.Enabled = measuringToolStripMenuItem.Checked && lineProfileToolStripButton.Checked;
                 gaussianToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
 
-                groupBoxPosition.Enabled = m_bMeasure;
-                ProfileGroupBox.Enabled = m_bMeasure;
-                gaussGroupBox.Enabled = m_bMeasure && m_bGaussian;
+                groupBoxPosition.Enabled = m_sysData.Measure;
+                ProfileGroupBox.Enabled = m_sysData.Measure;
+                gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
 
                 dataSplitContainer.Panel1Collapsed = !propertyBoxToolStripMenuItem.Checked;
             }
@@ -687,6 +698,8 @@ namespace BeamOn_2K
 
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (m_sysData.applicationData.bSaveExit == true) m_sysData.SerializeAppData(m_sysData.applicationData.m_strMyDataDir + "\\$$$.ini");
+
             bm.Stop();
         }
 
@@ -721,29 +734,24 @@ namespace BeamOn_2K
 
         private void scaleProfileToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
-            m_bScaleProfile = scaleProfileToolStripMenuItem.Checked;
-        }
-
-        private void toolStripButtonPixelFormat_CheckedChanged(object sender, EventArgs e)
-        {
-            ToolStripButton tsb = (ToolStripButton)sender;
-
-            picturePaletteImage.Format = (tsb.Checked == true) ? PixelFormat.Format24bppRgb : PixelFormat.Format8bppIndexed;
-
-            toolStripButtonPixelFormat.Image = (picturePaletteImage.Format == PixelFormat.Format8bppIndexed) ? global::BeamOn_2K.Properties.Resources.black_12bit_mode : global::BeamOn_2K.Properties.Resources.black_8bit_mode;
-
-            bitsPerPixel12ToolStripMenuItem.Checked = toolStripButtonPixelFormat.Checked;
-            bitsPerPixel8ToolStripMenuItem.Checked = !toolStripButtonPixelFormat.Checked;
-
-            toolStripStatusLabelPixelFormat.Text = (toolStripButtonPixelFormat.Checked == true) ? "12 bpp" : "8 bpp";
-
+            m_sysData.ScaleProfile = scaleProfileToolStripMenuItem.Checked;
         }
 
         private void pixelFormatToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem tsb = (ToolStripMenuItem)sender;
 
-            toolStripButtonPixelFormat.Checked = ((tsb.Name.Contains("12") == true) && (picturePaletteImage.Format != PixelFormat.Format24bppRgb));
+            if (tsb.Name.Contains("12"))
+                bitsPerPixel8ToolStripMenuItem.Checked = !tsb.Checked;
+            else if (tsb.Name.Contains("8"))
+                bitsPerPixel12ToolStripMenuItem.Checked = !tsb.Checked;
+
+            if(bitsPerPixel12ToolStripMenuItem.Checked == true)
+                picturePaletteImage.Format = PixelFormat.Format24bppRgb;
+            else if (bitsPerPixel8ToolStripMenuItem.Checked == true)
+                picturePaletteImage.Format = PixelFormat.Format8bppIndexed;
+
+            toolStripStatusLabelPixelFormat.Text = (bitsPerPixel12ToolStripMenuItem.Checked == true) ? "12 bpp" : "8 bpp";
         }
 
         private void typeProfileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -758,50 +766,47 @@ namespace BeamOn_2K
 
             bm.typeProfile = (sumProfileToolStripMenuItem.Checked == true) ? BeamOnCL.BeamOnCL.TypeProfile.tpSum : BeamOnCL.BeamOnCL.TypeProfile.tpLIne;
             toolStripStatusLabelTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum) ? "Sum" : "Line";
-
-            tbLabelAngle.Enabled = lineProfileToolStripButton.Checked;
-            numericUpDownAngle.Enabled = lineProfileToolStripButton.Checked;
         }
 
         private void gaussianToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            m_bGaussian = gaussianToolStripMenuItem.Checked;
+            m_sysData.ViewGaussian = gaussianToolStripMenuItem.Checked;
 
-            gaussGroupBox.Enabled = m_bMeasure && m_bGaussian;
+            gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
         }
 
         private void dataSplitContainer_Panel2_Paint(object sender, PaintEventArgs e)
         {
-            if (m_bMeasure == true)
+            if (m_sysData.Measure == true)
             {
                 labelPositionXValue.Text = GetStringFormat(m_sysData.positionData.RealPosition.X);
                 labelPositionYValue.Text = GetStringFormat(m_sysData.positionData.RealPosition.Y);
 
-                labelHorizontalValue1.Text = m_sysData.profData[0].strWidth[0];
-                labelHorizontalValue2.Text = m_sysData.profData[0].strWidth[1];
-                labelHorizontalValue3.Text = m_sysData.profData[0].strWidth[2];
+                labelHorizontalValue1.Text = m_sysData.HorizontalProfile.strWidth[0];
+                labelHorizontalValue2.Text = m_sysData.HorizontalProfile.strWidth[1];
+                labelHorizontalValue3.Text = m_sysData.HorizontalProfile.strWidth[2];
 
-                labelVerticalValue1.Text = m_sysData.profData[1].strWidth[0];
-                labelVerticalValue2.Text = m_sysData.profData[1].strWidth[1];
-                labelVerticalValue3.Text = m_sysData.profData[1].strWidth[2];
+                labelVerticalValue1.Text = m_sysData.VerticalProfile.strWidth[0];
+                labelVerticalValue2.Text = m_sysData.VerticalProfile.strWidth[1];
+                labelVerticalValue3.Text = m_sysData.VerticalProfile.strWidth[2];
 
-                if (m_bGaussian == true)
+                if (m_sysData.ViewGaussian == true)
                 {
-                    labelGaussianHorizontalValue1.Text = m_sysData.profData[0].strGaussWidth[0];
-                    labelGaussianHorizontalValue2.Text = m_sysData.profData[0].strGaussWidth[1];
-                    labelGaussianHorizontalValue3.Text = m_sysData.profData[0].strGaussWidth[2];
+                    labelGaussianHorizontalValue1.Text = m_sysData.HorizontalProfile.strGaussWidth[0];
+                    labelGaussianHorizontalValue2.Text = m_sysData.HorizontalProfile.strGaussWidth[1];
+                    labelGaussianHorizontalValue3.Text = m_sysData.HorizontalProfile.strGaussWidth[2];
 
-                    labelGaussianVerticalValue1.Text = m_sysData.profData[1].strGaussWidth[0];
-                    labelGaussianVerticalValue2.Text = m_sysData.profData[1].strGaussWidth[1];
-                    labelGaussianVerticalValue3.Text = m_sysData.profData[1].strGaussWidth[2];
+                    labelGaussianVerticalValue1.Text = m_sysData.VerticalProfile.strGaussWidth[0];
+                    labelGaussianVerticalValue2.Text = m_sysData.VerticalProfile.strGaussWidth[1];
+                    labelGaussianVerticalValue3.Text = m_sysData.VerticalProfile.strGaussWidth[2];
 
-                    labelGaussianCorrelationHorizontalValue.Text = GetStringFormat((float)m_sysData.profData[0].m_fCorrelation);
-                    labelGaussianCorrelationVerticalValue.Text = GetStringFormat((float)m_sysData.profData[1].m_fCorrelation);
+                    labelGaussianCorrelationHorizontalValue.Text = GetStringFormat((float)m_sysData.HorizontalProfile.m_fCorrelation);
+                    labelGaussianCorrelationVerticalValue.Text = GetStringFormat((float)m_sysData.VerticalProfile.m_fCorrelation);
                 }
 
-                labelClipLevel3.Text = Decimal.ToSingle(m_sysData.ldLevels.Level(2)).ToString("F1") + "%";
-                labelClipLevel2.Text = Decimal.ToSingle(m_sysData.ldLevels.Level(1)).ToString("F1") + "%";
-                labelClipLevel1.Text = Decimal.ToSingle(m_sysData.ldLevels.Level(0)).ToString("F1") + "%";
+                labelClipLevel3.Text = Decimal.ToSingle(m_sysData.ClipLevels.Level(2)).ToString("F1") + "%";
+                labelClipLevel2.Text = Decimal.ToSingle(m_sysData.ClipLevels.Level(1)).ToString("F1") + "%";
+                labelClipLevel1.Text = Decimal.ToSingle(m_sysData.ClipLevels.Level(0)).ToString("F1") + "%";
 
                 labelGaussianClipLevel3.Text = labelClipLevel3.Text;
                 labelGaussianClipLevel2.Text = labelClipLevel2.Text;
@@ -1229,51 +1234,33 @@ namespace BeamOn_2K
         private void measuringToolStrip_Click(object sender, EventArgs e)
         {
             if (sender.GetType() == typeof(ToolStripButton))
-                m_bMeasure = ((ToolStripButton)sender).Checked;
+                m_sysData.Measure = ((ToolStripButton)sender).Checked;
             else if (sender.GetType() == typeof(ToolStripMenuItem))
-                m_bMeasure = ((ToolStripMenuItem)sender).Checked;
+                m_sysData.Measure = ((ToolStripMenuItem)sender).Checked;
 
-            measuringToolStripMenuItem.Checked = m_bMeasure;
-            measuringToolStripButton.Checked = m_bMeasure;
+            measuringToolStripMenuItem.Checked = m_sysData.Measure;
+            measuringToolStripButton.Checked = m_sysData.Measure;
 
-            groupBoxPosition.Enabled = m_bMeasure;
-            ProfileGroupBox.Enabled = m_bMeasure;
-            gaussGroupBox.Enabled = m_bMeasure && m_bGaussian;
+            groupBoxPosition.Enabled = m_sysData.Measure;
+            ProfileGroupBox.Enabled = m_sysData.Measure;
+            gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
 
             scaleProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
             typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
             sumProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
             lineProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
-            tbLabelAngle.Enabled = measuringToolStripMenuItem.Checked && lineProfileToolStripButton.Checked;
-            numericUpDownAngle.Enabled = measuringToolStripMenuItem.Checked && lineProfileToolStripButton.Checked;
 
             gaussianToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
+
+            tbOptionsSetupDataCollection.Enabled = measuringToolStripMenuItem.Checked;
+            mnuFileSetupDataCollection.Enabled = measuringToolStripMenuItem.Checked;
+            tbOptionsStartDataCollection.Checked = measuringToolStripMenuItem.Checked;
+            mnuFileStartDataCollection.Checked = measuringToolStripMenuItem.Checked;
         }
 
         private void measuringToolStrip_CheckedChanged(object sender, EventArgs e)
         {
             measuringToolStripButton.Checked = measuringToolStripMenuItem.Checked;
-        }
-
-        private void numericUpDownAngle_ValueChanged(object sender, EventArgs e)
-        {
-            AsyncChangeAngle asyncChangeAngle = new AsyncChangeAngle(UpdateAngleProfile);
-            asyncChangeAngle.BeginInvoke(Convert.ToDouble(numericUpDownAngle.Value), null, null);
-        }
-
-        private void UpdateAngleProfile(Double Angle)
-        {
-            try
-            {
-                this.Invoke((MethodInvoker)delegate
-                {
-                    bm.lineProfileAngle = Angle * Math.PI / 180f;
-                });
-
-            }
-            catch
-            {
-            }
         }
 
         private void mnuOptionsStartDataCollection_Click(object sender, EventArgs e)
@@ -1352,36 +1339,38 @@ namespace BeamOn_2K
 
         private void CloseLogFile()
         {
-            if (this.InvokeRequired)
+            try
             {
-                SetEndLogCallback d = new SetEndLogCallback(CloseLogFile);
-                this.Invoke(d, null);
+                this.Invoke((MethodInvoker)delegate
+                {
+                    this.mnuFileStartDataCollection.Checked = false;
+                    this.mnuFileStartDataCollection.Image = global::BeamOn_2K.Properties.Resources.Start;
+                    this.mnuFileStartDataCollection.Text = "Start Lo&g";
+                    this.mnuFileStartDataCollection.ToolTipText = "Start Log";
+
+                    this.tbOptionsStartDataCollection.ToolTipText = this.mnuFileStartDataCollection.ToolTipText;
+                    this.tbOptionsStartDataCollection.Image = this.mnuFileStartDataCollection.Image;
+                    this.tbOptionsStartDataCollection.Text = this.mnuFileStartDataCollection.Text;
+                    this.tbOptionsStartDataCollection.Checked = this.mnuFileStartDataCollection.Checked;
+
+                    this.mnuFileSetupDataCollection.Enabled = !this.mnuFileStartDataCollection.Checked;
+                    this.tbOptionsSetupDataCollection.Enabled = this.mnuFileSetupDataCollection.Enabled;
+
+                    m_SystemMessage = (Byte)(m_SystemMessage & (~(int)SystemStatus.M_SS_LOG));
+
+                    AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
+                    asyncSM.BeginInvoke(null, null);
+                });
             }
-            else
+            catch
             {
-                this.mnuFileStartDataCollection.Checked = false;
-                this.mnuFileStartDataCollection.Image = global::BeamOn_2K.Properties.Resources.Start;
-                this.mnuFileStartDataCollection.Text = "Start Lo&g";
-                this.mnuFileStartDataCollection.ToolTipText = "Start Log";
-
-                this.tbOptionsStartDataCollection.ToolTipText = this.mnuFileStartDataCollection.ToolTipText;
-                this.tbOptionsStartDataCollection.Image = this.mnuFileStartDataCollection.Image;
-                this.tbOptionsStartDataCollection.Text = this.mnuFileStartDataCollection.Text;
-                this.tbOptionsStartDataCollection.Checked = this.mnuFileStartDataCollection.Checked;
-
-                this.mnuFileSetupDataCollection.Enabled = !this.mnuFileStartDataCollection.Checked;
-                this.tbOptionsSetupDataCollection.Enabled = this.mnuFileSetupDataCollection.Enabled;
-
-                m_SystemMessage = (Byte)(m_SystemMessage & (~(int)SystemStatus.M_SS_LOG));
-
-                AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
-                asyncSM.BeginInvoke(null, null);
             }
         }
 
         void m_fldLog_OnStopLogFile(object sender, EventArgs e)
         {
-            this.CloseLogFile();
+            CloseLogAsyncDelegate asyncCloseLog = new CloseLogAsyncDelegate(CloseLogFile);
+            asyncCloseLog.BeginInvoke(null, null);
         }
 
         private void UpdateSystemMessage()
@@ -1419,6 +1408,43 @@ namespace BeamOn_2K
             {
                 mnuFileStartDataCollection.Enabled = true;
                 tbOptionsStartDataCollection.Enabled = mnuFileStartDataCollection.Enabled;
+            }
+        }
+
+        private void statusBarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mainStatusStrip.Visible = statusBarToolStripMenuItem.Checked;
+            m_sysData.applicationData.bViewStatusBar = statusBarToolStripMenuItem.Checked;
+        }
+
+        private void mnuOptionsSaveSettingsOnExit_Click(object sender, EventArgs e)
+        {
+            m_sysData.applicationData.bSaveExit = mnuOptionsSaveSettingsOnExit.Checked;
+        }
+
+        private void buttonCollapseProperty_Click(object sender, EventArgs e)
+        {
+            dataSplitContainer.Panel1Collapsed = !dataSplitContainer.Panel1Collapsed;
+            propertyBoxToolStripMenuItem.Checked = !dataSplitContainer.Panel1Collapsed;
+        }
+
+        private void tbViewProjection_Click(object sender, EventArgs e)
+        {
+            if (sender.GetType() == typeof(ToolStripButton))
+                projection3DToolStripMenuItem.Checked = tbViewProjection.Checked;
+            else if (sender.GetType() == typeof(ToolStripMenuItem))
+                tbViewProjection.Checked = projection3DToolStripMenuItem.Checked;
+
+            if (projection3DToolStripMenuItem.Checked == true)
+            {
+                m_frm3D = new Form3DProjection();
+                m_frm3D.SetColorPalette(picturePaletteImage.colorArray);
+                m_frm3D.Show(this);
+            }
+            else
+            {
+                if (m_frm3D != null) m_frm3D.Close();
+                m_frm3D = null;
             }
         }
     }

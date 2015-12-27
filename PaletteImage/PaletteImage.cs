@@ -168,19 +168,16 @@ namespace PaletteImage
         {
             int i;
 
+            for (i = 0; i < m_iLinePaletteUp; i++) m_colorReal[i] = m_color[(int)Math.Ceiling(i * 100 / m_sPaletteLevelUp)];
+            for (; i < m_color.Length; i++) m_colorReal[i] = m_color[m_color.Length - 1];
+
             if ((m_pixelFormat == PixelFormat.Format8bppIndexed) && (m_bmpPalette != null))
             {
                 ColorPalette pal = m_bmpPalette.Palette;
 
-                for (i = 0; i < m_iLinePaletteUp; i++) pal.Entries[i] = m_color[(int)Math.Ceiling(i * 100 / m_sPaletteLevelUp)];
-                for (; i < m_color.Length; i++) pal.Entries[i] = m_color[m_color.Length - 1];
+                for (i = 0; i < m_color.Length; i++) pal.Entries[i] = m_colorReal[i];
 
                 m_bmpPalette.Palette = pal;
-            }
-            else
-            {
-                for (i = 0; i < m_iLinePaletteUp; i++) m_colorReal[i] = m_color[(int)Math.Ceiling(i * 100 / m_sPaletteLevelUp)];
-                for (; i < m_color.Length; i++) m_colorReal[i] = m_color[m_color.Length - 1];
             }
 
             CreatePaletteImage();

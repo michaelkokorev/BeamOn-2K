@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BeamOnCL
 {
-    public class SnapshotBase
+    public class SnapshotBase : System.ICloneable
     {
         protected Rectangle m_rArea;
 
@@ -31,6 +31,20 @@ namespace BeamOnCL
         public SnapshotBase(Rectangle rArea)
         {
             m_rArea = rArea;
+        }
+
+        object ICloneable.Clone()
+        {
+            return this.Clone();
+        }
+
+        public virtual SnapshotBase Clone()
+        {
+            SnapshotBase snp = this.MemberwiseClone() as SnapshotBase;
+
+            snp.m_rArea = this.m_rArea;
+
+            return snp;
         }
 
         public Rectangle ImageRectangle

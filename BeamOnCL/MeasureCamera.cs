@@ -17,18 +17,66 @@ namespace BeamOnCL
         public delegate void ChangeStatusCamera(object sender, EventArgs e);
         public event ChangeStatusCamera OnChangeStatusCamera;
 
-        public class NewDataRecevedEventArgs : EventArgs
+        public class NewDataRecevedEventArgs : EventArgs, ICloneable
         {
             private SnapshotBase m_snapshot = null;
+            private long m_timeStamp = 0;
+            private bool m_bClone = false;
 
-            public NewDataRecevedEventArgs(SnapshotBase snapshot)
+            public NewDataRecevedEventArgs(SnapshotBase snapshot, long timeStamp)
             {
                 m_snapshot = snapshot;
+                m_timeStamp = timeStamp;
+            }
+
+            public long Timestamp
+            {
+                get { return m_timeStamp; }
             }
 
             public SnapshotBase Snapshot
             {
                 get { return m_snapshot; }
+            }
+
+            object ICloneable.Clone()
+            {
+                return this.Clone();
+            }
+
+            //
+            // Summary:
+            //     Indicates if the event arguments have been created by calling NewDataRecevedEventArgs.Clone().
+            public bool IsClone { get{return m_bClone;} }
+
+            // Summary:
+            //     Clones the event arguments including the Snapshot & Timestamp result.
+            //
+            // Returns:
+            //     Returns a copy of the event arguments with a clone of the contained Snapshot & Timestamp
+            //     result. The cloned Snapshot & Timestamp result must be disposed.
+            //
+            // Remarks:
+            //     The Snapshot & Timestamp result or the cloned event must be disposed.
+            public NewDataRecevedEventArgs Clone()
+            {
+                NewDataRecevedEventArgs ret = this.MemberwiseClone() as NewDataRecevedEventArgs; ;
+            
+                ret.m_snapshot = this.m_snapshot.Clone();
+
+                return ret;
+            }
+            //
+            // Summary:
+            //     Disposes the grab result held if the event arguments have been created by
+            //     calling NewDataRecevedEventArgs.Clone().
+            public void DisposeDataRecevedIfClone()
+            {
+                if (m_bClone == true)
+                {
+                    m_snapshot = null;
+                    m_timeStamp = 0;
+                }
             }
         }
 
@@ -88,8 +136,8 @@ namespace BeamOnCL
                     m_camera.Parameters[PLCamera.GainAuto].TrySetValue(PLCamera.GainAuto.Off);
                     m_camera.Parameters[PLCamera.ExposureAuto].TrySetValue(PLCamera.ExposureAuto.Off);
 
-                    m_camera.Parameters[PLCamera.BinningHorizontal].SetValue((int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum());
-                    m_camera.Parameters[PLCamera.BinningVertical].SetValue((int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum());
+                    if (m_camera.Parameters[PLCamera.BinningHorizontal].IsWritable == true) m_camera.Parameters[PLCamera.BinningHorizontal].TrySetValue((int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum());
+                    if (m_camera.Parameters[PLCamera.BinningHorizontal].IsWritable == true) m_camera.Parameters[PLCamera.BinningVertical].TrySetValue((int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum());
 
                     m_camera.Parameters[PLCamera.Width].SetValue((int)m_camera.Parameters[PLCamera.Width].GetMaximum());
                     m_camera.Parameters[PLCamera.Height].SetValue((int)m_camera.Parameters[PLCamera.Height].GetMaximum());
@@ -147,9 +195,12 @@ namespace BeamOnCL
         {
             try
             {
-                // Start the grabbing of images until grabbing is stopped.
-                m_camera.Parameters[PLCamera.AcquisitionMode].SetValue(PLCamera.AcquisitionMode.Continuous);
-                m_camera.StreamGrabber.Start(GrabStrategy.OneByOne, GrabLoop.ProvidedByStreamGrabber);
+                if ((m_camera != null) && (m_camera.StreamGrabber.IsGrabbing == false))
+                {
+                    // Start the grabbing of images until grabbing is stopped.
+                    m_camera.Parameters[PLCamera.AcquisitionMode].SetValue(PLCamera.AcquisitionMode.Continuous);
+                    m_camera.StreamGrabber.Start(GrabStrategy.OneByOne, GrabLoop.ProvidedByStreamGrabber);
+                }
             }
             catch (Exception exception)
             {
@@ -162,9 +213,12 @@ namespace BeamOnCL
         {
             try
             {
-                // Starts the grabbing of one image.
-                m_camera.Parameters[PLCamera.AcquisitionMode].SetValue(PLCamera.AcquisitionMode.SingleFrame);
-                m_camera.StreamGrabber.Start(1, GrabStrategy.OneByOne, GrabLoop.ProvidedByStreamGrabber);
+                if ((m_camera != null) && (m_camera.StreamGrabber.IsGrabbing == false))
+                {
+                    // Starts the grabbing of one image.
+                    m_camera.Parameters[PLCamera.AcquisitionMode].SetValue(PLCamera.AcquisitionMode.SingleFrame);
+                    m_camera.StreamGrabber.Start(1, GrabStrategy.OneByOne, GrabLoop.ProvidedByStreamGrabber);
+                }
             }
             catch (Exception exception)
             {
@@ -247,7 +301,7 @@ namespace BeamOnCL
                 {
                     m_snapshot.GetData(grabResult.PixelData as byte[]);
 
-                    OnNewDataReceved(this, new NewDataRecevedEventArgs(m_snapshot));
+                    OnNewDataReceved(this, new NewDataRecevedEventArgs(m_snapshot, grabResult.Timestamp));
                 }
             }
             else
@@ -334,21 +388,21 @@ namespace BeamOnCL
 
         public int MaxBinning
         {
-            get { return (m_camera != null) ? (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMaximum() : 0; }
+            get { return ((m_camera != null) && (m_camera.Parameters[PLCamera.BinningHorizontal].IsReadable)) ? (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMaximum() : 0; }
         }
 
         public int MinBinning
         {
-            get { return (m_camera != null) ? (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum() : 0; }
+            get { return ((m_camera != null) && (m_camera.Parameters[PLCamera.BinningHorizontal].IsReadable)) ? (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum() : 0; }
         }
 
         public int Binning
         {
-            get { return (m_camera != null) ? (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetValue() : 0; }
+            get { return ((m_camera != null) && (m_camera.Parameters[PLCamera.BinningHorizontal].IsReadable)) ? (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetValue() : 0; }
 
             set
             {
-                if (m_camera != null)
+                if ((m_camera != null) && (m_camera.Parameters[PLCamera.BinningHorizontal].IsWritable))
                 {
                     if ((value >= (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum()) && (value <= (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMaximum()))
                     {

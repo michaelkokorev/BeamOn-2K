@@ -10,14 +10,14 @@ namespace BeamOnCL
     class Snapshot<T> : SnapshotBase
     {
         public T[] m_tMatrixArray = null;
-//        byte[] rgbValues = null;
+        //        byte[] rgbValues = null;
 
         public Snapshot(Rectangle rArea)
             : base(rArea)
         {
             m_tMatrixArray = new T[(int)m_rArea.Width * (int)m_rArea.Height];
 
-//            rgbValues = new byte[m_tMatrixArray.Length * 3];
+            //            rgbValues = new byte[m_tMatrixArray.Length * 3];
         }
 
         public unsafe override void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
@@ -85,5 +85,15 @@ namespace BeamOnCL
                     Marshal.Copy((IntPtr)pb, m_tMatrixArray as short[], 0, m_tMatrixArray.Length);
             }
         }
+
+        public override unsafe SnapshotBase Clone()
+        {
+            Snapshot<T> snp = this.MemberwiseClone() as Snapshot<T>;
+
+            snp.m_tMatrixArray = (T[])this.m_tMatrixArray.Clone();
+
+            return snp;
+        }
+
     }
 }

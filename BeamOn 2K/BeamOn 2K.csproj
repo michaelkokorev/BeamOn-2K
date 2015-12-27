@@ -41,6 +41,7 @@
     <Reference Include="Basler.Pylon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=e389355f398382ab, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -52,11 +53,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataExcel.cs" />
+    <Compile Include="Form3DProjection.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form3DProjection.Designer.cs">
+      <DependentUpon>Form3DProjection.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormErrorMessage.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormErrorMessage.Designer.cs">
       <DependentUpon>FormErrorMessage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSetup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSetup.Designer.cs">
+      <DependentUpon>FormSetup.cs</DependentUpon>
     </Compile>
     <Compile Include="FormSetupLog.cs">
       <SubType>Form</SubType>
@@ -90,8 +103,14 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SystemData.cs" />
+    <EmbeddedResource Include="Form3DProjection.resx">
+      <DependentUpon>Form3DProjection.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormErrorMessage.resx">
       <DependentUpon>FormErrorMessage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSetup.resx">
+      <DependentUpon>FormSetup.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormSetupLog.resx">
       <DependentUpon>FormSetupLog.cs</DependentUpon>
@@ -129,6 +148,10 @@
     <ProjectReference Include="..\BeamOnCL\BeamOnCL.csproj">
       <Project>{1CFF4952-DBC7-4C41-B34D-D99DB9429EBA}</Project>
       <Name>BeamOnCL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OpenGLControl\OpenGLControl.csproj">
+      <Project>{1B277C35-696B-4FDC-B6E4-6EDFD9207228}</Project>
+      <Name>OpenGLControl</Name>
     </ProjectReference>
     <ProjectReference Include="..\PaletteImage\PaletteImage.csproj">
       <Project>{550D144B-6BDE-4EF9-988A-0E816E9DC005}</Project>
