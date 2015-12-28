@@ -114,9 +114,11 @@ namespace BeamOnCL
             else
                 OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus));
 
-            m_camera.StreamGrabber.Stop();
-
-            m_camera.Close();
+            if (m_camera != null)
+            {
+                m_camera.StreamGrabber.Stop();
+                m_camera.Close();
+            }
 
             return bRet;
         }

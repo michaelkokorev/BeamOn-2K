@@ -25,11 +25,6 @@ namespace BeamOn_2K
             image3D.colorArray = colorArray;
         }
 
-        private void checkBoxProperty_CheckedChanged(object sender, EventArgs e)
-        {
-            splitContainer3D.Panel2Collapsed = !checkBoxProperty.Checked;
-        }
-
         private void Form3DProjection_Load(object sender, EventArgs e)
         {
             checkProjectionX.Checked = ((m_sysData.projectionData.Projection == OpenGLControl.TypeProjection.XZProjection) || (m_sysData.projectionData.Projection == OpenGLControl.TypeProjection.XZ_YZProjection));
@@ -138,6 +133,11 @@ namespace BeamOn_2K
             m_sysData.projectionData.AngleTilt = Decimal.ToInt16(TiltUpDown.Value);
 
             image3D.AngleY = m_sysData.projectionData.AngleTilt;
+        }
+
+        private void buttonProperty_Click(object sender, EventArgs e)
+        {
+            splitContainer3D.Panel2Collapsed = !splitContainer3D.Panel2Collapsed;
         }
     }
 }

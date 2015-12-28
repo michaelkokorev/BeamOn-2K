@@ -52,6 +52,7 @@ namespace BeamOn_2K
 
         private BeamOnCL.BeamOnCL bm = null;
 
+        Pen m_PenSensor = new Pen(System.Drawing.Color.Yellow, 1.2f);
         Pen m_PenCentroid = new Pen(System.Drawing.Color.Blue, 0.2f);
         Pen m_PenEllipse = new Pen(System.Drawing.Color.Green, 2f);
         Pen m_PenGaussian = new Pen(System.Drawing.Color.Red, 0.2f);
@@ -413,6 +414,16 @@ namespace BeamOn_2K
 
                 grfx.DrawLine(m_PenCentroid, OldPoint, NewPoint);
 
+                OldPoint = new Point(bm.ImageRectangle.X, (int)(bm.MaxImageRectangle.Height / 2) - (int)bm.ImageRectangle.Y);
+                NewPoint = new Point(bm.ImageRectangle.X + bm.ImageRectangle.Width, (int)(bm.MaxImageRectangle.Height / 2) - (int)(bm.ImageRectangle.Y));
+
+                grfx.DrawLine(m_PenSensor, OldPoint, NewPoint);
+
+                OldPoint = new Point((int)(bm.MaxImageRectangle.Width / 2) - bm.ImageRectangle.X, (int)bm.ImageRectangle.Y);
+                NewPoint = new Point((int)(bm.MaxImageRectangle.Width / 2) - bm.ImageRectangle.X, (int)(bm.ImageRectangle.Y + bm.ImageRectangle.Height));
+
+                grfx.DrawLine(m_PenSensor, OldPoint, NewPoint);
+
                 if (plArea != null) grfx.DrawLines(m_PenEllipse, plArea);
 
                 grfx.DrawRectangle(m_PenCentroid, bm.WorkingArea);
@@ -642,11 +653,13 @@ namespace BeamOn_2K
 
                 bm.pixelFormat = picturePaletteImage.Format;
 
+                sumProfileToolStripMenuItem.Checked = (m_sysData.ProfileType == BeamOnCL.BeamOnCL.TypeProfile.tpSum);
                 lineProfileToolStripMenuItem.Checked = !sumProfileToolStripMenuItem.Checked;
-                sumProfileToolStripMenuItem.Checked = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum);
 
                 lineProfileToolStripButton.Checked = lineProfileToolStripMenuItem.Checked;
                 sumProfileToolStripButton.Checked = sumProfileToolStripMenuItem.Checked;
+
+                bm.typeProfile = m_sysData.ProfileType;
 
                 toolStripStatusLabelTypeProfile.Text = (sumProfileToolStripMenuItem.Checked) ? "Sum" : "Line";
 
@@ -746,7 +759,7 @@ namespace BeamOn_2K
             else if (tsb.Name.Contains("8"))
                 bitsPerPixel12ToolStripMenuItem.Checked = !tsb.Checked;
 
-            if(bitsPerPixel12ToolStripMenuItem.Checked == true)
+            if (bitsPerPixel12ToolStripMenuItem.Checked == true)
                 picturePaletteImage.Format = PixelFormat.Format24bppRgb;
             else if (bitsPerPixel8ToolStripMenuItem.Checked == true)
                 picturePaletteImage.Format = PixelFormat.Format8bppIndexed;
@@ -764,7 +777,9 @@ namespace BeamOn_2K
             sumProfileToolStripButton.Checked = sumProfileToolStripMenuItem.Checked;
             lineProfileToolStripButton.Checked = lineProfileToolStripMenuItem.Checked;
 
-            bm.typeProfile = (sumProfileToolStripMenuItem.Checked == true) ? BeamOnCL.BeamOnCL.TypeProfile.tpSum : BeamOnCL.BeamOnCL.TypeProfile.tpLIne;
+            m_sysData.ProfileType =  (sumProfileToolStripMenuItem.Checked == true) ? BeamOnCL.BeamOnCL.TypeProfile.tpSum : BeamOnCL.BeamOnCL.TypeProfile.tpLIne;
+            bm.typeProfile = m_sysData.ProfileType;
+
             toolStripStatusLabelTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum) ? "Sum" : "Line";
         }
 
@@ -1439,6 +1454,7 @@ namespace BeamOn_2K
             {
                 m_frm3D = new Form3DProjection();
                 m_frm3D.SetColorPalette(picturePaletteImage.colorArray);
+                m_frm3D.FormClosed += new FormClosedEventHandler(m_frm3D_FormClosed);
                 m_frm3D.Show(this);
             }
             else
@@ -1446,6 +1462,14 @@ namespace BeamOn_2K
                 if (m_frm3D != null) m_frm3D.Close();
                 m_frm3D = null;
             }
+        }
+
+        void m_frm3D_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            m_frm3D = null;
+
+            projection3DToolStripMenuItem.Checked = false;
+            tbViewProjection.Checked = false;
         }
     }
 }

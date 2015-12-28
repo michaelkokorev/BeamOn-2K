@@ -112,6 +112,8 @@ namespace OpenGLControl
                     if ((m_colorArray == null) || (value.Length != m_colorArray.Length)) m_colorArray = new System.Drawing.Color[value.Length];
 
                     value.CopyTo(m_colorArray, 0);
+
+                    m_dz = 1 / (float)(colorArray.Length - 1);
                 }
             }
         }
@@ -229,9 +231,7 @@ namespace OpenGLControl
         private float m_fStepAutoRotateX = 5.0f;
         private float m_fStepAutoRotateY = 5.0f;
         private float m_fStepAutoRotateZ = 5.0f;
-        private float m_fTomSize = 10f;
         private Boolean m_bDrawGrid = true;
-        private Boolean m_bViewVW = true;
         Timer tmrRotate = null;
         private TypeGrid m_tgResolution = TypeGrid.Low;
         private TypeProjection m_tpDraw3DProjection = TypeProjection.NoneProjection;
@@ -286,9 +286,17 @@ namespace OpenGLControl
             {
                 if (value != null)
                 {
-                    lock (this)
+                    //lock (this)
                     {
                         m_bImageData = value;
+
+                        //if ((m_rectViewing.Width == 0) || (m_rectViewing.Height == 0)) ViewingRect = new Rectangle(0, 0, m_bImageData.Width, m_bImageData.Height);
+
+                        //m_dStepGrid = (float)(m_wStepGrid / (float)m_rectViewing.Width);
+                        //m_dHalfHeight = (float)(m_rectViewing.Height * m_dStepGrid / (2.0 * m_wStepGrid));
+
+                        m_dStepGrid = (float)(m_wStepGrid / (float)m_bImageData.Width);
+                        m_dHalfHeight = (float)(m_bImageData.Height * m_dStepGrid / (2.0 * m_wStepGrid));
 
                         if (m_tpDraw3DProjection != TypeProjection.NoneProjection)
                         {
@@ -310,15 +318,6 @@ namespace OpenGLControl
                         Invalidate();
                     }
                 }
-            }
-        }
-
-        public Boolean Axis
-        {
-            get { return m_bViewVW; }
-            set
-            {
-                m_bViewVW = value;
             }
         }
 
@@ -476,10 +475,6 @@ namespace OpenGLControl
                     m_wStepGrid = 1;
                     break;
             }
-
-            m_dStepGrid = (float)(m_wStepGrid / (float)m_rectViewing.Width);
-            m_dz = 1 / 255f;
-            m_dHalfHeight = (float)(m_rectViewing.Height * m_dStepGrid / (2.0 * m_wStepGrid));
         }
 
         void tmrRotate_Tick(object sender, EventArgs e)
@@ -527,129 +522,132 @@ namespace OpenGLControl
             float[] Y = new float[30];
             String strData;
 
-            PSize = (float)((m_fTomSize * 11) / 12f);
-
-            //Half = PSize * (m_rectWorkingArea.Height / 2 - 8) / m_rectWorkingArea.Height;
-            Half = PSize / 2;
-
-            if (Half >= 10000)
-                U = 10000;
-            else if (Half >= 1000)
-                U = 1000;
-            else if (Half >= 100)
-                U = 100;
-            else if (Half >= 10)
-                U = 10;
-            else
-                U = 1;
-
-            N = (int)Math.Floor(Half / U);
-            if (N >= 3)
-                SubU = U;
-            else if (N == 2)
-                SubU = U / 2f;
-            else
-                SubU = U / 5f;
-
-            NG = (int)Math.Floor(Half / SubU);
-
-            YS = (float)(m_dHalfWidth + m_CubeSize / PSize * NG * SubU);
-
-            for (i = -NG; i <= NG; i++)
+            if (ImageData != null)
             {
-                Y[i + NG] = (float)((m_dHalfWidth + m_CubeSize / PSize * i * SubU) - m_dHalfWidth);
-                X[i + NG] = (float)((m_dHalfWidth + m_CubeSize / PSize * i * SubU) - m_dHalfWidth);
-            }
+                PSize = (float)((ImageData.Width * 11) / 12f);
 
-            if (N >= 5)
-                SubN = 5;
-            else if (N >= 2)
-                SubN = 2;
-            else
-                SubN = 1;
+                //Half = PSize * (m_rectWorkingArea.Height / 2 - 8) / m_rectWorkingArea.Height;
+                Half = PSize / 2;
 
-            // Draw string.
-            strData = "0";
+                if (Half >= 10000)
+                    U = 10000;
+                else if (Half >= 1000)
+                    U = 1000;
+                else if (Half >= 100)
+                    U = 100;
+                else if (Half >= 10)
+                    U = 10;
+                else
+                    U = 1;
 
-            glPushMatrix();
-            glColor3ub(0, 144, 255);
-            glTranslated(X[NG] + 0.07f * getPrintHeight(strData) / 2f, -m_dHalfWidth, m_dHalfWidth + 0.07f * getPrintWidth(strData));				// Center Our Text On The Screen
-            glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-            glRotated(90, 0.0, 1.0, 0.0);
-            glRotated(-90, 1.0, 0.0, 0.0);
-            glPrint(strData);						// Print GL Text To The Screen
-            glPopMatrix();
+                N = (int)Math.Floor(Half / U);
+                if (N >= 3)
+                    SubU = U;
+                else if (N == 2)
+                    SubU = U / 2f;
+                else
+                    SubU = U / 5f;
 
-            glPushMatrix();
-            glColor3ub(255, 0, 0);
-            glTranslated(0.55f * m_CubeSize, -m_dHalfWidth, Y[NG] + 0.07f * getPrintHeight(strData) / 2f);	// Center Our Text On The Screen
-            glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-            glRotated(-90, 1.0, 0.0, 0.0);
-            glPrint(strData);						// Print GL Text To The Screen
-            glPopMatrix();
+                NG = (int)Math.Floor(Half / SubU);
 
-            strData = String.Format(GetValueStringFormat(SubN * U * m_sUnitsCoeff), SubN * U * m_sUnitsCoeff);
-            strData += ((m_muUnits == MeasureUnits.muMicro) ? " (µm)" : " (mrad)");
+                YS = (float)(m_dHalfWidth + m_CubeSize / PSize * NG * SubU);
 
-            glPushMatrix();
-            glColor3ub(0, 144, 255);
-            glTranslated(X[2 * NG] + 0.07f * getPrintHeight(strData) / 2f, -m_dHalfWidth, m_dHalfWidth + 0.07f * getPrintWidth(strData));				// Center Our Text On The Screen
-            glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-            glRotated(90, 0.0, 1.0, 0.0);
-            glRotated(-90, 1.0, 0.0, 0.0);
-            glPrint(strData);						// Print GL Text To The Screen
-            glPopMatrix();
-
-            glPushMatrix();
-            glColor3ub(0, 144, 255);
-            glTranslated(X[0] + 0.07f * getPrintHeight(strData) / 2f, -m_dHalfWidth, m_dHalfWidth + 0.07f * getPrintWidth(strData));				// Center Our Text On The Screen
-            glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-            glRotated(90, 0.0, 1.0, 0.0);
-            glRotated(-90, 1.0, 0.0, 0.0);
-            glPrint(strData);						// Print GL Text To The Screen
-            glPopMatrix();
-
-            glPushMatrix();
-            glColor3ub(255, 0, 0);
-            glTranslated(0.55f * m_CubeSize, -m_dHalfWidth, Y[2 * NG] + 0.07f * getPrintHeight(strData) / 2f);	// Center Our Text On The Screen
-            glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-            glRotated(-90, 1.0, 0.0, 0.0);
-            glPrint(strData);						// Print GL Text To The Screen
-            glPopMatrix();
-
-            glPushMatrix();
-            glColor3ub(255, 0, 0);
-            glTranslated(0.55f * m_CubeSize, -m_dHalfWidth, Y[0] + 0.07f * getPrintHeight(strData) / 2f);	// Center Our Text On The Screen
-            glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-            glRotated(-90, 1.0, 0.0, 0.0);
-            glPrint(strData);						// Print GL Text To The Screen
-            glPopMatrix();
-
-
-            for (i = 0; i < 2 * NG + 1; i++)
-            {
-                for (j = Y[0]; j <= Y[2 * NG]; j += 3)
+                for (i = -NG; i <= NG; i++)
                 {
-                    //grfx.DrawLine(PenGrid, X[i], j, X[i], j + 1);
-                    glBegin(GL_LINES);
-                    glColor3f(0.5f, 0.5f, 0.5f);
-                    glVertex3d(X[i], -m_dHalfWidth, -m_dHalfWidth);
-                    glVertex3d(X[i], -m_dHalfWidth, m_dHalfWidth);
-                    glVertex3d(X[i], -m_dHalfWidth, -m_dHalfWidth);
-                    glVertex3d(X[i], m_dHalfWidth, -m_dHalfWidth);
-                    glEnd();
+                    Y[i + NG] = (float)((m_dHalfWidth + m_CubeSize / PSize * i * SubU) - m_dHalfWidth);
+                    X[i + NG] = (float)((m_dHalfWidth + m_CubeSize / PSize * i * SubU) - m_dHalfWidth);
                 }
 
-                for (j = X[0]; j <= X[2 * NG]; j += 3)
+                if (N >= 5)
+                    SubN = 5;
+                else if (N >= 2)
+                    SubN = 2;
+                else
+                    SubN = 1;
+
+                // Draw string.
+                strData = "0";
+
+                glPushMatrix();
+                glColor3ub(0, 144, 255);
+                glTranslated(X[NG] + 0.07f * getPrintHeight(strData) / 2f, -m_dHalfWidth, m_dHalfWidth + 0.07f * getPrintWidth(strData));				// Center Our Text On The Screen
+                glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
+                glRotated(90, 0.0, 1.0, 0.0);
+                glRotated(-90, 1.0, 0.0, 0.0);
+                glPrint(strData);						// Print GL Text To The Screen
+                glPopMatrix();
+
+                glPushMatrix();
+                glColor3ub(255, 0, 0);
+                glTranslated(0.55f * m_CubeSize, -m_dHalfWidth, Y[NG] + 0.07f * getPrintHeight(strData) / 2f);	// Center Our Text On The Screen
+                glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
+                glRotated(-90, 1.0, 0.0, 0.0);
+                glPrint(strData);						// Print GL Text To The Screen
+                glPopMatrix();
+
+                strData = String.Format(GetValueStringFormat(SubN * U * m_sUnitsCoeff), SubN * U * m_sUnitsCoeff);
+                strData += ((m_muUnits == MeasureUnits.muMicro) ? " (µm)" : " (mrad)");
+
+                glPushMatrix();
+                glColor3ub(0, 144, 255);
+                glTranslated(X[2 * NG] + 0.07f * getPrintHeight(strData) / 2f, -m_dHalfWidth, m_dHalfWidth + 0.07f * getPrintWidth(strData));				// Center Our Text On The Screen
+                glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
+                glRotated(90, 0.0, 1.0, 0.0);
+                glRotated(-90, 1.0, 0.0, 0.0);
+                glPrint(strData);						// Print GL Text To The Screen
+                glPopMatrix();
+
+                glPushMatrix();
+                glColor3ub(0, 144, 255);
+                glTranslated(X[0] + 0.07f * getPrintHeight(strData) / 2f, -m_dHalfWidth, m_dHalfWidth + 0.07f * getPrintWidth(strData));				// Center Our Text On The Screen
+                glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
+                glRotated(90, 0.0, 1.0, 0.0);
+                glRotated(-90, 1.0, 0.0, 0.0);
+                glPrint(strData);						// Print GL Text To The Screen
+                glPopMatrix();
+
+                glPushMatrix();
+                glColor3ub(255, 0, 0);
+                glTranslated(0.55f * m_CubeSize, -m_dHalfWidth, Y[2 * NG] + 0.07f * getPrintHeight(strData) / 2f);	// Center Our Text On The Screen
+                glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
+                glRotated(-90, 1.0, 0.0, 0.0);
+                glPrint(strData);						// Print GL Text To The Screen
+                glPopMatrix();
+
+                glPushMatrix();
+                glColor3ub(255, 0, 0);
+                glTranslated(0.55f * m_CubeSize, -m_dHalfWidth, Y[0] + 0.07f * getPrintHeight(strData) / 2f);	// Center Our Text On The Screen
+                glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
+                glRotated(-90, 1.0, 0.0, 0.0);
+                glPrint(strData);						// Print GL Text To The Screen
+                glPopMatrix();
+
+
+                for (i = 0; i < 2 * NG + 1; i++)
                 {
-                    //grfx.DrawLine(PenGrid, j, Y[i], j + 1, Y[i]);
-                    glBegin(GL_LINES);
-                    glColor3f(0.5f, 0.5f, 0.5f);
-                    glVertex3d(m_dHalfWidth, -m_dHalfWidth, Y[i]);
-                    glVertex3d(-m_dHalfWidth, -m_dHalfWidth, Y[i]);
-                    glVertex3d(-m_dHalfWidth, m_dHalfWidth, Y[i]);
-                    glVertex3d(-m_dHalfWidth, -m_dHalfWidth, Y[i]);
-                    glEnd();
+                    for (j = Y[0]; j <= Y[2 * NG]; j += 3)
+                    {
+                        //grfx.DrawLine(PenGrid, X[i], j, X[i], j + 1);
+                        glBegin(GL_LINES);
+                        glColor3f(0.5f, 0.5f, 0.5f);
+                        glVertex3d(X[i], -m_dHalfWidth, -m_dHalfWidth);
+                        glVertex3d(X[i], -m_dHalfWidth, m_dHalfWidth);
+                        glVertex3d(X[i], -m_dHalfWidth, -m_dHalfWidth);
+                        glVertex3d(X[i], m_dHalfWidth, -m_dHalfWidth);
+                        glEnd();
+                    }
+
+                    for (j = X[0]; j <= X[2 * NG]; j += 3)
+                    {
+                        //grfx.DrawLine(PenGrid, j, Y[i], j + 1, Y[i]);
+                        glBegin(GL_LINES);
+                        glColor3f(0.5f, 0.5f, 0.5f);
+                        glVertex3d(m_dHalfWidth, -m_dHalfWidth, Y[i]);
+                        glVertex3d(-m_dHalfWidth, -m_dHalfWidth, Y[i]);
+                        glVertex3d(-m_dHalfWidth, m_dHalfWidth, Y[i]);
+                        glVertex3d(-m_dHalfWidth, -m_dHalfWidth, Y[i]);
+                        glEnd();
+                    }
                 }
             }
         }
@@ -896,7 +894,7 @@ namespace OpenGLControl
 
             if (m_bImageData != null)
             {
-                lock (this)
+                //lock (this)
                 {
                     for (int i = 0; i < m_bImageData.Width; i++)
                     {
@@ -930,7 +928,7 @@ namespace OpenGLControl
             int i, j;
             double dStepGrid = 1 / (float)ViewingRect.Width;
 
-            lock (this)
+            //lock (this)
             {
                 try
                 {
@@ -988,7 +986,7 @@ namespace OpenGLControl
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            lock (this)
+            //lock (this)
             {
                 ActivateContext();
 
@@ -1022,42 +1020,6 @@ namespace OpenGLControl
             base.OnPaint(e);
         }
 
-        //void Image3D_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
-        //{
-        //    // Àêòèâèðóåì êîíòåêñò OpenGL
-        //    ActivateContext();
-
-        //    // Öâåò ôîíà - èñïîëüçóåì ñâîéñòâî BackColor, óíàñëåäîâàííîå îò Control
-        //    glClearColor(
-        //                    (float)BackColor.R / 255f,
-        //                    (float)BackColor.G / 255f,
-        //                    (float)BackColor.B / 255f,
-        //                    (float)BackColor.A / 255f
-        //                 );
-
-        //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        //    glMatrixMode(GL_MODELVIEW);
-        //    glLoadIdentity();
-        //    _camera.ReInitCamera();
-        //    glTranslated(_fTransX, _fTransY, _fTransZ);
-
-        //    glRotated(_fAngleY, 1, 0, 0);
-        //    glRotated(_fAngleX, 0, 1, 0);
-        //    //glRotated(_fAngleZ, 0, 0, 1);
-
-        //    if (m_bDrawGrid == true) OnScaleGL();
-        //    OnPlaneGL();
-
-        //    if (m_bViewVW == true) glCallList(2);
-        //    if (m_tpDraw3DProjection != TypeProjection.NoneProjection) Draw3DProjection();
-
-        //    // Ïåðåêëþ÷àåì áóôåðà è äåàêòèâèðóåì êîíòåêñò OpenGL
-        //    SwapBuffers();
-        //    // Äåàêòèâèðóåì êîíòåêñò OpenGL
-        //    DeactivateContext();
-        //}
-
         protected virtual void OnScaleGL()
         {
             if (m_bCubeChange == true)
@@ -1070,288 +1032,6 @@ namespace OpenGLControl
             DrawGrid();
         }
 
-        /*
-                void OnScaleGL()
-        {
-        char		st[20];
-        float		NewVal;
-        float		NewPos;
-        float		fCentrPosX, fCentrPosY;
-        float		l_fTmpStepValueY;
-        float		l_fTmpStepValueX;
-        float		l_iTmpStepSizeY;
-        float		l_iTmpStepSizeX;
-        string      strData;
-
-        // main X
-            glPushMatrix();
-        //		glColor3ub(0, 0, 255);
-                glColor3ub(0, 144, 255);
-                glTranslated((float)(0.63 * m_CubeSize), -m_dHalfWidth, -m_dHalfWidth);				// Center Our Text On The Screen
-                glScalef(0.1f * m_CubeSize, 0.1f * m_CubeSize, 0.1f * m_CubeSize);
-                glRotated(-90, 1.0, 0.0, 0.0);
-            strData = "Y"+ ((m_muUnits == MeasureUnits.muMicro) ? " (µm)" : " (mrad)");
-        glPrint(strData);						// Print GL Text To The Screen
-            glPopMatrix();
-
-        // main Z
-            glPushMatrix();
-                glColor3ub(255, 0, 0);
-                glTranslated(-m_dHalfWidth, -m_dHalfWidth, 0.9f * m_CubeSize);				// Center Our Text On The Screen
-                glScalef(0.1f * m_CubeSize, 0.1f * m_CubeSize, 0.1f * m_CubeSize);
-                glRotated(90, 0.0, 1.0, 0.0);
-                glRotated(-90, 1.0, 0.0, 0.0);
-            strData = "X"+ ((m_muUnits == MeasureUnits.muMicro) ? " (µm)" : " (mrad)");
-                glPrint(strData);						// Print GL Text To The Screen
-            glPopMatrix();
-
-        // main Y
-            glPushMatrix();
-                glColor3ub(0, 255, 0);
-                glTranslated(-m_dHalfWidth, 0.63 * m_CubeSize, -m_dHalfWidth);				// Center Our Text On The Screen
-                glScalef(0.1f * m_CubeSize, 0.1f * m_CubeSize, 0.1f * m_CubeSize);
-                glRotated(45, 0.0, 1.0, 0.0);
-                    strData="P(%%)";
-                glPrint(strData);						// Print GL Text To The Screen
-            glPopMatrix();
-	
-            fCentrPosX = (float)((((m_pctpPrj->m_pos.m_fpCentr.fx + m_pctpPrj->m_pos.m_fpCentrShift.fx) - m_pctpPrj->m_PCurrent.x) * m_pctpPrj->GetCoeffExpand() - m_pctpPrj->m_ViewingPoint.x) / (float)m_pctpPrj->m_size.cx - m_dHalfWidth);
-            fCentrPosY = (float)((((m_pctpPrj->m_pos.m_fpCentr.fy + m_pctpPrj->m_pos.m_fpCentrShift.fy) - m_pctpPrj->m_PCurrent.y) * m_pctpPrj->GetCoeffExpand() - m_pctpPrj->m_ViewingPoint.y) / (float)m_pctpPrj->m_size.cx - dHalfHeight);
-
-            NewPos = fCentrPosY;
-            NewVal = 0;
-            l_fTmpStepValueY = m_iStepValueY;
-            l_iTmpStepSizeY = m_iStepSizeY / (float)m_pctpPrj->m_size.cx;
-
-            if (m_pctpPrj->GetCoeffExpand() > 1)
-            {
-                if ( ((m_pctpPrj->m_ViewingSize.cy * m_pctpPrj->GetCoeffExpand()) / m_iStepSizeY) < 4 )	//5
-                {
-                    l_fTmpStepValueY = l_fTmpStepValueY;
-                    l_iTmpStepSizeY = l_iTmpStepSizeY;
-                }
-                else
-                {
-                    l_fTmpStepValueY = 2 * l_fTmpStepValueY;
-                    l_iTmpStepSizeY = 2 * l_iTmpStepSizeY;
-                }
-            }
-
-            while (NewPos >= - m_dHalfWidth)
-            {
-                if (NewVal != 0)
-                {
-                    switch(m_pctpPrj->GetCoeffExpand())
-                    {
-                        case 1:
-                            sprintf(st, "%.1f", NewVal);
-                            break;
-                        case 2:
-                            sprintf(st, "%.1f", NewVal);
-                            break;
-                        case 4:
-                            sprintf(st, "%.2f", NewVal);
-                            break;
-                        case 8:
-                        case 16:
-                        case 32:
-                            sprintf(st, "%.3f", NewVal);
-                            break;
-                    }
-                }
-                else
-                    sprintf(st, "%d", NewVal);
-
-                if (NewPos <= m_dHalfWidth)
-                {
-                    glPushMatrix();
-        //				glColor3ub(0, 0, 255);
-                        glColor3ub(0, 144, 255);
-                        glTranslated(NewPos, -m_dHalfWidth, 0.7f * m_CubeSize);	// Center Our Text On The Screen
-                        glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-                        glRotated(90, 0.0, 1.0, 0.0);
-                        glRotated(-90, 1.0, 0.0, 0.0);
-                        pDevice->glPrint("%s", st);						// Print GL Text To The Screen
-                    glPopMatrix();
-
-                    glColor3f(0.5f, 0.5f, 0.5f);
-
-                    glBegin(GL_LINES);
-                        glVertex3d(NewPos, -m_dHalfWidth, -m_dHalfWidth);
-                        glVertex3d(NewPos, -m_dHalfWidth,  m_dHalfWidth);
-                        glVertex3d(NewPos, -m_dHalfWidth, -m_dHalfWidth);
-                        glVertex3d(NewPos,  m_dHalfWidth, -m_dHalfWidth);
-                    glEnd();
-                }
-
-                NewVal -= l_fTmpStepValueY;
-                NewPos -= l_iTmpStepSizeY;
-            }
-
-            NewPos = fCentrPosY + l_iTmpStepSizeY;
-            NewVal = l_fTmpStepValueY;
-
-            while (NewPos <= m_dHalfWidth)
-            {
-                switch(m_pctpPrj->GetCoeffExpand())
-                {
-                    case 1:
-                        sprintf(st, "%.1f", NewVal);
-                        break;
-                    case 2:
-                        sprintf(st, "%.1f", NewVal);
-                        break;
-                    case 4:
-                        sprintf(st, "%.2f", NewVal);
-                        break;
-                    case 8:
-                    case 16:
-                    case 32:
-                        sprintf(st, "%.3f", NewVal);
-                        break;
-                }
-
-                if (NewPos >= -m_dHalfWidth)
-                {
-                    glPushMatrix();
-        //				glColor3ub(0, 0, 255);
-                        glColor3ub(0, 144, 255);
-                        glTranslated(NewPos, -m_dHalfWidth, 0.7f * m_CubeSize);	// Center Our Text On The Screen
-                        glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-                        glRotated(90, 0.0, 1.0, 0.0);
-                        glRotated(-90, 1.0, 0.0, 0.0);
-                        glPrint("%s", st);						// Print GL Text To The Screen
-                    glPopMatrix();
-
-                    glColor3f(0.5f, 0.5f, 0.5f);
-
-                    glBegin(GL_LINES);
-                        glVertex3d(NewPos, -m_dHalfWidth, -m_dHalfWidth);
-                        glVertex3d(NewPos, -m_dHalfWidth,  m_dHalfWidth);
-                        glVertex3d(NewPos, -m_dHalfWidth, -m_dHalfWidth);
-                        glVertex3d(NewPos,  m_dHalfWidth, -m_dHalfWidth);
-                    glEnd();
-                }
-
-                NewVal += l_fTmpStepValueY;
-                NewPos += l_iTmpStepSizeY;
-            }
-
-            NewPos = fCentrPosX;
-            NewVal = 0;
-
-            l_fTmpStepValueX = m_iStepValueX;
-            l_iTmpStepSizeX = m_iStepSizeX / (float)m_pctpPrj->m_size.cx;
-
-            if (m_pctpPrj->GetCoeffExpand() > 1)
-            {
-                if ( ((m_ViewingSize.cx * m_pctpPrj->GetCoeffExpand()) / m_iStepSizeX) < 4 )	//5
-                {
-                    l_fTmpStepValueX = l_fTmpStepValueX / (float)m_pctpPrj->GetCoeffExpand();
-                    l_iTmpStepSizeX = l_iTmpStepSizeX / m_pctpPrj->GetCoeffExpand();
-                }
-                else
-                {
-                    l_fTmpStepValueX = 2 * l_fTmpStepValueX / (float)m_pctpPrj->GetCoeffExpand();
-                    l_iTmpStepSizeX = 2 * l_iTmpStepSizeX / m_pctpPrj->GetCoeffExpand();
-                }
-            }
-
-            while (NewPos <= m_dHalfWidth)
-            {
-                if (NewVal != 0)
-                {
-                    switch(m_pctpPrj->GetCoeffExpand())
-                    {
-                        case 1:
-                        case 2:
-                            sprintf(st, "%.1f", NewVal);
-                            break;
-                        case 4:
-                            sprintf(st, "%.2f", NewVal);
-                            break;
-                        case 8:
-                        case 16:
-                        case 32:
-                            sprintf(st, "%.3f", NewVal);
-                            break;
-                    }
-                }
-                else
-                    sprintf(st, "%d", NewVal);
- 
-                if (NewPos >= -m_dHalfWidth)
-                {
-                    glPushMatrix();
-                        glColor3ub(255, 0, 0);
-                        glTranslated(0.55f * m_CubeSize, -m_dHalfWidth, NewPos);	// Center Our Text On The Screen
-                        glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-                        glRotated(-90, 1.0, 0.0, 0.0);
-                        ->glPrint("%s", st);						// Print GL Text To The Screen
-                    glPopMatrix();
-
-                    glColor3f(0.5f, 0.5f, 0.5f);
-
-                    glBegin(GL_LINES);
-                        glVertex3d(  m_dHalfWidth, -m_dHalfWidth, NewPos);
-                        glVertex3d( -m_dHalfWidth, -m_dHalfWidth, NewPos);
-
-                        glVertex3d( -m_dHalfWidth,  m_dHalfWidth, NewPos);
-                        glVertex3d( -m_dHalfWidth, -m_dHalfWidth, NewPos);
-                    glEnd();
-                }
-
-                NewVal += l_fTmpStepValueX;
-                NewPos += l_iTmpStepSizeX;
-            }
-
-            NewVal = - l_fTmpStepValueX;
-            NewPos = fCentrPosX - l_iTmpStepSizeX;
-
-            while (NewPos >= - m_dHalfWidth)
-            {
-                switch(m_pctpPrj->GetCoeffExpand())
-                {
-                    case 1:
-                    case 2:
-                        sprintf(st, "%.1f", NewVal);
-                        break;
-                    case 4:
-                        sprintf(st, "%.2f", NewVal);
-                        break;
-                    case 8:
-                    case 16:
-                    case 32:
-                        sprintf(st, "%.3f", NewVal);
-                        break;
-                }
-
-                if (NewPos <= m_dHalfWidth)
-                {
-                    glPushMatrix();
-                        glColor3ub(255, 0, 0);
-                        glTranslated(0.55f * m_CubeSize, -m_dHalfWidth, NewPos);	// Center Our Text On The Screen
-                        glScalef(0.07f * m_CubeSize, 0.07f * m_CubeSize, 0.07f * m_CubeSize);
-                        glRotated(-90, 1.0, 0.0, 0.0);
-                        pDevice->glPrint("%s", st);						// Print GL Text To The Screen
-                    glPopMatrix();
-			
-                    glColor3f(0.5f, 0.5f, 0.5f);
-
-                    glBegin(GL_LINES);
-                        glVertex3d(  m_dHalfWidth, -m_dHalfWidth, NewPos);
-                        glVertex3d( -m_dHalfWidth, -m_dHalfWidth, NewPos);
-
-                        glVertex3d( -m_dHalfWidth,  m_dHalfWidth, NewPos);
-                        glVertex3d( -m_dHalfWidth, -m_dHalfWidth, NewPos);
-                    glEnd();
-                }
-
-                NewVal -= l_fTmpStepValueX;
-                NewPos -= l_iTmpStepSizeX;
-            }
-        }
-        */
         void OnPlaneGL()
         {
             int i, j;
@@ -1364,18 +1044,25 @@ namespace OpenGLControl
 
             if (m_bImageData != null)
             {
-                lock (this)
+                //lock (this)
                 {
-                    if ((m_rectViewing.Width == 0) || (m_rectViewing.Height == 0)) ViewingRect = new Rectangle(0, 0, m_bImageData.Width, m_bImageData.Height);
                     int dShiftY = (int)(m_wStepGrid * m_bImageData.Width);
 
-                    iStart = m_bImageData.Height - 1 - (m_rectViewing.Top + m_rectViewing.Height - m_wStepGrid);
-                    iFinich = m_bImageData.Height - 1 - m_rectViewing.Top;
+                    //iStart = m_bImageData.Height - 1 - (m_rectViewing.Top + m_rectViewing.Height - m_wStepGrid);
+                    //iFinich = m_bImageData.Height - 1 - m_rectViewing.Top;
+
+                    //iFinich = (iFinich > m_bImageData.Height) ? m_bImageData.Height : iFinich;
+
+                    //jStart = m_rectViewing.Left;
+                    //jFinich = jStart + m_rectViewing.Width - m_wStepGrid;
+
+                    iStart = m_bImageData.Height - 1 - (m_bImageData.Top + m_bImageData.Height - m_wStepGrid);
+                    iFinich = m_bImageData.Height - 1 - m_bImageData.Top;
 
                     iFinich = (iFinich > m_bImageData.Height) ? m_bImageData.Height : iFinich;
 
-                    jStart = m_rectViewing.Left;
-                    jFinich = jStart + m_rectViewing.Width - m_wStepGrid;
+                    jStart = m_bImageData.Left;
+                    jFinich = jStart + m_bImageData.Width - m_wStepGrid;
 
                     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

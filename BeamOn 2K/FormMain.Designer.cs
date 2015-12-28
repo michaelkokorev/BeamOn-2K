@@ -92,7 +92,6 @@
             this.lineProfileToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tbHelpActiveWindow = new System.Windows.Forms.ToolStripButton();
-            this.toolStripStatuslblError = new BeamOn_2K.MyToolStripLabel();
             this.mainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.imageSplitContainer = new System.Windows.Forms.SplitContainer();
             this.picturePaletteImage = new PaletteImage.PaletteImage();
@@ -152,6 +151,7 @@
             this.printDocument = new System.Drawing.Printing.PrintDocument();
             this.printPreviewDialog = new System.Windows.Forms.PrintPreviewDialog();
             this.pageSetupDialog = new System.Windows.Forms.PageSetupDialog();
+            this.toolStripStatuslblError = new BeamOn_2K.MyToolStripLabel();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -786,22 +786,6 @@
             this.tbHelpActiveWindow.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.tbHelpActiveWindow.Click += new System.EventHandler(this.tbHelpActiveWindow_Click);
             // 
-            // toolStripStatuslblError
-            // 
-            this.toolStripStatuslblError.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripStatuslblError.AutoSize = false;
-            this.toolStripStatuslblError.BackColor = System.Drawing.Color.Black;
-            this.toolStripStatuslblError.DemoVersion = false;
-            this.toolStripStatuslblError.ErrorMessage = BeamOn_2K.ErrorStatus.BA_OK;
-            this.toolStripStatuslblError.ErrorMessageBeep = false;
-            this.toolStripStatuslblError.ForeColor = System.Drawing.Color.Black;
-            this.toolStripStatuslblError.LogTypeMessage = ((byte)(0));
-            this.toolStripStatuslblError.Margin = new System.Windows.Forms.Padding(0, 1, 2, 2);
-            this.toolStripStatuslblError.Name = "toolStripStatuslblError";
-            this.toolStripStatuslblError.PortName = "";
-            this.toolStripStatuslblError.Size = new System.Drawing.Size(220, 30);
-            this.toolStripStatuslblError.SystemMessage = ((ushort)(0));
-            // 
             // mainSplitContainer
             // 
             this.mainSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -958,7 +942,7 @@
             this.trackBarBinning.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBarBinning.Location = new System.Drawing.Point(3, 19);
             this.trackBarBinning.Name = "trackBarBinning";
-            this.trackBarBinning.Size = new System.Drawing.Size(128, 43);
+            this.trackBarBinning.Size = new System.Drawing.Size(128, 45);
             this.trackBarBinning.TabIndex = 0;
             this.trackBarBinning.Scroll += new System.EventHandler(this.trackBarBinning_Scroll);
             // 
@@ -1000,7 +984,7 @@
             this.trackBarGain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBarGain.Location = new System.Drawing.Point(3, 19);
             this.trackBarGain.Name = "trackBarGain";
-            this.trackBarGain.Size = new System.Drawing.Size(276, 43);
+            this.trackBarGain.Size = new System.Drawing.Size(276, 45);
             this.trackBarGain.TabIndex = 3;
             this.trackBarGain.Scroll += new System.EventHandler(this.trackBarGain_Scroll);
             // 
@@ -1043,7 +1027,7 @@
             this.trackBarExposure.LargeChange = 500000;
             this.trackBarExposure.Location = new System.Drawing.Point(3, 19);
             this.trackBarExposure.Name = "trackBarExposure";
-            this.trackBarExposure.Size = new System.Drawing.Size(273, 43);
+            this.trackBarExposure.Size = new System.Drawing.Size(273, 45);
             this.trackBarExposure.SmallChange = 100000;
             this.trackBarExposure.TabIndex = 6;
             this.trackBarExposure.TickFrequency = 1000000;
@@ -1089,7 +1073,7 @@
             this.trackBarTransparency.Location = new System.Drawing.Point(3, 19);
             this.trackBarTransparency.Maximum = 255;
             this.trackBarTransparency.Name = "trackBarTransparency";
-            this.trackBarTransparency.Size = new System.Drawing.Size(136, 43);
+            this.trackBarTransparency.Size = new System.Drawing.Size(136, 45);
             this.trackBarTransparency.SmallChange = 5;
             this.trackBarTransparency.TabIndex = 6;
             this.trackBarTransparency.Scroll += new System.EventHandler(this.trackBarTransparency_Scroll);
@@ -1476,10 +1460,27 @@
             // 
             this.pageSetupDialog.Document = this.printDocument;
             // 
+            // toolStripStatuslblError
+            // 
+            this.toolStripStatuslblError.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripStatuslblError.AutoSize = false;
+            this.toolStripStatuslblError.BackColor = System.Drawing.Color.Black;
+            this.toolStripStatuslblError.DemoVersion = false;
+            this.toolStripStatuslblError.ErrorMessage = BeamOn_2K.ErrorStatus.BA_OK;
+            this.toolStripStatuslblError.ErrorMessageBeep = false;
+            this.toolStripStatuslblError.ForeColor = System.Drawing.Color.Black;
+            this.toolStripStatuslblError.LogTypeMessage = ((byte)(0));
+            this.toolStripStatuslblError.Margin = new System.Windows.Forms.Padding(0, 1, 2, 2);
+            this.toolStripStatuslblError.Name = "toolStripStatuslblError";
+            this.toolStripStatuslblError.PortName = "";
+            this.toolStripStatuslblError.Size = new System.Drawing.Size(220, 30);
+            this.toolStripStatuslblError.SystemMessage = ((ushort)(0));
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(1350, 729);
             this.Controls.Add(this.mainSplitContainer);
             this.Controls.Add(this.mainToolStrip);

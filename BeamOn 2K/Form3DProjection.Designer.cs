@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.splitContainer3D = new System.Windows.Forms.SplitContainer();
-            this.checkBoxProperty = new System.Windows.Forms.CheckBox();
             this.image3D = new OpenGLControl.Image3D();
             this.groupBoxGrid = new System.Windows.Forms.GroupBox();
             this.checkBoxGrid = new System.Windows.Forms.CheckBox();
@@ -49,6 +48,7 @@
             this.lblRotate = new System.Windows.Forms.Label();
             this.lblAuto = new System.Windows.Forms.Label();
             this.checkAutoRotate = new System.Windows.Forms.CheckBox();
+            this.buttonProperty = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3D)).BeginInit();
             this.splitContainer3D.Panel1.SuspendLayout();
             this.splitContainer3D.Panel2.SuspendLayout();
@@ -73,7 +73,7 @@
             // 
             // splitContainer3D.Panel1
             // 
-            this.splitContainer3D.Panel1.Controls.Add(this.checkBoxProperty);
+            this.splitContainer3D.Panel1.Controls.Add(this.buttonProperty);
             this.splitContainer3D.Panel1.Controls.Add(this.image3D);
             // 
             // splitContainer3D.Panel2
@@ -84,31 +84,11 @@
             this.splitContainer3D.Panel2.Controls.Add(this.gbTilt);
             this.splitContainer3D.Panel2.Controls.Add(this.gbRotation);
             this.splitContainer3D.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer3D_Panel2_Paint);
-            this.splitContainer3D.Size = new System.Drawing.Size(591, 422);
-            this.splitContainer3D.SplitterDistance = 426;
+            this.splitContainer3D.Panel2MinSize = 165;
+            this.splitContainer3D.Size = new System.Drawing.Size(605, 422);
+            this.splitContainer3D.SplitterDistance = 433;
             this.splitContainer3D.SplitterWidth = 2;
             this.splitContainer3D.TabIndex = 1;
-            // 
-            // checkBoxProperty
-            // 
-            this.checkBoxProperty.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkBoxProperty.Appearance = System.Windows.Forms.Appearance.Button;
-            this.checkBoxProperty.AutoEllipsis = true;
-            this.checkBoxProperty.BackColor = System.Drawing.SystemColors.Control;
-            this.checkBoxProperty.Checked = true;
-            this.checkBoxProperty.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxProperty.Cursor = System.Windows.Forms.Cursors.Default;
-            this.checkBoxProperty.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBoxProperty.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.checkBoxProperty.Location = new System.Drawing.Point(410, 0);
-            this.checkBoxProperty.Name = "checkBoxProperty";
-            this.checkBoxProperty.Size = new System.Drawing.Size(15, 118);
-            this.checkBoxProperty.TabIndex = 2;
-            this.checkBoxProperty.Text = "Property";
-            this.checkBoxProperty.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.checkBoxProperty.UseCompatibleTextRendering = true;
-            this.checkBoxProperty.UseVisualStyleBackColor = false;
-            this.checkBoxProperty.CheckedChanged += new System.EventHandler(this.checkBoxProperty_CheckedChanged);
             // 
             // image3D
             // 
@@ -118,7 +98,7 @@
             this.image3D.AutoRotateX = false;
             this.image3D.AutoRotateY = false;
             this.image3D.AutoRotateZ = false;
-            this.image3D.Axis = true;
+            this.image3D.colorArray = null;
             this.image3D.Dock = System.Windows.Forms.DockStyle.Fill;
             this.image3D.FocalLens = 1F;
             this.image3D.Grid = true;
@@ -128,12 +108,13 @@
             this.image3D.OpticalFactor = 1F;
             this.image3D.Projection = OpenGLControl.TypeProjection.NoneProjection;
             this.image3D.Resolution = OpenGLControl.TypeGrid.Low;
-            this.image3D.Size = new System.Drawing.Size(424, 420);
+            this.image3D.Size = new System.Drawing.Size(431, 420);
             this.image3D.StepAutoRotateX = 5F;
             this.image3D.StepAutoRotateY = 5F;
             this.image3D.StepAutoRotateZ = 5F;
             this.image3D.TabIndex = 1;
             this.image3D.UnitMeasure = OpenGLControl.MeasureUnits.muMicro;
+            this.image3D.ViewingRect = new System.Drawing.Rectangle(0, 0, 0, 0);
             this.image3D.OnChangeAngle += new OpenGLControl.Image3D.ChangeAngle(this.image3D_OnChangeAngle);
             // 
             // groupBoxGrid
@@ -197,7 +178,7 @@
             this.gbDensity.Controls.Add(this.rbDensityLow);
             this.gbDensity.Location = new System.Drawing.Point(3, 164);
             this.gbDensity.Name = "gbDensity";
-            this.gbDensity.Size = new System.Drawing.Size(165, 103);
+            this.gbDensity.Size = new System.Drawing.Size(159, 103);
             this.gbDensity.TabIndex = 26;
             this.gbDensity.TabStop = false;
             this.gbDensity.Text = "Wide Density";
@@ -244,7 +225,7 @@
             this.gbTilt.Controls.Add(this.lblTilt);
             this.gbTilt.Location = new System.Drawing.Point(3, 107);
             this.gbTilt.Name = "gbTilt";
-            this.gbTilt.Size = new System.Drawing.Size(165, 51);
+            this.gbTilt.Size = new System.Drawing.Size(159, 51);
             this.gbTilt.TabIndex = 25;
             this.gbTilt.TabStop = false;
             this.gbTilt.Text = "Tilt";
@@ -280,7 +261,7 @@
             this.gbRotation.Controls.Add(this.checkAutoRotate);
             this.gbRotation.Location = new System.Drawing.Point(3, 3);
             this.gbRotation.Name = "gbRotation";
-            this.gbRotation.Size = new System.Drawing.Size(165, 98);
+            this.gbRotation.Size = new System.Drawing.Size(159, 98);
             this.gbRotation.TabIndex = 24;
             this.gbRotation.TabStop = false;
             this.gbRotation.Text = "Rotation";
@@ -340,11 +321,28 @@
             this.checkAutoRotate.UseVisualStyleBackColor = true;
             this.checkAutoRotate.CheckedChanged += new System.EventHandler(this.checkAutoRotate_CheckedChanged);
             // 
+            // buttonProperty
+            // 
+            this.buttonProperty.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonProperty.AutoEllipsis = true;
+            this.buttonProperty.FlatAppearance.BorderSize = 0;
+            this.buttonProperty.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonProperty.Image = global::BeamOn_2K.Properties.Resources.PropertyS11;
+            this.buttonProperty.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.buttonProperty.Location = new System.Drawing.Point(398, 0);
+            this.buttonProperty.Name = "buttonProperty";
+            this.buttonProperty.Size = new System.Drawing.Size(33, 88);
+            this.buttonProperty.TabIndex = 3;
+            this.buttonProperty.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.buttonProperty.UseCompatibleTextRendering = true;
+            this.buttonProperty.UseVisualStyleBackColor = false;
+            this.buttonProperty.Click += new System.EventHandler(this.buttonProperty_Click);
+            // 
             // Form3DProjection
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(591, 422);
+            this.ClientSize = new System.Drawing.Size(605, 422);
             this.Controls.Add(this.splitContainer3D);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
@@ -390,12 +388,12 @@
         private System.Windows.Forms.RadioButton rbDensityHigh;
         private System.Windows.Forms.RadioButton rbDensityMedium;
         private System.Windows.Forms.RadioButton rbDensityLow;
-        private System.Windows.Forms.CheckBox checkBoxProperty;
         private System.Windows.Forms.GroupBox gbProjection;
         private System.Windows.Forms.CheckBox checkProjectionY;
         private System.Windows.Forms.CheckBox checkProjectionX;
         private System.Windows.Forms.GroupBox groupBoxGrid;
         private System.Windows.Forms.CheckBox checkBoxGrid;
+        private System.Windows.Forms.Button buttonProperty;
 
     }
 }

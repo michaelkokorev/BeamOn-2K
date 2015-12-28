@@ -169,6 +169,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\PropertyS11.png" />
+    <None Include="Resources\PropertyS1.png" />
+    <None Include="Resources\PropertyS.png" />
+    <None Include="Resources\Property.png" />
     <None Include="Resources\Hand.bmp" />
     <None Include="Resources\Setup.bmp" />
     <None Include="Resources\Start.bmp" />

@@ -58,6 +58,8 @@ namespace BeamOn_2K
             public Single m_sOpticalFactor = 1f;
             [DataMember(Name = "Units")]
             public MeasureUnits m_muUnits = MeasureUnits.muMicro;
+            [DataMember(Name = "TypeProfile")]
+            public BeamOnCL.BeamOnCL.TypeProfile m_tpProfile = BeamOnCL.BeamOnCL.TypeProfile.tpSum;
 
             public Data()
             {
@@ -137,6 +139,12 @@ namespace BeamOn_2K
                     m_profDataVertical.FocalLens = m_sFocalLens;
                 }
             }
+        }
+
+        public BeamOnCL.BeamOnCL.TypeProfile ProfileType
+        {
+            get { return m_data.m_tpProfile; }
+            set { m_data.m_tpProfile = value; }
         }
 
         public PixelFormat FormatPixel

@@ -20,6 +20,16 @@ namespace BeamOnCL
             get { return (UInt16)m_rArea.Height; }
         }
 
+        public UInt16 Top
+        {
+            get { return (UInt16)m_rArea.Top; }
+        }
+
+        public UInt16 Left
+        {
+            get { return (UInt16)m_rArea.Left; }
+        }
+
         public virtual unsafe void GetData(byte[] bData)
         {
         }
