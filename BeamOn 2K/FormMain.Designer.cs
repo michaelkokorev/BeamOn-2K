@@ -52,10 +52,6 @@
             this.toolBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusBarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.propertyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pixelFormatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bitsPerPixel8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bitsPerPixel12ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.measuringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scaleProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.typeProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -90,8 +86,11 @@
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.sumProfileToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.lineProfileToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
+            this.propertyToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tbHelpActiveWindow = new System.Windows.Forms.ToolStripButton();
+            this.toolStripStatuslblError = new BeamOn_2K.MyToolStripLabel();
             this.mainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.imageSplitContainer = new System.Windows.Forms.SplitContainer();
             this.picturePaletteImage = new PaletteImage.PaletteImage();
@@ -99,10 +98,6 @@
             this.pictureBoxData = new System.Windows.Forms.PictureBox();
             this.dataSplitContainer = new System.Windows.Forms.SplitContainer();
             this.propertyGroupBox = new System.Windows.Forms.GroupBox();
-            this.groupBoxBinning = new System.Windows.Forms.GroupBox();
-            this.labelBinningMax = new System.Windows.Forms.Label();
-            this.labelBinningMin = new System.Windows.Forms.Label();
-            this.trackBarBinning = new System.Windows.Forms.TrackBar();
             this.groupBoxGain = new System.Windows.Forms.GroupBox();
             this.labelGainMax = new System.Windows.Forms.Label();
             this.labelGainMin = new System.Windows.Forms.Label();
@@ -151,7 +146,6 @@
             this.printDocument = new System.Drawing.Printing.PrintDocument();
             this.printPreviewDialog = new System.Windows.Forms.PrintPreviewDialog();
             this.pageSetupDialog = new System.Windows.Forms.PageSetupDialog();
-            this.toolStripStatuslblError = new BeamOn_2K.MyToolStripLabel();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -172,8 +166,6 @@
             this.dataSplitContainer.Panel2.SuspendLayout();
             this.dataSplitContainer.SuspendLayout();
             this.propertyGroupBox.SuspendLayout();
-            this.groupBoxBinning.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarBinning)).BeginInit();
             this.groupBoxGain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarGain)).BeginInit();
             this.groupBoxExposure.SuspendLayout();
@@ -395,8 +387,6 @@
             // propertyToolStripMenuItem
             // 
             this.propertyToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.pixelFormatToolStripMenuItem,
-            this.toolStripMenuItem3,
             this.measuringToolStripMenuItem,
             this.scaleProfileToolStripMenuItem,
             this.typeProfileToolStripMenuItem,
@@ -406,36 +396,6 @@
             this.propertyToolStripMenuItem.Name = "propertyToolStripMenuItem";
             this.propertyToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.propertyToolStripMenuItem.Text = "&Options";
-            // 
-            // pixelFormatToolStripMenuItem
-            // 
-            this.pixelFormatToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.bitsPerPixel8ToolStripMenuItem,
-            this.bitsPerPixel12ToolStripMenuItem});
-            this.pixelFormatToolStripMenuItem.Name = "pixelFormatToolStripMenuItem";
-            this.pixelFormatToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            this.pixelFormatToolStripMenuItem.Text = "Pi&xel Format";
-            // 
-            // bitsPerPixel8ToolStripMenuItem
-            // 
-            this.bitsPerPixel8ToolStripMenuItem.CheckOnClick = true;
-            this.bitsPerPixel8ToolStripMenuItem.Name = "bitsPerPixel8ToolStripMenuItem";
-            this.bitsPerPixel8ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.bitsPerPixel8ToolStripMenuItem.Text = "8 Bits Per Pixel";
-            this.bitsPerPixel8ToolStripMenuItem.Click += new System.EventHandler(this.pixelFormatToolStripMenuItem_Click);
-            // 
-            // bitsPerPixel12ToolStripMenuItem
-            // 
-            this.bitsPerPixel12ToolStripMenuItem.CheckOnClick = true;
-            this.bitsPerPixel12ToolStripMenuItem.Name = "bitsPerPixel12ToolStripMenuItem";
-            this.bitsPerPixel12ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.bitsPerPixel12ToolStripMenuItem.Text = "12 Bits Per Pixel";
-            this.bitsPerPixel12ToolStripMenuItem.Click += new System.EventHandler(this.pixelFormatToolStripMenuItem_Click);
-            // 
-            // toolStripMenuItem3
-            // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(178, 6);
             // 
             // measuringToolStripMenuItem
             // 
@@ -628,6 +588,8 @@
             this.toolStripSeparator4,
             this.sumProfileToolStripButton,
             this.lineProfileToolStripButton,
+            this.toolStripSeparator10,
+            this.propertyToolStripButton,
             this.toolStripSeparator2,
             this.tbHelpActiveWindow,
             this.toolStripStatuslblError});
@@ -770,6 +732,22 @@
             this.lineProfileToolStripButton.ToolTipText = "View Line Profile";
             this.lineProfileToolStripButton.Click += new System.EventHandler(this.typeProfileToolStripMenuItem_Click);
             // 
+            // toolStripSeparator10
+            // 
+            this.toolStripSeparator10.Name = "toolStripSeparator10";
+            this.toolStripSeparator10.Size = new System.Drawing.Size(6, 48);
+            // 
+            // propertyToolStripButton
+            // 
+            this.propertyToolStripButton.AutoSize = false;
+            this.propertyToolStripButton.Image = global::BeamOn_2K.Properties.Resources.Property;
+            this.propertyToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.propertyToolStripButton.Name = "propertyToolStripButton";
+            this.propertyToolStripButton.Size = new System.Drawing.Size(45, 45);
+            this.propertyToolStripButton.Text = "Setup";
+            this.propertyToolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.propertyToolStripButton.Click += new System.EventHandler(this.propertyToolStripButton_Click);
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
@@ -785,6 +763,22 @@
             this.tbHelpActiveWindow.Text = "Help";
             this.tbHelpActiveWindow.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.tbHelpActiveWindow.Click += new System.EventHandler(this.tbHelpActiveWindow_Click);
+            // 
+            // toolStripStatuslblError
+            // 
+            this.toolStripStatuslblError.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripStatuslblError.AutoSize = false;
+            this.toolStripStatuslblError.BackColor = System.Drawing.Color.Black;
+            this.toolStripStatuslblError.DemoVersion = false;
+            this.toolStripStatuslblError.ErrorMessage = BeamOn_2K.ErrorStatus.BA_OK;
+            this.toolStripStatuslblError.ErrorMessageBeep = false;
+            this.toolStripStatuslblError.ForeColor = System.Drawing.Color.Black;
+            this.toolStripStatuslblError.LogTypeMessage = ((byte)(0));
+            this.toolStripStatuslblError.Margin = new System.Windows.Forms.Padding(0, 1, 2, 2);
+            this.toolStripStatuslblError.Name = "toolStripStatuslblError";
+            this.toolStripStatuslblError.PortName = "";
+            this.toolStripStatuslblError.Size = new System.Drawing.Size(220, 30);
+            this.toolStripStatuslblError.SystemMessage = ((ushort)(0));
             // 
             // mainSplitContainer
             // 
@@ -875,7 +869,6 @@
             // dataSplitContainer.Panel1
             // 
             this.dataSplitContainer.Panel1.Controls.Add(this.propertyGroupBox);
-            this.dataSplitContainer.Panel1Collapsed = true;
             this.dataSplitContainer.Panel1MinSize = 240;
             // 
             // dataSplitContainer.Panel2
@@ -892,7 +885,6 @@
             // 
             // propertyGroupBox
             // 
-            this.propertyGroupBox.Controls.Add(this.groupBoxBinning);
             this.propertyGroupBox.Controls.Add(this.groupBoxGain);
             this.propertyGroupBox.Controls.Add(this.groupBoxExposure);
             this.propertyGroupBox.Controls.Add(this.groupBoxTransparency);
@@ -903,48 +895,6 @@
             this.propertyGroupBox.TabIndex = 6;
             this.propertyGroupBox.TabStop = false;
             this.propertyGroupBox.Text = "Property";
-            // 
-            // groupBoxBinning
-            // 
-            this.groupBoxBinning.Controls.Add(this.labelBinningMax);
-            this.groupBoxBinning.Controls.Add(this.labelBinningMin);
-            this.groupBoxBinning.Controls.Add(this.trackBarBinning);
-            this.groupBoxBinning.Font = new System.Drawing.Font("Arial Rounded MT Bold", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBoxBinning.Location = new System.Drawing.Point(3, 25);
-            this.groupBoxBinning.Name = "groupBoxBinning";
-            this.groupBoxBinning.Size = new System.Drawing.Size(134, 65);
-            this.groupBoxBinning.TabIndex = 1;
-            this.groupBoxBinning.TabStop = false;
-            this.groupBoxBinning.Text = "Binning";
-            // 
-            // labelBinningMax
-            // 
-            this.labelBinningMax.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelBinningMax.AutoSize = true;
-            this.labelBinningMax.Location = new System.Drawing.Point(109, 43);
-            this.labelBinningMax.Name = "labelBinningMax";
-            this.labelBinningMax.Size = new System.Drawing.Size(15, 15);
-            this.labelBinningMax.TabIndex = 2;
-            this.labelBinningMax.Text = "0";
-            // 
-            // labelBinningMin
-            // 
-            this.labelBinningMin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.labelBinningMin.AutoSize = true;
-            this.labelBinningMin.Location = new System.Drawing.Point(6, 43);
-            this.labelBinningMin.Name = "labelBinningMin";
-            this.labelBinningMin.Size = new System.Drawing.Size(15, 15);
-            this.labelBinningMin.TabIndex = 1;
-            this.labelBinningMin.Text = "0";
-            // 
-            // trackBarBinning
-            // 
-            this.trackBarBinning.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.trackBarBinning.Location = new System.Drawing.Point(3, 19);
-            this.trackBarBinning.Name = "trackBarBinning";
-            this.trackBarBinning.Size = new System.Drawing.Size(128, 45);
-            this.trackBarBinning.TabIndex = 0;
-            this.trackBarBinning.Scroll += new System.EventHandler(this.trackBarBinning_Scroll);
             // 
             // groupBoxGain
             // 
@@ -984,7 +934,7 @@
             this.trackBarGain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBarGain.Location = new System.Drawing.Point(3, 19);
             this.trackBarGain.Name = "trackBarGain";
-            this.trackBarGain.Size = new System.Drawing.Size(276, 45);
+            this.trackBarGain.Size = new System.Drawing.Size(276, 43);
             this.trackBarGain.TabIndex = 3;
             this.trackBarGain.Scroll += new System.EventHandler(this.trackBarGain_Scroll);
             // 
@@ -1027,7 +977,7 @@
             this.trackBarExposure.LargeChange = 500000;
             this.trackBarExposure.Location = new System.Drawing.Point(3, 19);
             this.trackBarExposure.Name = "trackBarExposure";
-            this.trackBarExposure.Size = new System.Drawing.Size(273, 45);
+            this.trackBarExposure.Size = new System.Drawing.Size(273, 43);
             this.trackBarExposure.SmallChange = 100000;
             this.trackBarExposure.TabIndex = 6;
             this.trackBarExposure.TickFrequency = 1000000;
@@ -1073,7 +1023,7 @@
             this.trackBarTransparency.Location = new System.Drawing.Point(3, 19);
             this.trackBarTransparency.Maximum = 255;
             this.trackBarTransparency.Name = "trackBarTransparency";
-            this.trackBarTransparency.Size = new System.Drawing.Size(136, 45);
+            this.trackBarTransparency.Size = new System.Drawing.Size(136, 43);
             this.trackBarTransparency.SmallChange = 5;
             this.trackBarTransparency.TabIndex = 6;
             this.trackBarTransparency.Scroll += new System.EventHandler(this.trackBarTransparency_Scroll);
@@ -1460,22 +1410,6 @@
             // 
             this.pageSetupDialog.Document = this.printDocument;
             // 
-            // toolStripStatuslblError
-            // 
-            this.toolStripStatuslblError.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripStatuslblError.AutoSize = false;
-            this.toolStripStatuslblError.BackColor = System.Drawing.Color.Black;
-            this.toolStripStatuslblError.DemoVersion = false;
-            this.toolStripStatuslblError.ErrorMessage = BeamOn_2K.ErrorStatus.BA_OK;
-            this.toolStripStatuslblError.ErrorMessageBeep = false;
-            this.toolStripStatuslblError.ForeColor = System.Drawing.Color.Black;
-            this.toolStripStatuslblError.LogTypeMessage = ((byte)(0));
-            this.toolStripStatuslblError.Margin = new System.Windows.Forms.Padding(0, 1, 2, 2);
-            this.toolStripStatuslblError.Name = "toolStripStatuslblError";
-            this.toolStripStatuslblError.PortName = "";
-            this.toolStripStatuslblError.Size = new System.Drawing.Size(220, 30);
-            this.toolStripStatuslblError.SystemMessage = ((ushort)(0));
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1516,9 +1450,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataSplitContainer)).EndInit();
             this.dataSplitContainer.ResumeLayout(false);
             this.propertyGroupBox.ResumeLayout(false);
-            this.groupBoxBinning.ResumeLayout(false);
-            this.groupBoxBinning.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarBinning)).EndInit();
             this.groupBoxGain.ResumeLayout(false);
             this.groupBoxGain.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarGain)).EndInit();
@@ -1556,10 +1487,6 @@
         private System.Windows.Forms.SplitContainer imageSplitContainer;
         private System.Windows.Forms.SplitContainer dataSplitContainer;
         private System.Windows.Forms.GroupBox propertyGroupBox;
-        private System.Windows.Forms.GroupBox groupBoxBinning;
-        private System.Windows.Forms.Label labelBinningMax;
-        private System.Windows.Forms.Label labelBinningMin;
-        private System.Windows.Forms.TrackBar trackBarBinning;
         private System.Windows.Forms.GroupBox groupBoxGain;
         private System.Windows.Forms.Label labelGainMax;
         private System.Windows.Forms.Label labelGainMin;
@@ -1615,10 +1542,6 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelPixelFormat;
         private System.Windows.Forms.ToolStripMenuItem measuringToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem scaleProfileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem pixelFormatToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem bitsPerPixel8ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem bitsPerPixel12ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem typeProfileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem lineProfileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sumProfileToolStripMenuItem;
@@ -1664,6 +1587,8 @@
         private System.Windows.Forms.ToolStripMenuItem mnuOptionsSaveSettingsOnExit;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
         private System.Windows.Forms.ToolStripMenuItem projection3DToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
+        private System.Windows.Forms.ToolStripButton propertyToolStripButton;
     }
 }
 

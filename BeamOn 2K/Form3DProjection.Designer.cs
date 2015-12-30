@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.splitContainer3D = new System.Windows.Forms.SplitContainer();
+            this.buttonProperty = new System.Windows.Forms.Button();
             this.image3D = new OpenGLControl.Image3D();
             this.groupBoxGrid = new System.Windows.Forms.GroupBox();
             this.checkBoxGrid = new System.Windows.Forms.CheckBox();
@@ -48,7 +49,6 @@
             this.lblRotate = new System.Windows.Forms.Label();
             this.lblAuto = new System.Windows.Forms.Label();
             this.checkAutoRotate = new System.Windows.Forms.CheckBox();
-            this.buttonProperty = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3D)).BeginInit();
             this.splitContainer3D.Panel1.SuspendLayout();
             this.splitContainer3D.Panel2.SuspendLayout();
@@ -68,6 +68,7 @@
             this.splitContainer3D.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.splitContainer3D.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer3D.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.splitContainer3D.IsSplitterFixed = true;
             this.splitContainer3D.Location = new System.Drawing.Point(0, 0);
             this.splitContainer3D.Name = "splitContainer3D";
             // 
@@ -75,6 +76,7 @@
             // 
             this.splitContainer3D.Panel1.Controls.Add(this.buttonProperty);
             this.splitContainer3D.Panel1.Controls.Add(this.image3D);
+            this.splitContainer3D.Panel1MinSize = 420;
             // 
             // splitContainer3D.Panel2
             // 
@@ -84,11 +86,29 @@
             this.splitContainer3D.Panel2.Controls.Add(this.gbTilt);
             this.splitContainer3D.Panel2.Controls.Add(this.gbRotation);
             this.splitContainer3D.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer3D_Panel2_Paint);
+            this.splitContainer3D.Panel2Collapsed = true;
             this.splitContainer3D.Panel2MinSize = 165;
             this.splitContainer3D.Size = new System.Drawing.Size(605, 422);
-            this.splitContainer3D.SplitterDistance = 433;
+            this.splitContainer3D.SplitterDistance = 420;
             this.splitContainer3D.SplitterWidth = 2;
             this.splitContainer3D.TabIndex = 1;
+            // 
+            // buttonProperty
+            // 
+            this.buttonProperty.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonProperty.AutoEllipsis = true;
+            this.buttonProperty.FlatAppearance.BorderSize = 0;
+            this.buttonProperty.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonProperty.Image = global::BeamOn_2K.Properties.Resources.PropertyS11;
+            this.buttonProperty.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.buttonProperty.Location = new System.Drawing.Point(570, 0);
+            this.buttonProperty.Name = "buttonProperty";
+            this.buttonProperty.Size = new System.Drawing.Size(33, 88);
+            this.buttonProperty.TabIndex = 3;
+            this.buttonProperty.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.buttonProperty.UseCompatibleTextRendering = true;
+            this.buttonProperty.UseVisualStyleBackColor = false;
+            this.buttonProperty.Click += new System.EventHandler(this.buttonProperty_Click);
             // 
             // image3D
             // 
@@ -108,7 +128,8 @@
             this.image3D.OpticalFactor = 1F;
             this.image3D.Projection = OpenGLControl.TypeProjection.NoneProjection;
             this.image3D.Resolution = OpenGLControl.TypeGrid.Low;
-            this.image3D.Size = new System.Drawing.Size(431, 420);
+            this.image3D.SensorCenterPosition = new System.Drawing.Point(0, 0);
+            this.image3D.Size = new System.Drawing.Size(603, 420);
             this.image3D.StepAutoRotateX = 5F;
             this.image3D.StepAutoRotateY = 5F;
             this.image3D.StepAutoRotateZ = 5F;
@@ -320,23 +341,6 @@
             this.checkAutoRotate.Text = "Auto-Rotate On/Off";
             this.checkAutoRotate.UseVisualStyleBackColor = true;
             this.checkAutoRotate.CheckedChanged += new System.EventHandler(this.checkAutoRotate_CheckedChanged);
-            // 
-            // buttonProperty
-            // 
-            this.buttonProperty.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonProperty.AutoEllipsis = true;
-            this.buttonProperty.FlatAppearance.BorderSize = 0;
-            this.buttonProperty.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonProperty.Image = global::BeamOn_2K.Properties.Resources.PropertyS11;
-            this.buttonProperty.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.buttonProperty.Location = new System.Drawing.Point(398, 0);
-            this.buttonProperty.Name = "buttonProperty";
-            this.buttonProperty.Size = new System.Drawing.Size(33, 88);
-            this.buttonProperty.TabIndex = 3;
-            this.buttonProperty.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.buttonProperty.UseCompatibleTextRendering = true;
-            this.buttonProperty.UseVisualStyleBackColor = false;
-            this.buttonProperty.Click += new System.EventHandler(this.buttonProperty_Click);
             // 
             // Form3DProjection
             // 

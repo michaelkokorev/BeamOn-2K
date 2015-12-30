@@ -70,6 +70,7 @@ namespace BeamOn_2K
         BeamOnCL.Profile m_profileHorizontal = null;
         BeamOnCL.Profile m_profileVertical = null;
         Point[] plArea = null;
+        Point pointSensorCenter = new Point();
 
         Image printImage = null;
         Font printFont = new Font("Arial", 10);
@@ -395,6 +396,10 @@ namespace BeamOn_2K
                 m_bmp = new Bitmap(pictureBoxImage.Width, pictureBoxImage.Height, picturePaletteImage.Format);
 
                 if (picturePaletteImage.Format == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
+
+                pointSensorCenter = new Point((int)(bm.MaxImageRectangle.Width / 2) - bm.ImageRectangle.X, (int)(bm.MaxImageRectangle.Height / 2) - (int)bm.ImageRectangle.Y);
+
+                if (m_frm3D != null) m_frm3D.SensorCenterPosition = pointSensorCenter;
             }
         }
 
@@ -414,13 +419,13 @@ namespace BeamOn_2K
 
                 grfx.DrawLine(m_PenCentroid, OldPoint, NewPoint);
 
-                OldPoint = new Point(bm.ImageRectangle.X, (int)(bm.MaxImageRectangle.Height / 2) - (int)bm.ImageRectangle.Y);
-                NewPoint = new Point(bm.ImageRectangle.X + bm.ImageRectangle.Width, (int)(bm.MaxImageRectangle.Height / 2) - (int)(bm.ImageRectangle.Y));
+                OldPoint = new Point(0, pointSensorCenter.Y);
+                NewPoint = new Point(bm.ImageRectangle.Width, pointSensorCenter.Y);
 
                 grfx.DrawLine(m_PenSensor, OldPoint, NewPoint);
 
-                OldPoint = new Point((int)(bm.MaxImageRectangle.Width / 2) - bm.ImageRectangle.X, (int)bm.ImageRectangle.Y);
-                NewPoint = new Point((int)(bm.MaxImageRectangle.Width / 2) - bm.ImageRectangle.X, (int)(bm.ImageRectangle.Y + bm.ImageRectangle.Height));
+                OldPoint = new Point(pointSensorCenter.X, 0);
+                NewPoint = new Point(pointSensorCenter.X, bm.ImageRectangle.Height);
 
                 grfx.DrawLine(m_PenSensor, OldPoint, NewPoint);
 
@@ -616,6 +621,8 @@ namespace BeamOn_2K
                     bm.pixelFormat = pixelFormat;
 
                     if (m_frm3D != null) m_frm3D.SetColorPalette(color);
+
+                    toolStripStatusLabelPixelFormat.Text = (m_sysData.videoDeviceData.pixelFormat == PixelFormat.Format8bppIndexed) ? "8 bpp" : "12 bpp";
                 });
             }
             catch
@@ -636,7 +643,7 @@ namespace BeamOn_2K
             {
                 m_sw = Stopwatch.StartNew();
 
-                picturePaletteImage.Format = PixelFormat.Format8bppIndexed;
+                picturePaletteImage.Format = m_sysData.videoDeviceData.pixelFormat;
 
                 pictureBoxImage.Size = bm.ImageRectangle.Size;
 
@@ -647,9 +654,7 @@ namespace BeamOn_2K
                 else
                     Color = picturePaletteImage.colorArray;
 
-                bitsPerPixel8ToolStripMenuItem.Checked = (m_sysData.FormatPixel == PixelFormat.Format8bppIndexed);
-                bitsPerPixel12ToolStripMenuItem.Checked = !bitsPerPixel8ToolStripMenuItem.Checked;
-                toolStripStatusLabelPixelFormat.Text = (bitsPerPixel12ToolStripMenuItem.Checked == true) ? "12 bpp" : "8 bpp";
+                toolStripStatusLabelPixelFormat.Text = (m_sysData.videoDeviceData.pixelFormat == PixelFormat.Format8bppIndexed) ? "8 bpp" : "12 bpp";
 
                 bm.pixelFormat = picturePaletteImage.Format;
 
@@ -663,11 +668,18 @@ namespace BeamOn_2K
 
                 toolStripStatusLabelTypeProfile.Text = (sumProfileToolStripMenuItem.Checked) ? "Sum" : "Line";
 
-                trackBarBinning.Maximum = bm.MaxBinning;
-                trackBarBinning.Minimum = bm.MinBinning;
-                trackBarBinning.Value = bm.Binning;
-                labelBinningMin.Text = trackBarBinning.Minimum.ToString();
-                labelBinningMax.Text = trackBarBinning.Maximum.ToString();
+                bm.Binning = m_sysData.videoDeviceData.uiBinning;
+
+                if (bm.Binning == m_sysData.videoDeviceData.uiBinning)
+                {
+                    m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, picturePaletteImage.Format);
+
+                    if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
+
+                    pictureBoxImage.Size = bm.ImageRectangle.Size;
+
+                    m_sysData.applicationData.m_FormErrorMessage.Dispose();
+                }
 
                 trackBarGain.Maximum = bm.MaxGain;
                 trackBarGain.Minimum = bm.MinGain;
@@ -694,6 +706,8 @@ namespace BeamOn_2K
                 gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
 
                 dataSplitContainer.Panel1Collapsed = !propertyBoxToolStripMenuItem.Checked;
+
+                pointSensorCenter = new Point((int)(bm.MaxImageRectangle.Width / 2) - bm.ImageRectangle.X, (int)(bm.MaxImageRectangle.Height / 2) - (int)bm.ImageRectangle.Y);
             }
             else
             {
@@ -716,19 +730,6 @@ namespace BeamOn_2K
             bm.Stop();
         }
 
-        private void trackBarBinning_Scroll(object sender, EventArgs e)
-        {
-            bm.Binning = trackBarBinning.Value;
-
-            m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, picturePaletteImage.Format);
-
-            if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
-
-            pictureBoxImage.Size = bm.ImageRectangle.Size;
-
-            m_sysData.applicationData.m_FormErrorMessage.Dispose();
-        }
-
         private void trackBarTransparency_Scroll(object sender, EventArgs e)
         {
             //            this.pictureBoxData.BackColor = System.Drawing.Color.FromArgb(trackBarTransparency.Value, pictureBoxData.BackColor.R, pictureBoxData.BackColor.G, pictureBoxData.BackColor.B);
@@ -748,23 +749,6 @@ namespace BeamOn_2K
         private void scaleProfileToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             m_sysData.ScaleProfile = scaleProfileToolStripMenuItem.Checked;
-        }
-
-        private void pixelFormatToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ToolStripMenuItem tsb = (ToolStripMenuItem)sender;
-
-            if (tsb.Name.Contains("12"))
-                bitsPerPixel8ToolStripMenuItem.Checked = !tsb.Checked;
-            else if (tsb.Name.Contains("8"))
-                bitsPerPixel12ToolStripMenuItem.Checked = !tsb.Checked;
-
-            if (bitsPerPixel12ToolStripMenuItem.Checked == true)
-                picturePaletteImage.Format = PixelFormat.Format24bppRgb;
-            else if (bitsPerPixel8ToolStripMenuItem.Checked == true)
-                picturePaletteImage.Format = PixelFormat.Format8bppIndexed;
-
-            toolStripStatusLabelPixelFormat.Text = (bitsPerPixel12ToolStripMenuItem.Checked == true) ? "12 bpp" : "8 bpp";
         }
 
         private void typeProfileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1454,6 +1438,9 @@ namespace BeamOn_2K
             {
                 m_frm3D = new Form3DProjection();
                 m_frm3D.SetColorPalette(picturePaletteImage.colorArray);
+                m_frm3D.SensorCenterPosition = pointSensorCenter;
+                m_frm3D.SetScaleGridX(200, 117f);
+                m_frm3D.SetScaleGridY(200, 117f);
                 m_frm3D.FormClosed += new FormClosedEventHandler(m_frm3D_FormClosed);
                 m_frm3D.Show(this);
             }
@@ -1470,6 +1457,35 @@ namespace BeamOn_2K
 
             projection3DToolStripMenuItem.Checked = false;
             tbViewProjection.Checked = false;
+        }
+
+        private void propertyToolStripButton_Click(object sender, EventArgs e)
+        {
+            FormSetup frmSetup = new FormSetup();
+
+            if (frmSetup.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                if (bm.Binning != m_sysData.videoDeviceData.uiBinning)
+                {
+                    bm.Binning = m_sysData.videoDeviceData.uiBinning;
+
+                    if (bm.Binning == m_sysData.videoDeviceData.uiBinning)
+                    {
+                        m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, picturePaletteImage.Format);
+
+                        if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
+
+                        pictureBoxImage.Size = bm.ImageRectangle.Size;
+
+                        m_sysData.applicationData.m_FormErrorMessage.Dispose();
+                    }
+                }
+
+                if (bm.pixelFormat != m_sysData.videoDeviceData.pixelFormat)
+                {
+                    picturePaletteImage.Format = m_sysData.videoDeviceData.pixelFormat;
+                }
+            }
         }
     }
 }

@@ -20,8 +20,6 @@ namespace BeamOn_2K
         [DataContract(Name = "Setup")]
         private class Data
         {
-            [DataMember(Name = "PixelFormat")]
-            public PixelFormat m_pixelFormat = PixelFormat.Format8bppIndexed;
             [DataMember(Name = "ScaleProfile")]
             public Boolean m_bScaleProfile = false;
             [DataMember(Name = "Gaussian")]
@@ -44,6 +42,8 @@ namespace BeamOn_2K
             public PowerData m_powerData = new PowerData();
             [DataMember(Name = "ApplicationData")]
             public ApplicationData m_applicationData = new ApplicationData();
+            [DataMember(Name = "VideoDeviceData")]
+            public VideoDevice m_videoDevice = new VideoDevice();
             public Boolean m_bDemo = false;
             public Boolean m_bDebug = false;
             public Boolean m_bCalibr = false;
@@ -76,6 +76,7 @@ namespace BeamOn_2K
                 m_powerData.InitializeComponent();
                 m_applicationData.InitializeComponent();
                 m_projectionData.InitializeComponent();
+                m_videoDevice.InitializeComponent();
 
                 string strProgramDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
                 string strProgramFilePath = Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles);
@@ -145,12 +146,6 @@ namespace BeamOn_2K
         {
             get { return m_data.m_tpProfile; }
             set { m_data.m_tpProfile = value; }
-        }
-
-        public PixelFormat FormatPixel
-        {
-            get { return m_data.m_pixelFormat; }
-            set { m_data.m_pixelFormat = value; }
         }
 
         public Boolean ViewGaussian
@@ -236,6 +231,11 @@ namespace BeamOn_2K
             get { return m_data.m_applicationData; }
         }
 
+        public VideoDevice videoDeviceData
+        {
+            get { return m_data.m_videoDevice; }
+        }
+
         public LogData logData
         {
             get { return m_data.m_logData; }
@@ -288,6 +288,24 @@ namespace BeamOn_2K
             set { m_data.FocalLens = value; }
         }
     }
+
+    [DataContract(Name = "VideoDevice")]
+    public class VideoDevice
+    {
+        [DataMember(Name = "Video")]
+        public UInt16 uiBinning = 1;
+        [DataMember(Name="PixelFormat")]
+        public PixelFormat pixelFormat = PixelFormat.Format8bppIndexed;
+
+        public void InitializeComponent()
+        {
+        }
+
+        public VideoDevice()
+        {
+            InitializeComponent();
+        }
+   }
 
     [DataContract(Name = "Setup")]
     public class ApplicationData
@@ -440,7 +458,7 @@ namespace BeamOn_2K
 
         public String HelpNamespace
         {
-            get { return m_strHelpNamespace; ;}
+            get { return m_strHelpNamespace; }
         }
 
         public ApplicationData()

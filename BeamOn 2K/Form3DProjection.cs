@@ -25,6 +25,22 @@ namespace BeamOn_2K
             image3D.colorArray = colorArray;
         }
 
+        public Point SensorCenterPosition
+        {
+            get { return image3D.SensorCenterPosition; }
+            set { image3D.SensorCenterPosition = value; }
+        }
+
+        public void SetScaleGridX(short Step, float Value)
+        {
+            image3D.SetScaleGridX(Step, Value);
+        }
+
+        public void SetScaleGridY(short Step, float Value)
+        {
+            image3D.SetScaleGridY(Step, Value);
+        }
+
         private void Form3DProjection_Load(object sender, EventArgs e)
         {
             checkProjectionX.Checked = ((m_sysData.projectionData.Projection == OpenGLControl.TypeProjection.XZProjection) || (m_sysData.projectionData.Projection == OpenGLControl.TypeProjection.XZ_YZProjection));
@@ -138,6 +154,7 @@ namespace BeamOn_2K
         private void buttonProperty_Click(object sender, EventArgs e)
         {
             splitContainer3D.Panel2Collapsed = !splitContainer3D.Panel2Collapsed;
+            splitContainer3D.SplitterDistance = splitContainer3D.Width - splitContainer3D.Panel2MinSize- splitContainer3D.SplitterWidth;
         }
     }
 }
