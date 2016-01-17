@@ -94,6 +94,5 @@ namespace BeamOnCL
 
             return snp;
         }
-
     }
 }

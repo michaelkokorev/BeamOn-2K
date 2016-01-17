@@ -334,5 +334,26 @@ namespace BeamOnCL
 
             set { mc.Exposure = value; }
         }
+
+        public int CameraFilter
+        {
+            get { return mc.CameraFilter; }
+            set { mc.CameraFilter = value; }
+        }
+
+        public float CurrentAreaIntensity
+        {
+            get { return m_pPositioning.CurrentAreaIntensity; }
+        }
+
+        public long CurrentAreaPoins
+        {
+            get { return m_pPositioning.CurrentAreaPoins; }
+        }
+
+        public double CurrentAreaPower
+        {
+            get { return m_pPositioning.CurrentAreaPower; }
+        }
     }
 }

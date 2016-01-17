@@ -28,6 +28,14 @@ namespace BeamOnCL
 
         Figure m_fType = Figure.enEllipse;
 
+        Boolean m_bLikeBucket = true;
+
+        public Boolean LikeBucket
+        {
+            get { return m_bLikeBucket; }
+            set { m_bLikeBucket = value; }
+        }
+
         public Area()
         {
             Angle = 0;

@@ -32,6 +32,14 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.groupBoxPixelFormat = new System.Windows.Forms.GroupBox();
+            this.radioButton8bpp = new System.Windows.Forms.RadioButton();
+            this.radioButton12bpp = new System.Windows.Forms.RadioButton();
+            this.groupBoxBinning = new System.Windows.Forms.GroupBox();
+            this.radioButtonBinning8 = new System.Windows.Forms.RadioButton();
+            this.radioButtonBinning4 = new System.Windows.Forms.RadioButton();
+            this.radioButtonBinningOff = new System.Windows.Forms.RadioButton();
+            this.radioButtonBinning2 = new System.Windows.Forms.RadioButton();
             this.gbFlip = new System.Windows.Forms.GroupBox();
             this.checkFlipVertical = new System.Windows.Forms.CheckBox();
             this.checkFlipHorizontal = new System.Windows.Forms.CheckBox();
@@ -128,16 +136,10 @@
             this.lblForeGroundColor = new System.Windows.Forms.Label();
             this.lblBackGroundColorName = new System.Windows.Forms.Label();
             this.lblBackGroundColor = new System.Windows.Forms.Label();
-            this.groupBoxBinning = new System.Windows.Forms.GroupBox();
-            this.radioButtonBinningOff = new System.Windows.Forms.RadioButton();
-            this.radioButtonBinning2 = new System.Windows.Forms.RadioButton();
-            this.radioButtonBinning4 = new System.Windows.Forms.RadioButton();
-            this.radioButtonBinning8 = new System.Windows.Forms.RadioButton();
-            this.groupBoxPixelFormat = new System.Windows.Forms.GroupBox();
-            this.radioButton12bpp = new System.Windows.Forms.RadioButton();
-            this.radioButton8bpp = new System.Windows.Forms.RadioButton();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.groupBoxPixelFormat.SuspendLayout();
+            this.groupBoxBinning.SuspendLayout();
             this.gbFlip.SuspendLayout();
             this.gbObjectiveMagnification.SuspendLayout();
             this.gbOpticalFactor.SuspendLayout();
@@ -177,8 +179,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.MaxUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown1)).BeginInit();
             this.tabPage2.SuspendLayout();
-            this.groupBoxBinning.SuspendLayout();
-            this.groupBoxPixelFormat.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnOK
@@ -232,6 +232,97 @@
             this.tabPage1.Size = new System.Drawing.Size(398, 344);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Settings";
+            // 
+            // groupBoxPixelFormat
+            // 
+            this.groupBoxPixelFormat.Controls.Add(this.radioButton8bpp);
+            this.groupBoxPixelFormat.Controls.Add(this.radioButton12bpp);
+            this.groupBoxPixelFormat.Location = new System.Drawing.Point(3, 290);
+            this.groupBoxPixelFormat.Name = "groupBoxPixelFormat";
+            this.groupBoxPixelFormat.Size = new System.Drawing.Size(389, 50);
+            this.groupBoxPixelFormat.TabIndex = 12;
+            this.groupBoxPixelFormat.TabStop = false;
+            this.groupBoxPixelFormat.Text = "Pixel Format";
+            // 
+            // radioButton8bpp
+            // 
+            this.radioButton8bpp.AutoSize = true;
+            this.radioButton8bpp.Location = new System.Drawing.Point(212, 17);
+            this.radioButton8bpp.Name = "radioButton8bpp";
+            this.radioButton8bpp.Size = new System.Drawing.Size(92, 17);
+            this.radioButton8bpp.TabIndex = 8;
+            this.radioButton8bpp.TabStop = true;
+            this.radioButton8bpp.Text = "8 bits per pixel";
+            this.radioButton8bpp.UseVisualStyleBackColor = true;
+            // 
+            // radioButton12bpp
+            // 
+            this.radioButton12bpp.AutoSize = true;
+            this.radioButton12bpp.Location = new System.Drawing.Point(84, 17);
+            this.radioButton12bpp.Name = "radioButton12bpp";
+            this.radioButton12bpp.Size = new System.Drawing.Size(98, 17);
+            this.radioButton12bpp.TabIndex = 7;
+            this.radioButton12bpp.TabStop = true;
+            this.radioButton12bpp.Text = "12 bits per pixel";
+            this.radioButton12bpp.UseVisualStyleBackColor = true;
+            // 
+            // groupBoxBinning
+            // 
+            this.groupBoxBinning.BackColor = System.Drawing.Color.Transparent;
+            this.groupBoxBinning.Controls.Add(this.radioButtonBinning8);
+            this.groupBoxBinning.Controls.Add(this.radioButtonBinning4);
+            this.groupBoxBinning.Controls.Add(this.radioButtonBinningOff);
+            this.groupBoxBinning.Controls.Add(this.radioButtonBinning2);
+            this.groupBoxBinning.Location = new System.Drawing.Point(3, 174);
+            this.groupBoxBinning.Name = "groupBoxBinning";
+            this.groupBoxBinning.Size = new System.Drawing.Size(389, 110);
+            this.groupBoxBinning.TabIndex = 11;
+            this.groupBoxBinning.TabStop = false;
+            this.groupBoxBinning.Text = "Binning";
+            // 
+            // radioButtonBinning8
+            // 
+            this.radioButtonBinning8.AutoSize = true;
+            this.radioButtonBinning8.Location = new System.Drawing.Point(176, 87);
+            this.radioButtonBinning8.Name = "radioButtonBinning8";
+            this.radioButtonBinning8.Size = new System.Drawing.Size(36, 17);
+            this.radioButtonBinning8.TabIndex = 8;
+            this.radioButtonBinning8.TabStop = true;
+            this.radioButtonBinning8.Text = "x8";
+            this.radioButtonBinning8.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonBinning4
+            // 
+            this.radioButtonBinning4.AutoSize = true;
+            this.radioButtonBinning4.Location = new System.Drawing.Point(176, 65);
+            this.radioButtonBinning4.Name = "radioButtonBinning4";
+            this.radioButtonBinning4.Size = new System.Drawing.Size(36, 17);
+            this.radioButtonBinning4.TabIndex = 7;
+            this.radioButtonBinning4.TabStop = true;
+            this.radioButtonBinning4.Text = "x4";
+            this.radioButtonBinning4.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonBinningOff
+            // 
+            this.radioButtonBinningOff.AutoSize = true;
+            this.radioButtonBinningOff.Location = new System.Drawing.Point(175, 19);
+            this.radioButtonBinningOff.Name = "radioButtonBinningOff";
+            this.radioButtonBinningOff.Size = new System.Drawing.Size(39, 17);
+            this.radioButtonBinningOff.TabIndex = 6;
+            this.radioButtonBinningOff.TabStop = true;
+            this.radioButtonBinningOff.Text = "Off";
+            this.radioButtonBinningOff.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonBinning2
+            // 
+            this.radioButtonBinning2.AutoSize = true;
+            this.radioButtonBinning2.Location = new System.Drawing.Point(176, 42);
+            this.radioButtonBinning2.Name = "radioButtonBinning2";
+            this.radioButtonBinning2.Size = new System.Drawing.Size(36, 17);
+            this.radioButtonBinning2.TabIndex = 5;
+            this.radioButtonBinning2.TabStop = true;
+            this.radioButtonBinning2.Text = "x2";
+            this.radioButtonBinning2.UseVisualStyleBackColor = true;
             // 
             // gbFlip
             // 
@@ -425,7 +516,6 @@
             // 
             this.gbMode.Controls.Add(this.rbStep);
             this.gbMode.Controls.Add(this.rbRun);
-            this.gbMode.Enabled = false;
             this.gbMode.Location = new System.Drawing.Point(3, 6);
             this.gbMode.Name = "gbMode";
             this.gbMode.Size = new System.Drawing.Size(186, 50);
@@ -701,6 +791,7 @@
             this.Level0UpDown.Name = "Level0UpDown";
             this.Level0UpDown.Size = new System.Drawing.Size(63, 20);
             this.Level0UpDown.TabIndex = 2;
+            this.Level0UpDown.ValueChanged += new System.EventHandler(this.Level0UpDown_ValueChanged);
             // 
             // Level1UpDown
             // 
@@ -714,6 +805,7 @@
             this.Level1UpDown.Name = "Level1UpDown";
             this.Level1UpDown.Size = new System.Drawing.Size(63, 20);
             this.Level1UpDown.TabIndex = 1;
+            this.Level1UpDown.ValueChanged += new System.EventHandler(this.Level1UpDown_ValueChanged);
             // 
             // Level2UpDown
             // 
@@ -727,6 +819,7 @@
             this.Level2UpDown.Name = "Level2UpDown";
             this.Level2UpDown.Size = new System.Drawing.Size(63, 20);
             this.Level2UpDown.TabIndex = 0;
+            this.Level2UpDown.ValueChanged += new System.EventHandler(this.Level2UpDown_ValueChanged);
             // 
             // gbVew
             // 
@@ -1363,97 +1456,6 @@
             this.lblBackGroundColor.Size = new System.Drawing.Size(82, 25);
             this.lblBackGroundColor.TabIndex = 14;
             // 
-            // groupBoxBinning
-            // 
-            this.groupBoxBinning.BackColor = System.Drawing.Color.Transparent;
-            this.groupBoxBinning.Controls.Add(this.radioButtonBinning8);
-            this.groupBoxBinning.Controls.Add(this.radioButtonBinning4);
-            this.groupBoxBinning.Controls.Add(this.radioButtonBinningOff);
-            this.groupBoxBinning.Controls.Add(this.radioButtonBinning2);
-            this.groupBoxBinning.Location = new System.Drawing.Point(3, 174);
-            this.groupBoxBinning.Name = "groupBoxBinning";
-            this.groupBoxBinning.Size = new System.Drawing.Size(389, 110);
-            this.groupBoxBinning.TabIndex = 11;
-            this.groupBoxBinning.TabStop = false;
-            this.groupBoxBinning.Text = "Binning";
-            // 
-            // radioButtonBinningOff
-            // 
-            this.radioButtonBinningOff.AutoSize = true;
-            this.radioButtonBinningOff.Location = new System.Drawing.Point(175, 19);
-            this.radioButtonBinningOff.Name = "radioButtonBinningOff";
-            this.radioButtonBinningOff.Size = new System.Drawing.Size(39, 17);
-            this.radioButtonBinningOff.TabIndex = 6;
-            this.radioButtonBinningOff.TabStop = true;
-            this.radioButtonBinningOff.Text = "Off";
-            this.radioButtonBinningOff.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonBinning2
-            // 
-            this.radioButtonBinning2.AutoSize = true;
-            this.radioButtonBinning2.Location = new System.Drawing.Point(176, 42);
-            this.radioButtonBinning2.Name = "radioButtonBinning2";
-            this.radioButtonBinning2.Size = new System.Drawing.Size(36, 17);
-            this.radioButtonBinning2.TabIndex = 5;
-            this.radioButtonBinning2.TabStop = true;
-            this.radioButtonBinning2.Text = "x2";
-            this.radioButtonBinning2.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonBinning4
-            // 
-            this.radioButtonBinning4.AutoSize = true;
-            this.radioButtonBinning4.Location = new System.Drawing.Point(176, 65);
-            this.radioButtonBinning4.Name = "radioButtonBinning4";
-            this.radioButtonBinning4.Size = new System.Drawing.Size(36, 17);
-            this.radioButtonBinning4.TabIndex = 7;
-            this.radioButtonBinning4.TabStop = true;
-            this.radioButtonBinning4.Text = "x4";
-            this.radioButtonBinning4.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonBinning8
-            // 
-            this.radioButtonBinning8.AutoSize = true;
-            this.radioButtonBinning8.Location = new System.Drawing.Point(176, 87);
-            this.radioButtonBinning8.Name = "radioButtonBinning8";
-            this.radioButtonBinning8.Size = new System.Drawing.Size(36, 17);
-            this.radioButtonBinning8.TabIndex = 8;
-            this.radioButtonBinning8.TabStop = true;
-            this.radioButtonBinning8.Text = "x8";
-            this.radioButtonBinning8.UseVisualStyleBackColor = true;
-            // 
-            // groupBoxPixelFormat
-            // 
-            this.groupBoxPixelFormat.Controls.Add(this.radioButton8bpp);
-            this.groupBoxPixelFormat.Controls.Add(this.radioButton12bpp);
-            this.groupBoxPixelFormat.Location = new System.Drawing.Point(3, 290);
-            this.groupBoxPixelFormat.Name = "groupBoxPixelFormat";
-            this.groupBoxPixelFormat.Size = new System.Drawing.Size(389, 50);
-            this.groupBoxPixelFormat.TabIndex = 12;
-            this.groupBoxPixelFormat.TabStop = false;
-            this.groupBoxPixelFormat.Text = "Pixel Format";
-            // 
-            // radioButton12bpp
-            // 
-            this.radioButton12bpp.AutoSize = true;
-            this.radioButton12bpp.Location = new System.Drawing.Point(84, 17);
-            this.radioButton12bpp.Name = "radioButton12bpp";
-            this.radioButton12bpp.Size = new System.Drawing.Size(98, 17);
-            this.radioButton12bpp.TabIndex = 7;
-            this.radioButton12bpp.TabStop = true;
-            this.radioButton12bpp.Text = "12 bits per pixel";
-            this.radioButton12bpp.UseVisualStyleBackColor = true;
-            // 
-            // radioButton8bpp
-            // 
-            this.radioButton8bpp.AutoSize = true;
-            this.radioButton8bpp.Location = new System.Drawing.Point(212, 17);
-            this.radioButton8bpp.Name = "radioButton8bpp";
-            this.radioButton8bpp.Size = new System.Drawing.Size(92, 17);
-            this.radioButton8bpp.TabIndex = 8;
-            this.radioButton8bpp.TabStop = true;
-            this.radioButton8bpp.Text = "8 bits per pixel";
-            this.radioButton8bpp.UseVisualStyleBackColor = true;
-            // 
             // FormSetup
             // 
             this.AcceptButton = this.btnOK;
@@ -1476,6 +1478,10 @@
             this.Load += new System.EventHandler(this.FormSetup_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.groupBoxPixelFormat.ResumeLayout(false);
+            this.groupBoxPixelFormat.PerformLayout();
+            this.groupBoxBinning.ResumeLayout(false);
+            this.groupBoxBinning.PerformLayout();
             this.gbFlip.ResumeLayout(false);
             this.gbFlip.PerformLayout();
             this.gbObjectiveMagnification.ResumeLayout(false);
@@ -1526,10 +1532,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown1)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
-            this.groupBoxBinning.ResumeLayout(false);
-            this.groupBoxBinning.PerformLayout();
-            this.groupBoxPixelFormat.ResumeLayout(false);
-            this.groupBoxPixelFormat.PerformLayout();
             this.ResumeLayout(false);
 
         }

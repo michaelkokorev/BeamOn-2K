@@ -9,6 +9,8 @@ namespace BeamOnCL
     class Positioning
     {
         const float SCALE_DIV = 8f;
+        const float MAX_POWER_OFFSET = 0.05f;
+        const float MIN_POWER = 0.8f;
 
         float m_fPixelSize = 5.86f;
 
@@ -29,6 +31,12 @@ namespace BeamOnCL
         Area m_WorkingAreaRect;
         Area m_EllipseArea = new Area();
         PointF m_pfOldCentroid = new PointF();
+        double m_dOldPower = 0;
+
+        double m_dAreaIntensity = 0;
+        float m_fCurrentAreaIntensity = 0;
+        long m_lCurrentAreaPoins = 0;
+        private double m_fCurrentAreaPower = 0;
 
         public Area Ellipse
         {
@@ -98,6 +106,7 @@ namespace BeamOnCL
                     {
                         m_pfOldCentroid = m_EllipseArea.Centroid;
                         m_WorkingAreaRect = SerchRectangle(snapshot);
+                        m_dOldPower = m_dAreaIntensity;
 
                         Create(snapshot);
                     }
@@ -119,6 +128,13 @@ namespace BeamOnCL
                         if (Math.Abs(sfDelta.Width) > fLimitDeltaX) rect.Offset((int)sfDelta.Width, 0);
 
                         if (m_AreaRect.Contains(rect) == false)
+                        {
+                            m_WorkingAreaRect = m_AreaRect;
+                            continue;
+                        }
+
+                        if ((m_dAreaIntensity > MIN_POWER) && (Math.Abs(m_dAreaIntensity / m_dOldPower - 1) > MAX_POWER_OFFSET) ||
+                            (m_dAreaIntensity < MIN_POWER))
                         {
                             m_WorkingAreaRect = m_AreaRect;
                             continue;
@@ -146,6 +162,8 @@ namespace BeamOnCL
             }
 
             Create2(snapshot);
+
+            m_fCurrentAreaIntensity = GetAreaIntensity(snapshot, ref m_lCurrentAreaPoins);
         }
 
         public void Create(SnapshotBase snapshot)
@@ -155,10 +173,12 @@ namespace BeamOnCL
             double l_dProfileHorizontalMin = double.MaxValue;
             double l_dProfileVerticalMax = 0;
             double l_dProfileHorizontalMax = 0;
+            double l_dPowerPointsCount = 0;
 
             float f_Threshold = 0;
             double l_Sum = 0;
             double l_Sum0 = 0;
+            double l_dPower = 0;
 
             Rectangle rect = m_WorkingAreaRect;
 
@@ -174,13 +194,19 @@ namespace BeamOnCL
                     uiData = snapshot.GetPixelColor(iShift);
                     m_dProfileHorizontal.m_sDataProfile[j] += uiData;
                     m_dProfileVertical.m_sDataProfile[i] += uiData;
+
+                    l_dPowerPointsCount++;
                 }
+
+                l_dPower += m_dProfileVertical.m_sDataProfile[i];
 
                 if (l_dProfileVerticalMin > m_dProfileVertical.m_sDataProfile[i])
                     l_dProfileVerticalMin = m_dProfileVertical.m_sDataProfile[i];
                 else if (l_dProfileVerticalMax < m_dProfileVertical.m_sDataProfile[i])
                     l_dProfileVerticalMax = m_dProfileVertical.m_sDataProfile[i];
             }
+
+            m_dAreaIntensity = (l_dPowerPointsCount > 0) ? (float)(l_dPower / l_dPowerPointsCount) : 0;
 
             f_Threshold = (float)((l_dProfileVerticalMax - l_dProfileVerticalMin) * 0.2);
 
@@ -732,6 +758,73 @@ namespace BeamOnCL
             if ((p.Y + s.Height) > m_AreaRect.Height) s.Height = m_AreaRect.Height - p.Y;
 
             return new RectangleF(p, s);
+        }
+
+        float GetAreaIntensity(SnapshotBase snapshot, ref long pnCount)
+        {
+            float fRet = 0;
+            long lCount = 0;
+            double m_dSum = 0;
+            float fLeft = 0, fRight = 0;
+            float fTop = 0, fBottom = 0;
+
+            if (m_EllipseArea.LikeBucket == true)
+            {
+                m_EllipseArea.GetMaxY(ref fBottom, ref fTop);
+                for (int j = (int)Math.Ceiling(fBottom); j < (int)Math.Floor(fTop); j++)
+                {
+                    if (m_EllipseArea.GetCrossX(j, ref fLeft, ref fRight))
+                    {
+                        for (int i = (int)Math.Ceiling(fLeft), iShift = i + j * snapshot.Width; i <= (int)Math.Floor(fRight); i++, iShift++)
+                        {
+                            lCount++;
+                            m_dSum += snapshot.GetPixelColor(iShift);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Rectangle rect = m_WorkingAreaRect;
+
+                m_dProfileHorizontal.ClearProfile();
+                m_dProfileVertical.ClearProfile();
+
+                m_dProfile45Max = double.MinValue;
+
+                for (int i = rect.Top; i < rect.Bottom; i++)
+                {
+                    for (int j = rect.Left, iShift = j + i * snapshot.Width; j < rect.Right; j++, iShift++)
+                    {
+                        m_dSum += snapshot.GetPixelColor(iShift);
+                    }
+                }
+
+                lCount = rect.Width * rect.Height;
+            }
+
+            m_fCurrentAreaPower = m_dSum;
+
+            if (lCount > 0) fRet = (float)(m_fCurrentAreaPower / (float)lCount);
+
+            pnCount = lCount;
+
+            return fRet;
+        }
+
+        public float CurrentAreaIntensity 
+        { 
+            get{return m_fCurrentAreaIntensity;}
+        }
+
+        public long CurrentAreaPoins
+        {
+            get { return m_lCurrentAreaPoins; }
+        }
+
+        public double CurrentAreaPower
+        {
+            get { return m_fCurrentAreaPower; }
         }
     }
 }

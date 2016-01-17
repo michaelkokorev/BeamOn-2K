@@ -44,6 +44,22 @@ namespace BeamOn_2K
                 radioButton8bpp.Checked = true;
             else if (m_sysData.videoDeviceData.pixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb)
                 radioButton12bpp.Checked = true;
+
+            //Step Mode
+            rbRun.Checked = m_sysData.RunOn;
+            rbStep.Checked = !rbRun.Checked;
+
+            //Status Power
+            chkToolbarPower.Checked = m_sysData.applicationData.bStatusViewPower;
+
+            //Profile
+            checkGaussian.Checked = m_sysData.ViewGaussian;
+            checkAutoscale.Checked = m_sysData.ScaleProfile;
+
+            Level2UpDown.Value = m_sysData.ClipLevels.Level(2);
+            Level1UpDown.Value = m_sysData.ClipLevels.Level(1);
+            Level0UpDown.Value = m_sysData.ClipLevels.Level(0);
+
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -64,7 +80,37 @@ namespace BeamOn_2K
             else if (radioButton8bpp.Checked == true)
                 m_sysData.videoDeviceData.pixelFormat = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
 
+            //Step Mode
+            m_sysData.RunOn = rbRun.Checked;
+
+            //Status Power
+            m_sysData.applicationData.bStatusViewPower = chkToolbarPower.Checked;
+
+            //Profile
+            m_sysData.ViewGaussian = checkGaussian.Checked;
+            m_sysData.ScaleProfile = checkAutoscale.Checked;
+
+            m_sysData.ClipLevels.SetLevel(0, Level0UpDown.Value);
+            m_sysData.ClipLevels.SetLevel(1, Level1UpDown.Value);
+            m_sysData.ClipLevels.SetLevel(2, Level2UpDown.Value);
+
             this.DialogResult = DialogResult.OK;
+        }
+
+        private void Level0UpDown_ValueChanged(object sender, EventArgs e)
+        {
+            Level1UpDown.Minimum = Level0UpDown.Value + 0.1M;
+        }
+
+        private void Level2UpDown_ValueChanged(object sender, EventArgs e)
+        {
+            Level1UpDown.Maximum = Level2UpDown.Value - 0.1M;
+        }
+
+        private void Level1UpDown_ValueChanged(object sender, EventArgs e)
+        {
+            Level2UpDown.Minimum = Level1UpDown.Value + 0.1M;
+            Level0UpDown.Maximum = Level1UpDown.Value - 0.1M;
         }
     }
 }

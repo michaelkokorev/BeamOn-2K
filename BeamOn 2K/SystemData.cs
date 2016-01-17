@@ -20,6 +20,8 @@ namespace BeamOn_2K
         [DataContract(Name = "Setup")]
         private class Data
         {
+            public Boolean m_bGetStep = false;
+            public Boolean m_bRunOn = true;
             [DataMember(Name = "ScaleProfile")]
             public Boolean m_bScaleProfile = false;
             [DataMember(Name = "Gaussian")]
@@ -107,6 +109,8 @@ namespace BeamOn_2K
 
                 m_applicationData.m_strMyTempDir = strNewPath + "\\Temp";
                 if (Directory.Exists(m_applicationData.m_strMyTempDir) == false) Directory.CreateDirectory(m_applicationData.m_strMyTempDir);
+
+                m_bRunOn = true;
             }
 
             public MeasureUnits UnitMeasure
@@ -152,6 +156,18 @@ namespace BeamOn_2K
         {
             get { return m_data.m_bGaussian; }
             set { m_data.m_bGaussian = value; }
+        }
+
+        public Boolean GetStep
+        {
+            get { return m_data.m_bGetStep; }
+            set { m_data.m_bGetStep = value; }
+        }
+
+        public Boolean RunOn
+        {
+            get { return m_data.m_bRunOn; }
+            set { m_data.m_bRunOn = value; }
         }
 
         public Boolean ScaleProfile
@@ -294,7 +310,7 @@ namespace BeamOn_2K
     {
         [DataMember(Name = "Video")]
         public UInt16 uiBinning = 1;
-        [DataMember(Name="PixelFormat")]
+        [DataMember(Name = "PixelFormat")]
         public PixelFormat pixelFormat = PixelFormat.Format8bppIndexed;
 
         public void InitializeComponent()
@@ -305,7 +321,7 @@ namespace BeamOn_2K
         {
             InitializeComponent();
         }
-   }
+    }
 
     [DataContract(Name = "Setup")]
     public class ApplicationData
@@ -545,9 +561,35 @@ namespace BeamOn_2K
         public Single Sensitivity;
     }
 
+    [DataContract(Name = "PowerCalibration")]
+    public class PowerCalibration
+    {
+        [DataMember(Name = "PowerCalibrationCoef")]
+        private double m_dPowerCalibrationCoeff = 1;
+        [DataMember(Name = "PowerCalibrationExposure")]
+        private int m_iPowerCalibrationExposure = 1;
+        [DataMember(Name = "PowerCalibrationGain")]
+        private int m_iPowerCalibrationGain = 1;
+
+        public void InitializePowerCalibration(double dCoeff, int iExposure, int iGain)
+        {
+            m_dPowerCalibrationCoeff = dCoeff;
+            m_iPowerCalibrationExposure = iExposure;
+            m_iPowerCalibrationGain = iGain;
+        }
+
+        public double PowerCoeff(int iExposure, int iGain)
+        {
+            return m_dPowerCalibrationCoeff * (iExposure / (float)m_iPowerCalibrationExposure) * ((iGain + 1) / (float)(m_iPowerCalibrationGain + 1));
+        }
+    }
+
     [DataContract(Name = "Power")]
     public class PowerData
     {
+        [DataMember(Name = "PowerCalibrationValue")]
+        public PowerCalibration PowerCalibr = new PowerCalibration();
+
         public float fSensFactor = 1.0f;                                             /* Sensitivity factor */
         public float fSensitivity = 0.387f;                                          /* Overral sensitivity */
         public FilterData[] headData = null;
@@ -561,8 +603,6 @@ namespace BeamOn_2K
         [DataMember(Name = "Wavelenght")]
         public UInt16 uiWavelenght;
 
-        public UInt16 uiWavelenghtMin;
-        public UInt16 uiWavelenghtMax;
         public String strFilterName;
         public String strFilterPath;
         public String strSAMName;
@@ -571,7 +611,9 @@ namespace BeamOn_2K
         public String strSensitivityPath;
         public Single realSAMFactor = 1f;
         public Single realFilterFactor = 1f;
+        [DataMember(Name = "FilterFactor")]
         public Single currentFilterFactor = 1f;
+        [DataMember(Name = "SAMFactor")]
         public Single currentSAMFactor = 1f;
         public FilterData[] filterData = null;
         public FilterData[] SAMData = null;
@@ -1059,6 +1101,7 @@ namespace BeamOn_2K
 
         internal void InitializeComponent()
         {
+            //PowerCalibr = new PowerCalibration();
         }
     }
 
@@ -1531,8 +1574,8 @@ namespace BeamOn_2K
         public Int16 AngleTilt
         {
             get { return m_iAngleTilt; }
-            set 
-            { 
+            set
+            {
                 m_iAngleTilt = value;
                 while (m_iAngleTilt > 359) m_iAngleTilt -= 360;
                 while (m_iAngleTilt < 0) m_iAngleTilt += 360;
