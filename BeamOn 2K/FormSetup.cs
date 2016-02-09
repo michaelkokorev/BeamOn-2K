@@ -25,7 +25,6 @@ namespace BeamOn_2K
 
             gbWaveLength.Enabled = !m_sysData.Simulation && !m_sysData.SnapshotView;
             gbAverage.Enabled = !m_sysData.Simulation && !m_sysData.SnapshotView;
-            gbMode.Enabled = !m_sysData.Simulation && !m_sysData.SnapshotView;
             gbUnits.Enabled = !m_sysData.Simulation && !m_sysData.SnapshotView;
 
             //Binning
@@ -50,10 +49,6 @@ namespace BeamOn_2K
                 radioButton8bpp.Checked = true;
             else if (m_sysData.videoDeviceData.pixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb)
                 radioButton12bpp.Checked = true;
-
-            //Step Mode
-            rbRun.Checked = m_sysData.RunOn;
-            rbStep.Checked = !rbRun.Checked;
 
             //Profile
             checkGaussian.Checked = m_sysData.ViewGaussian;
@@ -111,9 +106,6 @@ namespace BeamOn_2K
                 m_sysData.videoDeviceData.pixelFormat = System.Drawing.Imaging.PixelFormat.Format24bppRgb;
             else if (radioButton8bpp.Checked == true)
                 m_sysData.videoDeviceData.pixelFormat = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
-
-            //Step Mode
-            m_sysData.RunOn = rbRun.Checked;
 
             //Profile
             m_sysData.ViewGaussian = checkGaussian.Checked;

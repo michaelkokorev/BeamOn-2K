@@ -22,8 +22,6 @@ namespace BeamOn_2K
         [DataContract(Name = "Setup")]
         private class Data
         {
-            public Boolean m_bGetStep = false;
-            public Boolean m_bRunOn = true;
             public Boolean bSimulation = false;
             public Boolean fSnapshotView = false;
             [DataMember(Name = "ScaleProfile")]
@@ -124,8 +122,6 @@ namespace BeamOn_2K
                 m_applicationData.m_strMyTempDir = strNewPath + "\\Temp";
                 if (Directory.Exists(m_applicationData.m_strMyTempDir) == false) Directory.CreateDirectory(m_applicationData.m_strMyTempDir);
 
-                m_bRunOn = true;
-
                 bSimulation = false;
                 fSnapshotView = false;
 
@@ -211,18 +207,6 @@ namespace BeamOn_2K
         {
             get { return m_data.m_bGaussian; }
             set { m_data.m_bGaussian = value; }
-        }
-
-        public Boolean GetStep
-        {
-            get { return m_data.m_bGetStep; }
-            set { m_data.m_bGetStep = value; }
-        }
-
-        public Boolean RunOn
-        {
-            get { return m_data.m_bRunOn; }
-            set { m_data.m_bRunOn = value; }
         }
 
         public Boolean Simulation
@@ -347,9 +331,12 @@ namespace BeamOn_2K
 
         public void DeserializeAppData(String strPath)
         {
-            var ds = new DataContractSerializer(typeof(Data));
-            using (Stream s = File.OpenRead(strPath))
-                m_data = (Data)ds.ReadObject(s); // Десериализация
+            if (File.Exists(strPath) == true)
+            {
+                var ds = new DataContractSerializer(typeof(Data));
+                using (Stream s = File.OpenRead(strPath))
+                    m_data = (Data)ds.ReadObject(s); // Десериализация
+            }
 
             m_data.InitializeComponent();
         }

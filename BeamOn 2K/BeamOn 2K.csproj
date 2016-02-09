@@ -189,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\Snowflake-24.png" />
     <None Include="Resources\printer-icon.png" />
     <None Include="Resources\Faq-icon.png" />
     <None Include="Resources\Sidebar-Window-icon.png" />

@@ -55,32 +55,11 @@
             this.FocalLensUpDown = new System.Windows.Forms.NumericUpDown();
             this.rbUnitsum = new System.Windows.Forms.RadioButton();
             this.rbUnitsmrad = new System.Windows.Forms.RadioButton();
-            this.gbMode = new System.Windows.Forms.GroupBox();
-            this.rbStep = new System.Windows.Forms.RadioButton();
-            this.rbRun = new System.Windows.Forms.RadioButton();
             this.gbAverage = new System.Windows.Forms.GroupBox();
             this.checkAverage = new System.Windows.Forms.CheckBox();
             this.AverageUpDown = new System.Windows.Forms.NumericUpDown();
             this.gbWaveLength = new System.Windows.Forms.GroupBox();
             this.WaveUpDown = new System.Windows.Forms.NumericUpDown();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.rbUnitskW = new System.Windows.Forms.RadioButton();
-            this.rbUnitsW = new System.Windows.Forms.RadioButton();
-            this.rbUnitsdB = new System.Windows.Forms.RadioButton();
-            this.rbUnitsuW = new System.Windows.Forms.RadioButton();
-            this.rbUnitsmW = new System.Windows.Forms.RadioButton();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.gbClipLevels = new System.Windows.Forms.GroupBox();
-            this.lblLevel0 = new System.Windows.Forms.Label();
-            this.lblLevel1 = new System.Windows.Forms.Label();
-            this.lblLevel2 = new System.Windows.Forms.Label();
-            this.Level0UpDown = new System.Windows.Forms.NumericUpDown();
-            this.Level1UpDown = new System.Windows.Forms.NumericUpDown();
-            this.Level2UpDown = new System.Windows.Forms.NumericUpDown();
-            this.gbVew = new System.Windows.Forms.GroupBox();
-            this.checkGaussian = new System.Windows.Forms.CheckBox();
-            this.checkAutoscale = new System.Windows.Forms.CheckBox();
             this.tabPage6 = new System.Windows.Forms.TabPage();
             this.textBoxUserData = new System.Windows.Forms.TextBox();
             this.textBoxUserName = new System.Windows.Forms.TextBox();
@@ -124,16 +103,22 @@
             this.MinUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.lblName1 = new System.Windows.Forms.Label();
             this.checkName1 = new System.Windows.Forms.CheckBox();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.btnSet = new System.Windows.Forms.Button();
-            this.lblStandard = new System.Windows.Forms.Label();
-            this.cmbColorScheme = new System.Windows.Forms.ComboBox();
-            this.btnSave = new System.Windows.Forms.Button();
-            this.btnPreview = new System.Windows.Forms.Button();
-            this.lblForeColorName = new System.Windows.Forms.Label();
-            this.lblForeGroundColor = new System.Windows.Forms.Label();
-            this.lblBackGroundColorName = new System.Windows.Forms.Label();
-            this.lblBackGroundColor = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.rbUnitskW = new System.Windows.Forms.RadioButton();
+            this.rbUnitsW = new System.Windows.Forms.RadioButton();
+            this.rbUnitsdB = new System.Windows.Forms.RadioButton();
+            this.rbUnitsuW = new System.Windows.Forms.RadioButton();
+            this.rbUnitsmW = new System.Windows.Forms.RadioButton();
+            this.gbClipLevels = new System.Windows.Forms.GroupBox();
+            this.lblLevel0 = new System.Windows.Forms.Label();
+            this.lblLevel1 = new System.Windows.Forms.Label();
+            this.lblLevel2 = new System.Windows.Forms.Label();
+            this.Level0UpDown = new System.Windows.Forms.NumericUpDown();
+            this.Level1UpDown = new System.Windows.Forms.NumericUpDown();
+            this.Level2UpDown = new System.Windows.Forms.NumericUpDown();
+            this.gbVew = new System.Windows.Forms.GroupBox();
+            this.checkGaussian = new System.Windows.Forms.CheckBox();
+            this.checkAutoscale = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBoxPixelFormat.SuspendLayout();
@@ -143,19 +128,10 @@
             this.gbOpticalFactor.SuspendLayout();
             this.gbUnits.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FocalLensUpDown)).BeginInit();
-            this.gbMode.SuspendLayout();
             this.gbAverage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.AverageUpDown)).BeginInit();
             this.gbWaveLength.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.WaveUpDown)).BeginInit();
-            this.tabPage3.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.tabPage4.SuspendLayout();
-            this.gbClipLevels.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Level0UpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Level1UpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Level2UpDown)).BeginInit();
-            this.gbVew.SuspendLayout();
             this.tabPage6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MaxUpDown9)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown9)).BeginInit();
@@ -175,12 +151,18 @@
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MaxUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown1)).BeginInit();
-            this.tabPage2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.gbClipLevels.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Level0UpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Level1UpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Level2UpDown)).BeginInit();
+            this.gbVew.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(233, 378);
+            this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnOK.Location = new System.Drawing.Point(229, 340);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(82, 25);
             this.btnOK.TabIndex = 5;
@@ -190,8 +172,9 @@
             // 
             // btnCancel
             // 
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(321, 378);
+            this.btnCancel.Location = new System.Drawing.Point(319, 340);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(82, 25);
             this.btnCancel.TabIndex = 4;
@@ -201,32 +184,31 @@
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Controls.Add(this.tabPage6);
-            this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Location = new System.Drawing.Point(1, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(406, 370);
+            this.tabControl1.Size = new System.Drawing.Size(404, 332);
             this.tabControl1.TabIndex = 6;
             // 
             // tabPage1
             // 
             this.tabPage1.BackColor = System.Drawing.Color.Transparent;
+            this.tabPage1.Controls.Add(this.gbVew);
+            this.tabPage1.Controls.Add(this.gbClipLevels);
+            this.tabPage1.Controls.Add(this.groupBox1);
             this.tabPage1.Controls.Add(this.groupBoxPixelFormat);
             this.tabPage1.Controls.Add(this.groupBoxBinning);
             this.tabPage1.Controls.Add(this.gbFlip);
             this.tabPage1.Controls.Add(this.gbObjectiveMagnification);
             this.tabPage1.Controls.Add(this.gbOpticalFactor);
             this.tabPage1.Controls.Add(this.gbUnits);
-            this.tabPage1.Controls.Add(this.gbMode);
             this.tabPage1.Controls.Add(this.gbAverage);
             this.tabPage1.Controls.Add(this.gbWaveLength);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(398, 344);
+            this.tabPage1.Size = new System.Drawing.Size(396, 306);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Settings";
             // 
@@ -235,7 +217,7 @@
             this.groupBoxPixelFormat.Controls.Add(this.radioButton8bpp);
             this.groupBoxPixelFormat.Controls.Add(this.radioButton12bpp);
             this.groupBoxPixelFormat.Enabled = false;
-            this.groupBoxPixelFormat.Location = new System.Drawing.Point(3, 290);
+            this.groupBoxPixelFormat.Location = new System.Drawing.Point(-3000, 290);
             this.groupBoxPixelFormat.Name = "groupBoxPixelFormat";
             this.groupBoxPixelFormat.Size = new System.Drawing.Size(389, 50);
             this.groupBoxPixelFormat.TabIndex = 12;
@@ -272,7 +254,7 @@
             this.groupBoxBinning.Controls.Add(this.radioButtonBinningOff);
             this.groupBoxBinning.Controls.Add(this.radioButtonBinning2);
             this.groupBoxBinning.Enabled = false;
-            this.groupBoxBinning.Location = new System.Drawing.Point(3, 174);
+            this.groupBoxBinning.Location = new System.Drawing.Point(-3000, 174);
             this.groupBoxBinning.Name = "groupBoxBinning";
             this.groupBoxBinning.Size = new System.Drawing.Size(389, 110);
             this.groupBoxBinning.TabIndex = 11;
@@ -328,9 +310,9 @@
             this.gbFlip.Controls.Add(this.checkFlipVertical);
             this.gbFlip.Controls.Add(this.checkFlipHorizontal);
             this.gbFlip.Enabled = false;
-            this.gbFlip.Location = new System.Drawing.Point(195, 6);
+            this.gbFlip.Location = new System.Drawing.Point(3, 62);
             this.gbFlip.Name = "gbFlip";
-            this.gbFlip.Size = new System.Drawing.Size(197, 50);
+            this.gbFlip.Size = new System.Drawing.Size(389, 50);
             this.gbFlip.TabIndex = 10;
             this.gbFlip.TabStop = false;
             this.gbFlip.Text = "Flip";
@@ -338,7 +320,7 @@
             // checkFlipVertical
             // 
             this.checkFlipVertical.AutoSize = true;
-            this.checkFlipVertical.Location = new System.Drawing.Point(113, 19);
+            this.checkFlipVertical.Location = new System.Drawing.Point(220, 19);
             this.checkFlipVertical.Name = "checkFlipVertical";
             this.checkFlipVertical.Size = new System.Drawing.Size(61, 17);
             this.checkFlipVertical.TabIndex = 3;
@@ -348,7 +330,7 @@
             // checkFlipHorizontal
             // 
             this.checkFlipHorizontal.AutoSize = true;
-            this.checkFlipHorizontal.Location = new System.Drawing.Point(30, 19);
+            this.checkFlipHorizontal.Location = new System.Drawing.Point(108, 19);
             this.checkFlipHorizontal.Name = "checkFlipHorizontal";
             this.checkFlipHorizontal.Size = new System.Drawing.Size(73, 17);
             this.checkFlipHorizontal.TabIndex = 2;
@@ -437,16 +419,16 @@
             this.gbUnits.Controls.Add(this.rbUnitsum);
             this.gbUnits.Controls.Add(this.rbUnitsmrad);
             this.gbUnits.Enabled = false;
-            this.gbUnits.Location = new System.Drawing.Point(3, 62);
+            this.gbUnits.Location = new System.Drawing.Point(108, 118);
             this.gbUnits.Name = "gbUnits";
-            this.gbUnits.Size = new System.Drawing.Size(389, 50);
+            this.gbUnits.Size = new System.Drawing.Size(284, 66);
             this.gbUnits.TabIndex = 6;
             this.gbUnits.TabStop = false;
-            this.gbUnits.Text = "Units";
+            this.gbUnits.Text = "Measure Units";
             // 
             // labelFocalLens
             // 
-            this.labelFocalLens.Location = new System.Drawing.Point(218, 21);
+            this.labelFocalLens.Location = new System.Drawing.Point(127, 30);
             this.labelFocalLens.Name = "labelFocalLens";
             this.labelFocalLens.Size = new System.Drawing.Size(65, 18);
             this.labelFocalLens.TabIndex = 9;
@@ -454,7 +436,7 @@
             // 
             // labelmm
             // 
-            this.labelmm.Location = new System.Drawing.Point(340, 21);
+            this.labelmm.Location = new System.Drawing.Point(249, 30);
             this.labelmm.Name = "labelmm";
             this.labelmm.Size = new System.Drawing.Size(30, 18);
             this.labelmm.TabIndex = 8;
@@ -468,7 +450,7 @@
             0,
             0,
             65536});
-            this.FocalLensUpDown.Location = new System.Drawing.Point(283, 19);
+            this.FocalLensUpDown.Location = new System.Drawing.Point(192, 28);
             this.FocalLensUpDown.Maximum = new decimal(new int[] {
             2000,
             0,
@@ -492,7 +474,7 @@
             // rbUnitsum
             // 
             this.rbUnitsum.AutoSize = true;
-            this.rbUnitsum.Location = new System.Drawing.Point(30, 19);
+            this.rbUnitsum.Location = new System.Drawing.Point(30, 28);
             this.rbUnitsum.Name = "rbUnitsum";
             this.rbUnitsum.Size = new System.Drawing.Size(39, 17);
             this.rbUnitsum.TabIndex = 6;
@@ -503,7 +485,7 @@
             // rbUnitsmrad
             // 
             this.rbUnitsmrad.AutoSize = true;
-            this.rbUnitsmrad.Location = new System.Drawing.Point(123, 19);
+            this.rbUnitsmrad.Location = new System.Drawing.Point(75, 28);
             this.rbUnitsmrad.Name = "rbUnitsmrad";
             this.rbUnitsmrad.Size = new System.Drawing.Size(48, 17);
             this.rbUnitsmrad.TabIndex = 5;
@@ -511,45 +493,12 @@
             this.rbUnitsmrad.Text = "mrad";
             this.rbUnitsmrad.UseVisualStyleBackColor = true;
             // 
-            // gbMode
-            // 
-            this.gbMode.Controls.Add(this.rbStep);
-            this.gbMode.Controls.Add(this.rbRun);
-            this.gbMode.Location = new System.Drawing.Point(3, 6);
-            this.gbMode.Name = "gbMode";
-            this.gbMode.Size = new System.Drawing.Size(186, 50);
-            this.gbMode.TabIndex = 4;
-            this.gbMode.TabStop = false;
-            this.gbMode.Text = "Mode";
-            // 
-            // rbStep
-            // 
-            this.rbStep.AutoSize = true;
-            this.rbStep.Location = new System.Drawing.Point(105, 19);
-            this.rbStep.Name = "rbStep";
-            this.rbStep.Size = new System.Drawing.Size(47, 17);
-            this.rbStep.TabIndex = 1;
-            this.rbStep.TabStop = true;
-            this.rbStep.Text = "Step";
-            this.rbStep.UseVisualStyleBackColor = true;
-            // 
-            // rbRun
-            // 
-            this.rbRun.AutoSize = true;
-            this.rbRun.Location = new System.Drawing.Point(30, 19);
-            this.rbRun.Name = "rbRun";
-            this.rbRun.Size = new System.Drawing.Size(45, 17);
-            this.rbRun.TabIndex = 0;
-            this.rbRun.TabStop = true;
-            this.rbRun.Text = "Run";
-            this.rbRun.UseVisualStyleBackColor = true;
-            // 
             // gbAverage
             // 
             this.gbAverage.Controls.Add(this.checkAverage);
             this.gbAverage.Controls.Add(this.AverageUpDown);
             this.gbAverage.Enabled = false;
-            this.gbAverage.Location = new System.Drawing.Point(175, 118);
+            this.gbAverage.Location = new System.Drawing.Point(175, 6);
             this.gbAverage.Name = "gbAverage";
             this.gbAverage.Size = new System.Drawing.Size(217, 50);
             this.gbAverage.TabIndex = 2;
@@ -559,7 +508,7 @@
             // checkAverage
             // 
             this.checkAverage.AutoSize = true;
-            this.checkAverage.Location = new System.Drawing.Point(30, 19);
+            this.checkAverage.Location = new System.Drawing.Point(43, 19);
             this.checkAverage.Name = "checkAverage";
             this.checkAverage.Size = new System.Drawing.Size(59, 17);
             this.checkAverage.TabIndex = 1;
@@ -568,7 +517,7 @@
             // 
             // AverageUpDown
             // 
-            this.AverageUpDown.Location = new System.Drawing.Point(105, 19);
+            this.AverageUpDown.Location = new System.Drawing.Point(118, 19);
             this.AverageUpDown.Maximum = new decimal(new int[] {
             20,
             0,
@@ -592,7 +541,7 @@
             // gbWaveLength
             // 
             this.gbWaveLength.Controls.Add(this.WaveUpDown);
-            this.gbWaveLength.Location = new System.Drawing.Point(3, 118);
+            this.gbWaveLength.Location = new System.Drawing.Point(3, 6);
             this.gbWaveLength.Name = "gbWaveLength";
             this.gbWaveLength.Size = new System.Drawing.Size(166, 50);
             this.gbWaveLength.TabIndex = 0;
@@ -621,213 +570,6 @@
             0,
             0,
             0});
-            // 
-            // tabPage3
-            // 
-            this.tabPage3.BackColor = System.Drawing.Color.Transparent;
-            this.tabPage3.Controls.Add(this.groupBox1);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(398, 344);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Power";
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.rbUnitskW);
-            this.groupBox1.Controls.Add(this.rbUnitsW);
-            this.groupBox1.Controls.Add(this.rbUnitsdB);
-            this.groupBox1.Controls.Add(this.rbUnitsuW);
-            this.groupBox1.Controls.Add(this.rbUnitsmW);
-            this.groupBox1.Location = new System.Drawing.Point(7, 6);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(385, 55);
-            this.groupBox1.TabIndex = 14;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Units";
-            // 
-            // rbUnitskW
-            // 
-            this.rbUnitskW.AutoSize = true;
-            this.rbUnitskW.Location = new System.Drawing.Point(71, 19);
-            this.rbUnitskW.Name = "rbUnitskW";
-            this.rbUnitskW.Size = new System.Drawing.Size(42, 17);
-            this.rbUnitskW.TabIndex = 4;
-            this.rbUnitskW.TabStop = true;
-            this.rbUnitskW.Text = "kW";
-            this.rbUnitskW.UseVisualStyleBackColor = true;
-            // 
-            // rbUnitsW
-            // 
-            this.rbUnitsW.AutoSize = true;
-            this.rbUnitsW.Location = new System.Drawing.Point(127, 19);
-            this.rbUnitsW.Name = "rbUnitsW";
-            this.rbUnitsW.Size = new System.Drawing.Size(36, 17);
-            this.rbUnitsW.TabIndex = 3;
-            this.rbUnitsW.TabStop = true;
-            this.rbUnitsW.Text = "W";
-            this.rbUnitsW.UseVisualStyleBackColor = true;
-            // 
-            // rbUnitsdB
-            // 
-            this.rbUnitsdB.AutoSize = true;
-            this.rbUnitsdB.Location = new System.Drawing.Point(283, 19);
-            this.rbUnitsdB.Name = "rbUnitsdB";
-            this.rbUnitsdB.Size = new System.Drawing.Size(46, 17);
-            this.rbUnitsdB.TabIndex = 2;
-            this.rbUnitsdB.TabStop = true;
-            this.rbUnitsdB.Text = "dBm";
-            this.rbUnitsdB.UseVisualStyleBackColor = true;
-            // 
-            // rbUnitsuW
-            // 
-            this.rbUnitsuW.AutoSize = true;
-            this.rbUnitsuW.Location = new System.Drawing.Point(231, 19);
-            this.rbUnitsuW.Name = "rbUnitsuW";
-            this.rbUnitsuW.Size = new System.Drawing.Size(42, 17);
-            this.rbUnitsuW.TabIndex = 1;
-            this.rbUnitsuW.TabStop = true;
-            this.rbUnitsuW.Text = "µW";
-            this.rbUnitsuW.UseVisualStyleBackColor = true;
-            // 
-            // rbUnitsmW
-            // 
-            this.rbUnitsmW.AutoSize = true;
-            this.rbUnitsmW.Location = new System.Drawing.Point(177, 19);
-            this.rbUnitsmW.Name = "rbUnitsmW";
-            this.rbUnitsmW.Size = new System.Drawing.Size(44, 17);
-            this.rbUnitsmW.TabIndex = 0;
-            this.rbUnitsmW.TabStop = true;
-            this.rbUnitsmW.Text = "mW";
-            this.rbUnitsmW.UseVisualStyleBackColor = true;
-            // 
-            // tabPage4
-            // 
-            this.tabPage4.BackColor = System.Drawing.Color.Transparent;
-            this.tabPage4.Controls.Add(this.gbClipLevels);
-            this.tabPage4.Controls.Add(this.gbVew);
-            this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(398, 344);
-            this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "Profile";
-            // 
-            // gbClipLevels
-            // 
-            this.gbClipLevels.Controls.Add(this.lblLevel0);
-            this.gbClipLevels.Controls.Add(this.lblLevel1);
-            this.gbClipLevels.Controls.Add(this.lblLevel2);
-            this.gbClipLevels.Controls.Add(this.Level0UpDown);
-            this.gbClipLevels.Controls.Add(this.Level1UpDown);
-            this.gbClipLevels.Controls.Add(this.Level2UpDown);
-            this.gbClipLevels.Location = new System.Drawing.Point(7, 6);
-            this.gbClipLevels.Name = "gbClipLevels";
-            this.gbClipLevels.Size = new System.Drawing.Size(388, 65);
-            this.gbClipLevels.TabIndex = 5;
-            this.gbClipLevels.TabStop = false;
-            this.gbClipLevels.Text = "Clip Levels (%)";
-            // 
-            // lblLevel0
-            // 
-            this.lblLevel0.AutoSize = true;
-            this.lblLevel0.Location = new System.Drawing.Point(48, 24);
-            this.lblLevel0.Name = "lblLevel0";
-            this.lblLevel0.Size = new System.Drawing.Size(10, 13);
-            this.lblLevel0.TabIndex = 5;
-            this.lblLevel0.Text = "I";
-            // 
-            // lblLevel1
-            // 
-            this.lblLevel1.AutoSize = true;
-            this.lblLevel1.Location = new System.Drawing.Point(166, 23);
-            this.lblLevel1.Name = "lblLevel1";
-            this.lblLevel1.Size = new System.Drawing.Size(13, 13);
-            this.lblLevel1.TabIndex = 4;
-            this.lblLevel1.Text = "II";
-            // 
-            // lblLevel2
-            // 
-            this.lblLevel2.AutoSize = true;
-            this.lblLevel2.Location = new System.Drawing.Point(289, 23);
-            this.lblLevel2.Name = "lblLevel2";
-            this.lblLevel2.Size = new System.Drawing.Size(16, 13);
-            this.lblLevel2.TabIndex = 3;
-            this.lblLevel2.Text = "III";
-            // 
-            // Level0UpDown
-            // 
-            this.Level0UpDown.DecimalPlaces = 1;
-            this.Level0UpDown.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.Level0UpDown.Location = new System.Drawing.Point(76, 21);
-            this.Level0UpDown.Name = "Level0UpDown";
-            this.Level0UpDown.Size = new System.Drawing.Size(63, 20);
-            this.Level0UpDown.TabIndex = 2;
-            this.Level0UpDown.ValueChanged += new System.EventHandler(this.Level0UpDown_ValueChanged);
-            // 
-            // Level1UpDown
-            // 
-            this.Level1UpDown.DecimalPlaces = 1;
-            this.Level1UpDown.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.Level1UpDown.Location = new System.Drawing.Point(195, 19);
-            this.Level1UpDown.Name = "Level1UpDown";
-            this.Level1UpDown.Size = new System.Drawing.Size(63, 20);
-            this.Level1UpDown.TabIndex = 1;
-            this.Level1UpDown.ValueChanged += new System.EventHandler(this.Level1UpDown_ValueChanged);
-            // 
-            // Level2UpDown
-            // 
-            this.Level2UpDown.DecimalPlaces = 1;
-            this.Level2UpDown.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.Level2UpDown.Location = new System.Drawing.Point(319, 19);
-            this.Level2UpDown.Name = "Level2UpDown";
-            this.Level2UpDown.Size = new System.Drawing.Size(63, 20);
-            this.Level2UpDown.TabIndex = 0;
-            this.Level2UpDown.ValueChanged += new System.EventHandler(this.Level2UpDown_ValueChanged);
-            // 
-            // gbVew
-            // 
-            this.gbVew.Controls.Add(this.checkGaussian);
-            this.gbVew.Controls.Add(this.checkAutoscale);
-            this.gbVew.Location = new System.Drawing.Point(7, 77);
-            this.gbVew.Name = "gbVew";
-            this.gbVew.Size = new System.Drawing.Size(388, 50);
-            this.gbVew.TabIndex = 4;
-            this.gbVew.TabStop = false;
-            this.gbVew.Text = "View";
-            // 
-            // checkGaussian
-            // 
-            this.checkGaussian.AutoSize = true;
-            this.checkGaussian.Location = new System.Drawing.Point(205, 19);
-            this.checkGaussian.Name = "checkGaussian";
-            this.checkGaussian.Size = new System.Drawing.Size(70, 17);
-            this.checkGaussian.TabIndex = 3;
-            this.checkGaussian.Text = "Gaussian";
-            this.checkGaussian.UseVisualStyleBackColor = true;
-            // 
-            // checkAutoscale
-            // 
-            this.checkAutoscale.AutoSize = true;
-            this.checkAutoscale.Location = new System.Drawing.Point(103, 19);
-            this.checkAutoscale.Name = "checkAutoscale";
-            this.checkAutoscale.Size = new System.Drawing.Size(75, 17);
-            this.checkAutoscale.TabIndex = 0;
-            this.checkAutoscale.Text = "AutoScale";
-            this.checkAutoscale.UseVisualStyleBackColor = true;
             // 
             // tabPage6
             // 
@@ -1334,104 +1076,189 @@
             this.checkName1.Text = "Power";
             this.checkName1.UseVisualStyleBackColor = true;
             // 
-            // tabPage2
+            // groupBox1
             // 
-            this.tabPage2.BackColor = System.Drawing.Color.Transparent;
-            this.tabPage2.Controls.Add(this.btnSet);
-            this.tabPage2.Controls.Add(this.lblStandard);
-            this.tabPage2.Controls.Add(this.cmbColorScheme);
-            this.tabPage2.Controls.Add(this.btnSave);
-            this.tabPage2.Controls.Add(this.btnPreview);
-            this.tabPage2.Controls.Add(this.lblForeColorName);
-            this.tabPage2.Controls.Add(this.lblForeGroundColor);
-            this.tabPage2.Controls.Add(this.lblBackGroundColorName);
-            this.tabPage2.Controls.Add(this.lblBackGroundColor);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(398, 344);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Color";
+            this.groupBox1.Controls.Add(this.rbUnitskW);
+            this.groupBox1.Controls.Add(this.rbUnitsW);
+            this.groupBox1.Controls.Add(this.rbUnitsdB);
+            this.groupBox1.Controls.Add(this.rbUnitsuW);
+            this.groupBox1.Controls.Add(this.rbUnitsmW);
+            this.groupBox1.Location = new System.Drawing.Point(3, 118);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(99, 181);
+            this.groupBox1.TabIndex = 15;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Power Units";
             // 
-            // btnSet
+            // rbUnitskW
             // 
-            this.btnSet.Location = new System.Drawing.Point(221, 151);
-            this.btnSet.Name = "btnSet";
-            this.btnSet.Size = new System.Drawing.Size(82, 25);
-            this.btnSet.TabIndex = 22;
-            this.btnSet.Text = "Set";
-            this.btnSet.UseVisualStyleBackColor = true;
+            this.rbUnitskW.AutoSize = true;
+            this.rbUnitskW.Location = new System.Drawing.Point(30, 37);
+            this.rbUnitskW.Name = "rbUnitskW";
+            this.rbUnitskW.Size = new System.Drawing.Size(42, 17);
+            this.rbUnitskW.TabIndex = 4;
+            this.rbUnitskW.TabStop = true;
+            this.rbUnitskW.Text = "kW";
+            this.rbUnitskW.UseVisualStyleBackColor = true;
             // 
-            // lblStandard
+            // rbUnitsW
             // 
-            this.lblStandard.AutoSize = true;
-            this.lblStandard.Location = new System.Drawing.Point(42, 16);
-            this.lblStandard.Name = "lblStandard";
-            this.lblStandard.Size = new System.Drawing.Size(74, 13);
-            this.lblStandard.TabIndex = 21;
-            this.lblStandard.Text = "Color scheme:";
-            this.lblStandard.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.rbUnitsW.AutoSize = true;
+            this.rbUnitsW.Location = new System.Drawing.Point(30, 62);
+            this.rbUnitsW.Name = "rbUnitsW";
+            this.rbUnitsW.Size = new System.Drawing.Size(36, 17);
+            this.rbUnitsW.TabIndex = 3;
+            this.rbUnitsW.TabStop = true;
+            this.rbUnitsW.Text = "W";
+            this.rbUnitsW.UseVisualStyleBackColor = true;
             // 
-            // cmbColorScheme
+            // rbUnitsdB
             // 
-            this.cmbColorScheme.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbColorScheme.FormattingEnabled = true;
-            this.cmbColorScheme.Location = new System.Drawing.Point(45, 32);
-            this.cmbColorScheme.Name = "cmbColorScheme";
-            this.cmbColorScheme.Size = new System.Drawing.Size(218, 21);
-            this.cmbColorScheme.TabIndex = 20;
+            this.rbUnitsdB.AutoSize = true;
+            this.rbUnitsdB.Location = new System.Drawing.Point(30, 137);
+            this.rbUnitsdB.Name = "rbUnitsdB";
+            this.rbUnitsdB.Size = new System.Drawing.Size(46, 17);
+            this.rbUnitsdB.TabIndex = 2;
+            this.rbUnitsdB.TabStop = true;
+            this.rbUnitsdB.Text = "dBm";
+            this.rbUnitsdB.UseVisualStyleBackColor = true;
             // 
-            // btnSave
+            // rbUnitsuW
             // 
-            this.btnSave.Location = new System.Drawing.Point(133, 151);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(82, 25);
-            this.btnSave.TabIndex = 19;
-            this.btnSave.Text = "Save";
-            this.btnSave.UseVisualStyleBackColor = true;
+            this.rbUnitsuW.AutoSize = true;
+            this.rbUnitsuW.Location = new System.Drawing.Point(30, 112);
+            this.rbUnitsuW.Name = "rbUnitsuW";
+            this.rbUnitsuW.Size = new System.Drawing.Size(42, 17);
+            this.rbUnitsuW.TabIndex = 1;
+            this.rbUnitsuW.TabStop = true;
+            this.rbUnitsuW.Text = "µW";
+            this.rbUnitsuW.UseVisualStyleBackColor = true;
             // 
-            // btnPreview
+            // rbUnitsmW
             // 
-            this.btnPreview.Location = new System.Drawing.Point(45, 151);
-            this.btnPreview.Name = "btnPreview";
-            this.btnPreview.Size = new System.Drawing.Size(82, 25);
-            this.btnPreview.TabIndex = 18;
-            this.btnPreview.Text = "Preview";
-            this.btnPreview.UseVisualStyleBackColor = true;
+            this.rbUnitsmW.AutoSize = true;
+            this.rbUnitsmW.Location = new System.Drawing.Point(30, 87);
+            this.rbUnitsmW.Name = "rbUnitsmW";
+            this.rbUnitsmW.Size = new System.Drawing.Size(44, 17);
+            this.rbUnitsmW.TabIndex = 0;
+            this.rbUnitsmW.TabStop = true;
+            this.rbUnitsmW.Text = "mW";
+            this.rbUnitsmW.UseVisualStyleBackColor = true;
             // 
-            // lblForeColorName
+            // gbClipLevels
             // 
-            this.lblForeColorName.Location = new System.Drawing.Point(142, 112);
-            this.lblForeColorName.Name = "lblForeColorName";
-            this.lblForeColorName.Size = new System.Drawing.Size(117, 21);
-            this.lblForeColorName.TabIndex = 17;
-            this.lblForeColorName.Text = "Foreground Color";
-            this.lblForeColorName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.gbClipLevels.Controls.Add(this.lblLevel0);
+            this.gbClipLevels.Controls.Add(this.lblLevel1);
+            this.gbClipLevels.Controls.Add(this.lblLevel2);
+            this.gbClipLevels.Controls.Add(this.Level0UpDown);
+            this.gbClipLevels.Controls.Add(this.Level1UpDown);
+            this.gbClipLevels.Controls.Add(this.Level2UpDown);
+            this.gbClipLevels.Location = new System.Drawing.Point(108, 190);
+            this.gbClipLevels.Name = "gbClipLevels";
+            this.gbClipLevels.Size = new System.Drawing.Size(136, 109);
+            this.gbClipLevels.TabIndex = 16;
+            this.gbClipLevels.TabStop = false;
+            this.gbClipLevels.Text = "Profile Clip Levels (%)";
             // 
-            // lblForeGroundColor
+            // lblLevel0
             // 
-            this.lblForeGroundColor.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.lblForeGroundColor.Location = new System.Drawing.Point(45, 110);
-            this.lblForeGroundColor.Name = "lblForeGroundColor";
-            this.lblForeGroundColor.Size = new System.Drawing.Size(82, 25);
-            this.lblForeGroundColor.TabIndex = 16;
+            this.lblLevel0.AutoSize = true;
+            this.lblLevel0.Location = new System.Drawing.Point(29, 30);
+            this.lblLevel0.Name = "lblLevel0";
+            this.lblLevel0.Size = new System.Drawing.Size(10, 13);
+            this.lblLevel0.TabIndex = 5;
+            this.lblLevel0.Text = "I";
             // 
-            // lblBackGroundColorName
+            // lblLevel1
             // 
-            this.lblBackGroundColorName.Location = new System.Drawing.Point(142, 82);
-            this.lblBackGroundColorName.Name = "lblBackGroundColorName";
-            this.lblBackGroundColorName.Size = new System.Drawing.Size(117, 21);
-            this.lblBackGroundColorName.TabIndex = 15;
-            this.lblBackGroundColorName.Text = "Background Color";
-            this.lblBackGroundColorName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblLevel1.AutoSize = true;
+            this.lblLevel1.Location = new System.Drawing.Point(28, 57);
+            this.lblLevel1.Name = "lblLevel1";
+            this.lblLevel1.Size = new System.Drawing.Size(13, 13);
+            this.lblLevel1.TabIndex = 4;
+            this.lblLevel1.Text = "II";
             // 
-            // lblBackGroundColor
+            // lblLevel2
             // 
-            this.lblBackGroundColor.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.lblBackGroundColor.Location = new System.Drawing.Point(45, 80);
-            this.lblBackGroundColor.Name = "lblBackGroundColor";
-            this.lblBackGroundColor.Size = new System.Drawing.Size(82, 25);
-            this.lblBackGroundColor.TabIndex = 14;
+            this.lblLevel2.AutoSize = true;
+            this.lblLevel2.Location = new System.Drawing.Point(27, 83);
+            this.lblLevel2.Name = "lblLevel2";
+            this.lblLevel2.Size = new System.Drawing.Size(16, 13);
+            this.lblLevel2.TabIndex = 3;
+            this.lblLevel2.Text = "III";
+            // 
+            // Level0UpDown
+            // 
+            this.Level0UpDown.DecimalPlaces = 1;
+            this.Level0UpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.Level0UpDown.Location = new System.Drawing.Point(57, 27);
+            this.Level0UpDown.Name = "Level0UpDown";
+            this.Level0UpDown.Size = new System.Drawing.Size(63, 20);
+            this.Level0UpDown.TabIndex = 2;
+            this.Level0UpDown.ValueChanged += new System.EventHandler(this.Level0UpDown_ValueChanged);
+            // 
+            // Level1UpDown
+            // 
+            this.Level1UpDown.DecimalPlaces = 1;
+            this.Level1UpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.Level1UpDown.Location = new System.Drawing.Point(57, 53);
+            this.Level1UpDown.Name = "Level1UpDown";
+            this.Level1UpDown.Size = new System.Drawing.Size(63, 20);
+            this.Level1UpDown.TabIndex = 1;
+            this.Level1UpDown.ValueChanged += new System.EventHandler(this.Level1UpDown_ValueChanged);
+            // 
+            // Level2UpDown
+            // 
+            this.Level2UpDown.DecimalPlaces = 1;
+            this.Level2UpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.Level2UpDown.Location = new System.Drawing.Point(57, 79);
+            this.Level2UpDown.Name = "Level2UpDown";
+            this.Level2UpDown.Size = new System.Drawing.Size(63, 20);
+            this.Level2UpDown.TabIndex = 0;
+            this.Level2UpDown.ValueChanged += new System.EventHandler(this.Level2UpDown_ValueChanged);
+            // 
+            // gbVew
+            // 
+            this.gbVew.Controls.Add(this.checkGaussian);
+            this.gbVew.Controls.Add(this.checkAutoscale);
+            this.gbVew.Location = new System.Drawing.Point(250, 193);
+            this.gbVew.Name = "gbVew";
+            this.gbVew.Size = new System.Drawing.Size(142, 106);
+            this.gbVew.TabIndex = 17;
+            this.gbVew.TabStop = false;
+            this.gbVew.Text = "Profile View";
+            // 
+            // checkGaussian
+            // 
+            this.checkGaussian.AutoSize = true;
+            this.checkGaussian.Location = new System.Drawing.Point(30, 60);
+            this.checkGaussian.Name = "checkGaussian";
+            this.checkGaussian.Size = new System.Drawing.Size(70, 17);
+            this.checkGaussian.TabIndex = 3;
+            this.checkGaussian.Text = "Gaussian";
+            this.checkGaussian.UseVisualStyleBackColor = true;
+            // 
+            // checkAutoscale
+            // 
+            this.checkAutoscale.AutoSize = true;
+            this.checkAutoscale.Location = new System.Drawing.Point(30, 27);
+            this.checkAutoscale.Name = "checkAutoscale";
+            this.checkAutoscale.Size = new System.Drawing.Size(75, 17);
+            this.checkAutoscale.TabIndex = 0;
+            this.checkAutoscale.Text = "AutoScale";
+            this.checkAutoscale.UseVisualStyleBackColor = true;
             // 
             // FormSetup
             // 
@@ -1439,7 +1266,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(410, 410);
+            this.ClientSize = new System.Drawing.Size(406, 372);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.btnCancel);
@@ -1467,24 +1294,11 @@
             this.gbUnits.ResumeLayout(false);
             this.gbUnits.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FocalLensUpDown)).EndInit();
-            this.gbMode.ResumeLayout(false);
-            this.gbMode.PerformLayout();
             this.gbAverage.ResumeLayout(false);
             this.gbAverage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.AverageUpDown)).EndInit();
             this.gbWaveLength.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.WaveUpDown)).EndInit();
-            this.tabPage3.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.tabPage4.ResumeLayout(false);
-            this.gbClipLevels.ResumeLayout(false);
-            this.gbClipLevels.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Level0UpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Level1UpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Level2UpDown)).EndInit();
-            this.gbVew.ResumeLayout(false);
-            this.gbVew.PerformLayout();
             this.tabPage6.ResumeLayout(false);
             this.tabPage6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MaxUpDown9)).EndInit();
@@ -1505,8 +1319,15 @@
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.MaxUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown1)).EndInit();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.gbClipLevels.ResumeLayout(false);
+            this.gbClipLevels.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Level0UpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Level1UpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Level2UpDown)).EndInit();
+            this.gbVew.ResumeLayout(false);
+            this.gbVew.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1532,42 +1353,11 @@
         private System.Windows.Forms.NumericUpDown FocalLensUpDown;
         private System.Windows.Forms.RadioButton rbUnitsum;
         private System.Windows.Forms.RadioButton rbUnitsmrad;
-        private System.Windows.Forms.GroupBox gbMode;
-        private System.Windows.Forms.RadioButton rbStep;
-        private System.Windows.Forms.RadioButton rbRun;
         private System.Windows.Forms.GroupBox gbAverage;
         private System.Windows.Forms.CheckBox checkAverage;
         private System.Windows.Forms.NumericUpDown AverageUpDown;
         private System.Windows.Forms.GroupBox gbWaveLength;
         private System.Windows.Forms.NumericUpDown WaveUpDown;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.Button btnSet;
-        private System.Windows.Forms.Label lblStandard;
-        private System.Windows.Forms.ComboBox cmbColorScheme;
-        private System.Windows.Forms.Button btnSave;
-        private System.Windows.Forms.Button btnPreview;
-        private System.Windows.Forms.Label lblForeColorName;
-        private System.Windows.Forms.Label lblForeGroundColor;
-        private System.Windows.Forms.Label lblBackGroundColorName;
-        private System.Windows.Forms.Label lblBackGroundColor;
-        private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.RadioButton rbUnitskW;
-        private System.Windows.Forms.RadioButton rbUnitsW;
-        private System.Windows.Forms.RadioButton rbUnitsdB;
-        private System.Windows.Forms.RadioButton rbUnitsuW;
-        private System.Windows.Forms.RadioButton rbUnitsmW;
-        private System.Windows.Forms.TabPage tabPage4;
-        private System.Windows.Forms.GroupBox gbClipLevels;
-        private System.Windows.Forms.Label lblLevel0;
-        private System.Windows.Forms.Label lblLevel1;
-        private System.Windows.Forms.Label lblLevel2;
-        private System.Windows.Forms.NumericUpDown Level0UpDown;
-        private System.Windows.Forms.NumericUpDown Level1UpDown;
-        private System.Windows.Forms.NumericUpDown Level2UpDown;
-        private System.Windows.Forms.GroupBox gbVew;
-        private System.Windows.Forms.CheckBox checkGaussian;
-        private System.Windows.Forms.CheckBox checkAutoscale;
         private System.Windows.Forms.TabPage tabPage6;
         private System.Windows.Forms.TextBox textBoxUserData;
         private System.Windows.Forms.TextBox textBoxUserName;
@@ -1619,5 +1409,21 @@
         private System.Windows.Forms.GroupBox groupBoxPixelFormat;
         private System.Windows.Forms.RadioButton radioButton8bpp;
         private System.Windows.Forms.RadioButton radioButton12bpp;
+        private System.Windows.Forms.GroupBox gbVew;
+        private System.Windows.Forms.CheckBox checkGaussian;
+        private System.Windows.Forms.CheckBox checkAutoscale;
+        private System.Windows.Forms.GroupBox gbClipLevels;
+        private System.Windows.Forms.Label lblLevel0;
+        private System.Windows.Forms.Label lblLevel1;
+        private System.Windows.Forms.Label lblLevel2;
+        private System.Windows.Forms.NumericUpDown Level0UpDown;
+        private System.Windows.Forms.NumericUpDown Level1UpDown;
+        private System.Windows.Forms.NumericUpDown Level2UpDown;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.RadioButton rbUnitskW;
+        private System.Windows.Forms.RadioButton rbUnitsW;
+        private System.Windows.Forms.RadioButton rbUnitsdB;
+        private System.Windows.Forms.RadioButton rbUnitsuW;
+        private System.Windows.Forms.RadioButton rbUnitsmW;
     }
 }

@@ -113,6 +113,7 @@ namespace BeamOn_2K
 
         public String m_strSystemTitle;
         private BeamOnCL.SnapshotBase m_snapshot = null;
+        private bool m_bFreezePicture = false;
 
         public FormMain(String strArgument)
         {
@@ -159,14 +160,12 @@ namespace BeamOn_2K
             //}
             //BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e = ee.Clone();
 
-            m_snapshot = e.Snapshot.Clone();
-
-            if (m_bmp != null)
+            if (m_bFreezePicture == false)
             {
-                if ((m_sysData.RunOn == true) || ((m_sysData.RunOn == false) && (m_sysData.GetStep == true)))
-                {
-                    m_sysData.GetStep = false;
+                m_snapshot = e.Snapshot.Clone();
 
+                if (m_bmp != null)
+                {
                     lock (m_lLockBMP)
                     {
                         try
@@ -180,74 +179,6 @@ namespace BeamOn_2K
                             e.Snapshot.SetImageDataArray(bmpData.Scan0, m_colorArray);
 
                             m_bmp.UnlockBits(bmpData);
-
-                            if (m_frm3D != null) m_frm3D.ImageData = m_snapshot;
-
-                            if (m_sysData.Measure == true)
-                            {
-                                bm.GetMeasure(m_snapshot);
-
-                                plArea = bm.CreateEllipse();
-
-                                m_sysData.positionData.RealPosition = bm.Centroid;
-                                m_sysData.positionData.Ellipse.Major = bm.MajorRadius;
-                                m_sysData.positionData.Ellipse.Minor = bm.MinorRadius;
-                                m_sysData.positionData.Ellipse.Orientation = bm.Angle;
-
-                                m_profileHorizontal = new BeamOnCL.Profile(bm.profileHorizontal);
-                                m_profileVertical = new BeamOnCL.Profile(bm.profileVertical);
-
-                                if ((m_sysData.ProfileType == BeamOnCL.BeamOnCL.TypeProfile.tpLIne) && (m_sysData.LineProfileType == BeamOnCL.BeamOnCL.TypeLineProfile.tpLineCentroid))
-                                    bm.CrossPosition = new Point((int)bm.PixelCentroid.X, (int)bm.PixelCentroid.Y);
-
-                                for (int i = 0; i < m_sysData.ClipLevels.NumberLevels; i++)
-                                {
-                                    m_sysData.HorizontalProfile.SetWidthProfile(i, m_profileHorizontal.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
-                                    m_sysData.VerticalProfile.SetWidthProfile(i, m_profileVertical.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
-                                }
-
-                                if (m_sysData.ViewGaussian == true)
-                                {
-                                    for (int i = 0; i < m_sysData.ClipLevels.NumberLevels; i++)
-                                    {
-                                        m_sysData.HorizontalProfile.SetWidthGauss(i, m_profileHorizontal.GaussianData.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
-                                        m_sysData.VerticalProfile.SetWidthGauss(i, m_profileVertical.GaussianData.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
-                                    }
-
-                                    m_sysData.HorizontalProfile.m_fCorrelation = m_profileHorizontal.GaussianData.Correlation;
-                                    m_sysData.VerticalProfile.m_fCorrelation = m_profileVertical.GaussianData.Correlation;
-                                }
-
-                                if ((m_fldLog != null) && (m_fldLog.IsOpen() == true))
-                                {
-                                    m_sysData.logData.LastMeasureTime = e.Timestamp;
-                                    m_fldLog.AddData();
-                                }
-
-                                if (m_bPowerCalibration == true)
-                                {
-                                    if (m_iPowerCalibrationCount > 0)
-                                    {
-                                        if (m_iPowerCalibrationCount == POWER_CALIBRATION_NUM)
-                                            m_uiPowerDataSum = bm.CurrentAreaPower;
-                                        else
-                                            m_uiPowerDataSum += bm.CurrentAreaPower;
-
-                                        m_iPowerCalibrationCount--;
-
-                                        if (m_formPowerCalibration != null) m_formPowerCalibration.MeasureCount = POWER_CALIBRATION_NUM - m_iPowerCalibrationCount;
-                                    }
-                                    else
-                                    {
-                                        m_dAveragePowerDataSum = m_uiPowerDataSum / (double)POWER_CALIBRATION_NUM;
-                                    }
-                                }
-                                else
-                                {
-                                    m_sysData.powerData.Power = (float)((bm.CurrentAreaPower / m_sysData.powerData.fSensitivity) / m_sysData.powerData.PowerCalibr.PowerCoeff(bm.Exposure, bm.Gain));
-                                    m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.realFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
-                                }
-                            }
                         }
                         catch { }
                         finally
@@ -258,7 +189,77 @@ namespace BeamOn_2K
                     }
                 }
             }
-            //Thread.Sleep(0);
+
+            if (m_snapshot != null)
+            {
+                if (m_frm3D != null) m_frm3D.ImageData = m_snapshot;
+
+                if (m_sysData.Measure == true)
+                {
+                    bm.GetMeasure(m_snapshot);
+
+                    plArea = bm.CreateEllipse();
+
+                    m_sysData.positionData.RealPosition = bm.Centroid;
+                    m_sysData.positionData.Ellipse.Major = bm.MajorRadius;
+                    m_sysData.positionData.Ellipse.Minor = bm.MinorRadius;
+                    m_sysData.positionData.Ellipse.Orientation = bm.Angle;
+
+                    m_profileHorizontal = new BeamOnCL.Profile(bm.profileHorizontal);
+                    m_profileVertical = new BeamOnCL.Profile(bm.profileVertical);
+
+                    if ((m_sysData.ProfileType == BeamOnCL.BeamOnCL.TypeProfile.tpLIne) && (m_sysData.LineProfileType == BeamOnCL.BeamOnCL.TypeLineProfile.tpLineCentroid))
+                        bm.CrossPosition = new Point((int)bm.PixelCentroid.X, (int)bm.PixelCentroid.Y);
+
+                    for (int i = 0; i < m_sysData.ClipLevels.NumberLevels; i++)
+                    {
+                        m_sysData.HorizontalProfile.SetWidthProfile(i, m_profileHorizontal.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
+                        m_sysData.VerticalProfile.SetWidthProfile(i, m_profileVertical.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
+                    }
+
+                    if (m_sysData.ViewGaussian == true)
+                    {
+                        for (int i = 0; i < m_sysData.ClipLevels.NumberLevels; i++)
+                        {
+                            m_sysData.HorizontalProfile.SetWidthGauss(i, m_profileHorizontal.GaussianData.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
+                            m_sysData.VerticalProfile.SetWidthGauss(i, m_profileVertical.GaussianData.GetWidth(Decimal.ToSingle(m_sysData.ClipLevels.Level(i))));
+                        }
+
+                        m_sysData.HorizontalProfile.m_fCorrelation = m_profileHorizontal.GaussianData.Correlation;
+                        m_sysData.VerticalProfile.m_fCorrelation = m_profileVertical.GaussianData.Correlation;
+                    }
+
+                    if ((m_fldLog != null) && (m_fldLog.IsOpen() == true))
+                    {
+                        m_sysData.logData.LastMeasureTime = e.Timestamp;
+                        m_fldLog.AddData();
+                    }
+
+                    if (m_bPowerCalibration == true)
+                    {
+                        if (m_iPowerCalibrationCount > 0)
+                        {
+                            if (m_iPowerCalibrationCount == POWER_CALIBRATION_NUM)
+                                m_uiPowerDataSum = bm.CurrentAreaPower;
+                            else
+                                m_uiPowerDataSum += bm.CurrentAreaPower;
+
+                            m_iPowerCalibrationCount--;
+
+                            if (m_formPowerCalibration != null) m_formPowerCalibration.MeasureCount = POWER_CALIBRATION_NUM - m_iPowerCalibrationCount;
+                        }
+                        else
+                        {
+                            m_dAveragePowerDataSum = m_uiPowerDataSum / (double)POWER_CALIBRATION_NUM;
+                        }
+                    }
+                    else
+                    {
+                        m_sysData.powerData.Power = (float)((bm.CurrentAreaPower / m_sysData.powerData.fSensitivity) / m_sysData.powerData.PowerCalibr.PowerCoeff(bm.Exposure, bm.Gain));
+                        m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.realFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
+                    }
+                }
+            }
 
             m_sw.Stop();
 
@@ -649,7 +650,6 @@ namespace BeamOn_2K
                     pictureBoxData.Invalidate();
                     toolStripStatusLabelTimeStamp.Text = (1000f / (double)Timestamp).ToString("#.000") + " fps";
                     toolStripStatuslblDate.Text = DateTime.Now.ToString();
-                    toolStripStatuslblRun.Text = (m_sysData.RunOn == true) ? "Run" : "Step";
                     toolStripStatuslblWave.Text = "Wavelength: " + m_sysData.powerData.uiWavelenght + "nm";
                     toolStripStatuslblFilter.Text = "Filter: " + m_strFilterName[m_sysData.powerData.currentFilter];
                     toolStripStatuslblClip.Text = "Clip Level: " + m_sysData.ClipLevels.Level(0).ToString() + "%";
@@ -763,6 +763,10 @@ namespace BeamOn_2K
                 AngleLineProfileToolStripLabel.Enabled = lineProfileToolStripButton.Checked;
                 numericUpDownAngle.Enabled = lineProfileToolStripButton.Checked;
 
+                typeLineProfileToolStripMenuItem.Enabled = lineProfileToolStripButton.Checked;
+                centroidToolStripMenuItem.Checked = (m_sysData.LineProfileType == BeamOnCL.BeamOnCL.TypeLineProfile.tpLineCentroid);
+                freeLineToolStripMenuItem.Checked = (m_sysData.LineProfileType == BeamOnCL.BeamOnCL.TypeLineProfile.tpLineFree);
+
                 bm.lineProfileAngle = m_sysData.lineProfileAngle;
 
                 bm.typeProfile = m_sysData.ProfileType;
@@ -802,10 +806,13 @@ namespace BeamOn_2K
                 typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
                 sumProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
                 lineProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
+                typeLineProfileToolStripMenuItem.Enabled = lineProfileToolStripButton.Checked;
 
                 groupBoxPosition.Enabled = m_sysData.Measure;
                 ProfileGroupBox.Enabled = m_sysData.Measure;
+                gaussGroupBox.Visible = m_sysData.ViewGaussian;
                 gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
+                powerGroupBox.Enabled = m_sysData.Measure;
 
                 dataSplitContainer.Panel1Collapsed = !propertyBoxToolStripMenuItem.Checked;
 
@@ -899,6 +906,8 @@ namespace BeamOn_2K
             toolStripStatusLabelTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum) ? "Sum" : "Line";
             AngleLineProfileToolStripLabel.Enabled = lineProfileToolStripButton.Checked;
             numericUpDownAngle.Enabled = lineProfileToolStripButton.Checked;
+
+            typeLineProfileToolStripMenuItem.Enabled = lineProfileToolStripButton.Checked;
         }
 
         private void dataSplitContainer_Panel2_Paint(object sender, PaintEventArgs e)
@@ -1328,7 +1337,7 @@ namespace BeamOn_2K
             ProfileGroupBox.Text = (m_sysData.UnitMeasure == MeasureUnits.muMicro) ? "Profile(µm)" : "Profile(mrad)";
             gaussGroupBox.Text = (m_sysData.UnitMeasure == MeasureUnits.muMicro) ? "Gaussian(µm)" : "Gaussian(mrad)";
 
-            groupBoxPower.Text = "Power(" + PowerData.bufUnits[m_sysData.powerData.PowerUnits] + ")";
+            powerGroupBox.Text = "Power(" + PowerData.bufUnits[m_sysData.powerData.PowerUnits] + ")";
         }
 
         private void measuringToolStrip_Click(object sender, EventArgs e)
@@ -1344,6 +1353,8 @@ namespace BeamOn_2K
             groupBoxPosition.Enabled = m_sysData.Measure;
             ProfileGroupBox.Enabled = m_sysData.Measure;
             gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
+            gaussGroupBox.Visible = m_sysData.ViewGaussian;
+            powerGroupBox.Enabled = m_sysData.Measure;
 
             typeProfileToolStripMenuItem.Enabled = measuringToolStripMenuItem.Checked;
             sumProfileToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
@@ -1582,10 +1593,8 @@ namespace BeamOn_2K
                     picturePaletteImage.Format = m_sysData.videoDeviceData.pixelFormat;
                 }
 
-                runStepToolStripButton.Enabled = !m_sysData.RunOn;
-                mnuOptionsStep.Enabled = runStepToolStripButton.Enabled;
-
                 gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
+                gaussGroupBox.Visible = m_sysData.ViewGaussian;
 
                 UpdateViewUnits();
             }
@@ -1724,19 +1733,6 @@ namespace BeamOn_2K
             }
         }
 
-        private void mnuOptionsStep_Click(object sender, EventArgs e)
-        {
-            m_sysData.GetStep = true;
-        }
-
-        private void toolStripStatuslblRun_DoubleClick(object sender, EventArgs e)
-        {
-            m_sysData.RunOn = !m_sysData.RunOn;
-
-            runStepToolStripButton.Enabled = !m_sysData.RunOn;
-            mnuOptionsStep.Enabled = runStepToolStripButton.Enabled;
-        }
-
         private void mnuOptionsUserData_Click(object sender, EventArgs e)
         {
             FormUserData FormUserData = new FormUserData();
@@ -1825,7 +1821,7 @@ namespace BeamOn_2K
             saveImageFile.InitialDirectory = m_sysData.applicationData.m_strMyDataDir;
             saveImageFile.RestoreDirectory = true;
             saveImageFile.FileOk += new CancelEventHandler(ImageFileDialog_FileOk);
-            saveImageFile.Title = "Save Image File";
+            saveImageFile.Title = "Save Image Data";
 
             if (saveImageFile.ShowDialog() == DialogResult.OK)
             {
@@ -1839,6 +1835,8 @@ namespace BeamOn_2K
                 {
                     img.Save(saveImageFile.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
                 }
+
+                SaveSnapshotFile(saveImageFile.FileName + ".snp");
             }
         }
 
@@ -2142,7 +2140,7 @@ namespace BeamOn_2K
         private void numericUpDownAngle_ValueChanged(object sender, EventArgs e)
         {
             AsyncChangeAngle asyncChangeAngle = new AsyncChangeAngle(UpdateAngleProfile);
-            asyncChangeAngle.BeginInvoke(Convert.ToDouble(numericUpDownAngle.Value), null, null);
+            asyncChangeAngle.BeginInvoke(Convert.ToDouble(-numericUpDownAngle.Value), null, null);
         }
 
         private void UpdateAngleProfile(Double Angle)
@@ -2159,6 +2157,26 @@ namespace BeamOn_2K
             catch
             {
             }
+        }
+
+        private void typeLineProfileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem tsmi = (ToolStripMenuItem)sender;
+
+            if (tsmi.Name.Contains("centroid") == true)
+                m_sysData.LineProfileType = BeamOnCL.BeamOnCL.TypeLineProfile.tpLineCentroid;
+            else if (tsmi.Name.Contains("free") == true)
+                m_sysData.LineProfileType = BeamOnCL.BeamOnCL.TypeLineProfile.tpLineFree;
+
+            bm.LineProfileType = m_sysData.LineProfileType;
+
+            centroidToolStripMenuItem.Checked = (m_sysData.LineProfileType == BeamOnCL.BeamOnCL.TypeLineProfile.tpLineCentroid);
+            freeLineToolStripMenuItem.Checked = (m_sysData.LineProfileType == BeamOnCL.BeamOnCL.TypeLineProfile.tpLineFree);
+        }
+
+        private void freezeToolStripButton_Click(object sender, EventArgs e)
+        {
+            m_bFreezePicture = freezeToolStripButton.Checked;
         }
     }
 }

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<Data>
+<Point><Wavelength>400</Wavelength><Sensitivity>0.125</Sensitivity></Point>
+<Point><Wavelength>1000</Wavelength><Sensitivity>0.125</Sensitivity></Point>
+</Data>

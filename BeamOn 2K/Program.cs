@@ -9,6 +9,7 @@ namespace BeamOn_2K
     {
         static DialogResult m_dr;
         static Boolean m_bSimulation = false;
+        static System.Threading.Mutex InstanceMutex;
 
         /// <summary>
         /// The main entry point for the application.
@@ -16,27 +17,43 @@ namespace BeamOn_2K
         [STAThread]
         static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
-            FormWellcome formWellcome = new FormWellcome();
-            m_dr = formWellcome.ShowDialog();
-
-            if (m_dr == DialogResult.Cancel)
+            if (IsAlreadyRunning() == false)
             {
-                m_bSimulation = (CustomMessageBox.Show("Would you like start this program in viewer/client mode?",
-                                                        "Hardware Error:",
-                                                        MessageBoxButtons.YesNo,
-                                                        MessageBoxIcon.Exclamation) == DialogResult.Yes);
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+
+                FormWellcome formWellcome = new FormWellcome();
+                m_dr = formWellcome.ShowDialog();
+
+                if (m_dr == DialogResult.Cancel)
+                {
+                    m_bSimulation = (CustomMessageBox.Show("Would you like start this program in viewer/client mode?",
+                                                            "Hardware Error:",
+                                                            MessageBoxButtons.YesNo,
+                                                            MessageBoxIcon.Exclamation) == DialogResult.Yes);
+                }
+
+                if ((((m_dr == DialogResult.OK) || (m_dr == DialogResult.Yes))) || (m_bSimulation == true))
+                {
+                    String strArg = (args.Length > 0) ? args[0] : null;
+
+                    FormMain formMain = new FormMain(strArg);
+                    Application.Run(formMain);
+                }
             }
 
-            if ((((m_dr == DialogResult.OK) || (m_dr == DialogResult.Yes))) || (m_bSimulation == true))
-            {
-                String strArg = (args.Length > 0) ? args[0] : null;
+            InstanceMutex.Close();
+        }
 
-                FormMain formMain = new FormMain(strArg);
-                Application.Run(formMain);
-            }
+        static Boolean IsAlreadyRunning()
+        {
+            const String UniqueString = "BeamOnByKokorevMichael";
+
+            Boolean createdNew = false;
+
+            InstanceMutex = new System.Threading.Mutex(false, UniqueString, out createdNew);
+
+            return !createdNew;
         }
     }
 }
