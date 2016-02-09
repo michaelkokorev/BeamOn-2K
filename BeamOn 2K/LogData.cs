@@ -173,16 +173,9 @@ namespace BeamOn_2K
                     writer.WriteEndElement();
                 }
 
-                writer.WriteStartElement("Filter");
-                writer.WriteValue(m_sysData.powerData.bIndFilter.ToString());
+                writer.WriteStartElement("Transmission");
+                writer.WriteValue(String.Format("{0:F2}", m_sysData.powerData.realFilterFactor));
                 writer.WriteEndElement();
-
-                if (m_sysData.powerData.bIndFilter == true)
-                {
-                    writer.WriteStartElement("Transmission");
-                    writer.WriteValue(String.Format("{0:F2}", m_sysData.powerData.realFilterFactor));
-                    writer.WriteEndElement();
-                }
 
                 writer.WriteStartElement("SAM");
                 writer.WriteValue(m_sysData.powerData.bIndSAM.ToString());
@@ -230,7 +223,7 @@ namespace BeamOn_2K
 
             m_lsStatisticData.AddData();
 
-            m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.currentFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
+            m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.realFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
 
             if ((m_sysData.powerData.mwPower < 0) && (m_sysData.powerData.bIndOffset == false)) m_sysData.powerData.mwPower = 0;
 
@@ -1712,7 +1705,7 @@ namespace BeamOn_2K
 
             m_lsStatisticData.AddData();
 
-            m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.currentFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
+            m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.realFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
 
             if ((m_sysData.powerData.mwPower < 0) && (m_sysData.powerData.bIndOffset == false)) m_sysData.powerData.mwPower = 0;
 
@@ -1841,10 +1834,7 @@ namespace BeamOn_2K
 
                 if (m_sysData.powerData.bIndOffset == true) sw.WriteLine("Null Value: " + String.Format(PowerData.GetValueFormat(m_sysData.powerData.mwOffsetPower, /*m_sysData.powerData.PowerUnits*/0), m_sysData.powerData.mwOffsetPower) + PowerData.bufUnits[/*m_sysData.powerData.PowerUnits*/0]);
 
-                sw.Write("Filter: " + ((m_sysData.powerData.bIndFilter == true) ? "Yes" : "No"));
-                sw.WriteLine();
-
-                if (m_sysData.powerData.bIndFilter == true) sw.WriteLine("Filter Transmission: " + String.Format("{0:F2}", m_sysData.powerData.realFilterFactor) + "%");
+                sw.WriteLine("Filter Transmission: " + String.Format("{0:F2}", m_sysData.powerData.realFilterFactor) + "%");
                 sw.WriteLine();
 
                 sw.Write("SAM: " + ((m_sysData.powerData.bIndSAM == true) ? "Yes" : "No"));
@@ -2011,7 +2001,7 @@ namespace BeamOn_2K
 
             m_lsStatisticData.AddData();
 
-            m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.currentFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
+            m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.realFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
 
             if ((m_sysData.powerData.mwPower < 0) && (m_sysData.powerData.bIndOffset == false)) m_sysData.powerData.mwPower = 0;
 
@@ -2165,16 +2155,9 @@ namespace BeamOn_2K
                 m_uiCurrentRowNumber++;
             }
 
-            m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "Filter:");
-            m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), (m_sysData.powerData.bIndFilter == true) ? "Yes" : "No");
+            m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "Filter Transmission:");
+            m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), String.Format("{0:F2}", m_sysData.powerData.realFilterFactor) + "%");
             m_uiCurrentRowNumber++;
-
-            if (m_sysData.powerData.bIndFilter == true)
-            {
-                m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "Filter Transmission:");
-                m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), String.Format("{0:F2}", m_sysData.powerData.realFilterFactor) + "%");
-                m_uiCurrentRowNumber++;
-            }
 
             m_de.SetData("A" + m_uiCurrentRowNumber.ToString(), "SAM:");
             m_de.SetData("B" + m_uiCurrentRowNumber.ToString(), (m_sysData.powerData.bIndSAM == true) ? "Yes" : "No");
@@ -2311,7 +2294,7 @@ namespace BeamOn_2K
 
         public void AddData()
         {
-            Double l_dPower = (m_sysData.powerData.Power / m_sysData.powerData.currentFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset)); ;
+            Double l_dPower = (m_sysData.powerData.Power / m_sysData.powerData.realFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset)); ;
 
             if ((l_dPower < 0) && (m_sysData.powerData.bIndOffset == false)) l_dPower = 0;
 

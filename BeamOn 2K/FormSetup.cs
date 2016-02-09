@@ -22,6 +22,12 @@ namespace BeamOn_2K
 
         private void FormSetup_Load(object sender, EventArgs e)
         {
+
+            gbWaveLength.Enabled = !m_sysData.Simulation && !m_sysData.SnapshotView;
+            gbAverage.Enabled = !m_sysData.Simulation && !m_sysData.SnapshotView;
+            gbMode.Enabled = !m_sysData.Simulation && !m_sysData.SnapshotView;
+            gbUnits.Enabled = !m_sysData.Simulation && !m_sysData.SnapshotView;
+
             //Binning
             switch (m_sysData.videoDeviceData.uiBinning)
             {
@@ -49,9 +55,6 @@ namespace BeamOn_2K
             rbRun.Checked = m_sysData.RunOn;
             rbStep.Checked = !rbRun.Checked;
 
-            //Status Power
-            chkToolbarPower.Checked = m_sysData.applicationData.bStatusViewPower;
-
             //Profile
             checkGaussian.Checked = m_sysData.ViewGaussian;
             checkAutoscale.Checked = m_sysData.ScaleProfile;
@@ -59,6 +62,35 @@ namespace BeamOn_2K
             Level2UpDown.Value = m_sysData.ClipLevels.Level(2);
             Level1UpDown.Value = m_sysData.ClipLevels.Level(1);
             Level0UpDown.Value = m_sysData.ClipLevels.Level(0);
+
+            //Wavelenght
+            WaveUpDown.Minimum = m_sysData.powerData.uiWavelenghtMin;
+            WaveUpDown.Maximum = m_sysData.powerData.uiWavelenghtMax;
+            WaveUpDown.Value = m_sysData.powerData.uiWavelenght;
+
+            //Unit
+            rbUnitsmrad.Checked = (m_sysData.UnitMeasure == MeasureUnits.muMiliRad);
+            rbUnitsum.Checked = !rbUnitsmrad.Checked;
+
+            //Power Units
+            switch (m_sysData.powerData.PowerUnits)
+            {
+                case 0:
+                    rbUnitsmW.Checked = true;
+                    break;
+                case 1:
+                    rbUnitsuW.Checked = true;
+                    break;
+                case 3:
+                    rbUnitsdB.Checked = true;
+                    break;
+                case 4:
+                    rbUnitsW.Checked = true;
+                    break;
+                case 5:
+                    rbUnitskW.Checked = true;
+                    break;
+            }
 
         }
 
@@ -83,9 +115,6 @@ namespace BeamOn_2K
             //Step Mode
             m_sysData.RunOn = rbRun.Checked;
 
-            //Status Power
-            m_sysData.applicationData.bStatusViewPower = chkToolbarPower.Checked;
-
             //Profile
             m_sysData.ViewGaussian = checkGaussian.Checked;
             m_sysData.ScaleProfile = checkAutoscale.Checked;
@@ -93,6 +122,28 @@ namespace BeamOn_2K
             m_sysData.ClipLevels.SetLevel(0, Level0UpDown.Value);
             m_sysData.ClipLevels.SetLevel(1, Level1UpDown.Value);
             m_sysData.ClipLevels.SetLevel(2, Level2UpDown.Value);
+
+            //Wavelenght
+            m_sysData.powerData.uiWavelenght = Decimal.ToUInt16(WaveUpDown.Value);
+            m_sysData.powerData.SetSensitivity();
+            m_sysData.powerData.SetFilterFactor();
+            m_sysData.powerData.SetSAMFactor();
+
+            //Unit
+            m_sysData.UnitMeasure = (rbUnitsmrad.Checked == true) ? MeasureUnits.muMiliRad : MeasureUnits.muMicro;
+            m_sysData.FocalLens = Decimal.ToSingle(FocalLensUpDown.Value);
+
+            //Power Units
+            if (rbUnitsmW.Checked == true)
+                m_sysData.powerData.PowerUnits = 0;
+            else if (rbUnitsuW.Checked == true)
+                m_sysData.powerData.PowerUnits = 1;
+            else if(rbUnitsdB.Checked == true)
+                m_sysData.powerData.PowerUnits = 3;
+            else if(rbUnitsW.Checked == true)
+                m_sysData.powerData.PowerUnits = 4;
+             else if(rbUnitskW.Checked == true)
+                m_sysData.powerData.PowerUnits = 5;
 
             this.DialogResult = DialogResult.OK;
         }

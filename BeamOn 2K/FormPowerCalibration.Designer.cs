@@ -68,7 +68,7 @@
             // 
             this.panelStart.Controls.Add(this.progressBarCalibration);
             this.panelStart.Controls.Add(this.labelStart);
-            this.panelStart.Location = new System.Drawing.Point(3, 6);
+            this.panelStart.Location = new System.Drawing.Point(3, 3);
             this.panelStart.Name = "panelStart";
             this.panelStart.Size = new System.Drawing.Size(337, 64);
             this.panelStart.TabIndex = 2;
@@ -134,10 +134,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
             this.ClientSize = new System.Drawing.Size(346, 111);
-            this.Controls.Add(this.panelStart);
             this.Controls.Add(this.panelPower);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOk);
+            this.Controls.Add(this.panelStart);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.HelpButton = true;
             this.Name = "FormPowerCalibration";

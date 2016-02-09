@@ -86,7 +86,6 @@
             this.splitContainer3D.Panel2.Controls.Add(this.gbTilt);
             this.splitContainer3D.Panel2.Controls.Add(this.gbRotation);
             this.splitContainer3D.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer3D_Panel2_Paint);
-            this.splitContainer3D.Panel2Collapsed = true;
             this.splitContainer3D.Panel2MinSize = 165;
             this.splitContainer3D.Size = new System.Drawing.Size(605, 422);
             this.splitContainer3D.SplitterDistance = 420;
@@ -99,9 +98,9 @@
             this.buttonProperty.AutoEllipsis = true;
             this.buttonProperty.FlatAppearance.BorderSize = 0;
             this.buttonProperty.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonProperty.Image = global::BeamOn_2K.Properties.Resources.PropertyS11;
+            this.buttonProperty.Image = global::BeamOn_U3.Properties.Resources.PropertyS11;
             this.buttonProperty.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.buttonProperty.Location = new System.Drawing.Point(570, 0);
+            this.buttonProperty.Location = new System.Drawing.Point(385, 0);
             this.buttonProperty.Name = "buttonProperty";
             this.buttonProperty.Size = new System.Drawing.Size(33, 88);
             this.buttonProperty.TabIndex = 3;
@@ -129,7 +128,7 @@
             this.image3D.Projection = OpenGLControl.TypeProjection.NoneProjection;
             this.image3D.Resolution = OpenGLControl.TypeGrid.Low;
             this.image3D.SensorCenterPosition = new System.Drawing.Point(0, 0);
-            this.image3D.Size = new System.Drawing.Size(603, 420);
+            this.image3D.Size = new System.Drawing.Size(418, 420);
             this.image3D.StepAutoRotateX = 5F;
             this.image3D.StepAutoRotateY = 5F;
             this.image3D.StepAutoRotateZ = 5F;

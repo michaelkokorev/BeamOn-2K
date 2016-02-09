@@ -8,10 +8,11 @@
     <ProjectGuid>{42BCFC88-A26D-4C82-9F52-199EDF3F1D96}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BeamOn_2K</RootNamespace>
-    <AssemblyName>BeamOn 2K</AssemblyName>
+    <RootNamespace>BeamOn_U3</RootNamespace>
+    <AssemblyName>BeamOn U3</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -60,7 +61,7 @@
       <DependentUpon>Form3DProjection.cs</DependentUpon>
     </Compile>
     <Compile Include="FormErrorMessage.cs">
-      <SubType>Form</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="FormErrorMessage.Designer.cs">
       <DependentUpon>FormErrorMessage.cs</DependentUpon>
@@ -152,6 +153,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -187,6 +189,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\printer-icon.png" />
+    <None Include="Resources\Faq-icon.png" />
+    <None Include="Resources\Sidebar-Window-icon.png" />
+    <None Include="Resources\Files-View-File-icon.png" />
     <None Include="Resources\Step.bmp" />
     <None Include="Resources\FilterWheel\MotorizeFilterWheel_W910smm.png" />
     <None Include="Resources\FilterWheel\MotorizeFilterWheel_W910smm.bmp" />

@@ -50,6 +50,8 @@ namespace BeamOn_2K
 
         Stopwatch m_sw = null;
 
+        System.Timers.Timer m_tUpdateSnapshot = null;
+
         private BeamOnCL.BeamOnCL bm = null;
 
         Pen m_PenSensor = new Pen(System.Drawing.Color.Yellow, 1.2f);
@@ -96,7 +98,8 @@ namespace BeamOn_2K
         Point pImageWhellPosition = new Point(0, 0);
         Rectangle rImageWhellRectangle = new Rectangle(0, 0, 143, 177);
         private static System.Timers.Timer whellTimer;
-        Point[] m_pFilterPosition = new Point[3];
+        Point[] m_pFilterPosition = new Point[4];
+        String[] m_strFilterName = new String[4];
         int m_iFilterRadius = 25;
         int m_iWhellDirection = -1;
         int m_iWhellStep = 0;
@@ -109,6 +112,7 @@ namespace BeamOn_2K
         private double m_dAveragePowerDataSum;
 
         public String m_strSystemTitle;
+        private BeamOnCL.SnapshotBase m_snapshot = null;
 
         public FormMain(String strArgument)
         {
@@ -132,10 +136,16 @@ namespace BeamOn_2K
             bm = new BeamOnCL.BeamOnCL();
             bm.OnImageReceved += new BeamOnCL.BeamOnCL.ImageReceved(bm_OnImageReceved);
 
-            imageWhell = global::BeamOn_2K.Properties.Resources.MotorizeFilterWheel_W910smm1;
-            m_pFilterPosition[0] = new Point(35, 64);
-            m_pFilterPosition[1] = new Point(71, 28);
-            m_pFilterPosition[2] = new Point(108, 64);
+            imageWhell = global::BeamOn_U3.Properties.Resources.MotorizeFilterWheel_W910smm1;
+            m_pFilterPosition[0] = new Point(71, 101);
+            m_pFilterPosition[1] = new Point(108, 64);
+            m_pFilterPosition[2] = new Point(71, 28);
+            m_pFilterPosition[3] = new Point(35, 64);
+
+            m_strFilterName[0] = "ND8";
+            m_strFilterName[1] = "ND64";
+            m_strFilterName[2] = "ND200";
+            m_strFilterName[3] = "ND1000";
         }
 
         void bm_OnImageReceved(object sender, BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e)
@@ -149,6 +159,8 @@ namespace BeamOn_2K
             //}
             //BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e = ee.Clone();
 
+            m_snapshot = e.Snapshot.Clone();
+
             if (m_bmp != null)
             {
                 if ((m_sysData.RunOn == true) || ((m_sysData.RunOn == false) && (m_sysData.GetStep == true)))
@@ -160,7 +172,7 @@ namespace BeamOn_2K
                         try
                         {
                             BitmapData bmpData = m_bmp.LockBits(
-                                                                new Rectangle(new Point(0, 0), e.Snapshot.ImageRectangle.Size),
+                                                                new Rectangle(new Point(0, 0), m_snapshot.ImageRectangle.Size),
                                                                 System.Drawing.Imaging.ImageLockMode.WriteOnly,
                                                                 m_bmp.PixelFormat
                                                                 );
@@ -169,11 +181,11 @@ namespace BeamOn_2K
 
                             m_bmp.UnlockBits(bmpData);
 
-                            if (m_frm3D != null) m_frm3D.ImageData = e.Snapshot;
+                            if (m_frm3D != null) m_frm3D.ImageData = m_snapshot;
 
                             if (m_sysData.Measure == true)
                             {
-                                bm.GetMeasure(e.Snapshot);
+                                bm.GetMeasure(m_snapshot);
 
                                 plArea = bm.CreateEllipse();
 
@@ -184,6 +196,9 @@ namespace BeamOn_2K
 
                                 m_profileHorizontal = new BeamOnCL.Profile(bm.profileHorizontal);
                                 m_profileVertical = new BeamOnCL.Profile(bm.profileVertical);
+
+                                if ((m_sysData.ProfileType == BeamOnCL.BeamOnCL.TypeProfile.tpLIne) && (m_sysData.LineProfileType == BeamOnCL.BeamOnCL.TypeLineProfile.tpLineCentroid))
+                                    bm.CrossPosition = new Point((int)bm.PixelCentroid.X, (int)bm.PixelCentroid.Y);
 
                                 for (int i = 0; i < m_sysData.ClipLevels.NumberLevels; i++)
                                 {
@@ -229,8 +244,8 @@ namespace BeamOn_2K
                                 }
                                 else
                                 {
-                                    m_sysData.powerData.Power = (float)(bm.CurrentAreaPower * m_sysData.powerData.PowerCalibr.PowerCoeff(bm.Exposure, bm.Gain));
-                                    m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.currentFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
+                                    m_sysData.powerData.Power = (float)((bm.CurrentAreaPower / m_sysData.powerData.fSensitivity) / m_sysData.powerData.PowerCalibr.PowerCoeff(bm.Exposure, bm.Gain));
+                                    m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.realFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
                                 }
                             }
                         }
@@ -272,11 +287,6 @@ namespace BeamOn_2K
             dataSplitContainer.Panel1Collapsed = !propertyBoxToolStripMenuItem.Checked;
         }
 
-        private void dataPanelToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
-        {
-            mainSplitContainer.Panel2Collapsed = !dataPanelToolStripMenuItem.Checked;
-        }
-
         private void toolBarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             m_sysData.applicationData.bViewToolbar = toolBarToolStripMenuItem.Checked;
@@ -288,14 +298,9 @@ namespace BeamOn_2K
         {
             mainToolStrip.Visible = bValue;
             toolBarToolStripMenuItem.Checked = bValue;
+            numericUpDownAngle.Visible = toolBarToolStripMenuItem.Checked;
 
-            if (m_sysData.applicationData.m_FormErrorMessage != null)
-            {
-                if (bValue == true)
-                    m_sysData.applicationData.m_FormErrorMessage.Hide();
-                else
-                    m_sysData.applicationData.m_FormErrorMessage.Show();
-            }
+            //            formErrorMessage.Visible = !bValue;
         }
 
         private void statusBarToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
@@ -377,8 +382,10 @@ namespace BeamOn_2K
 
         private void DefaultSettings()
         {
-            m_sysData.powerData.strSAMName = "SAM.dat";
-            m_sysData.powerData.strSAMPath = m_sysData.applicationData.m_strMyCurrentDir;
+            //Power
+            m_sysData.powerData.fSensFactor = 1.0f;
+            m_sysData.powerData.fSensitivity = 1f;
+            m_sysData.powerData.currentFilter = 3;
             m_sysData.powerData.PowerUnits = 0;
 
             m_sysData.applicationData.bSaveExit = true;
@@ -386,15 +393,24 @@ namespace BeamOn_2K
             m_sysData.applicationData.bViewToolbar = true;
 
             //Profile
+            m_sysData.ProfileType = BeamOnCL.BeamOnCL.TypeProfile.tpLIne;
+            m_sysData.LineProfileType = BeamOnCL.BeamOnCL.TypeLineProfile.tpLineCentroid;
+
             m_sysData.ClipLevels.SetLevel(0, 13.5M);
             m_sysData.ClipLevels.SetLevel(1, 50M);
             m_sysData.ClipLevels.SetLevel(2, 80M);
 
-            m_sysData.applicationData.bStatusViewPower = true;
+            //Wavelenght
+            m_sysData.powerData.uiWavelenghtMin = 350;
+            m_sysData.powerData.uiWavelenghtMax = 1100;
+            m_sysData.powerData.uiWavelenght = 633;
 
-            m_sysData.applicationData.bSaveExit = true;
-            m_sysData.applicationData.bViewStatusBar = true;
-            m_sysData.applicationData.bViewToolbar = true;
+            //Log
+            m_sysData.logData.LogInterval = 1;
+            m_sysData.logData.LogDuration = 5;
+            m_sysData.logData.ltMode = LogType.ltTime;
+            m_sysData.logData.ftFile = FileType.ftLog;
+            m_sysData.logData.strFileName = m_sysData.applicationData.m_strMyDataDir + "\\" + m_sysData.applicationData.ProductName + ".log";
         }
 
         private void SetClipLevel(int iIndex, float fValue)
@@ -417,7 +433,7 @@ namespace BeamOn_2K
             {
                 if (iLevelCurrent == -1)
                 {
-                    bm.CrossPosition = new Point(e.X, e.Y);
+                    if ((m_sysData.ProfileType == BeamOnCL.BeamOnCL.TypeProfile.tpLIne) && (m_sysData.LineProfileType == BeamOnCL.BeamOnCL.TypeLineProfile.tpLineFree)) bm.CrossPosition = new Point(e.X, e.Y);
                 }
                 else
                 {
@@ -494,28 +510,31 @@ namespace BeamOn_2K
                 DrawProfile(m_profileVertical, m_PenGrid, DrawOrientation.doVertical, grfx);
                 DrawProfile(m_profileHorizontal, m_PenGrid, DrawOrientation.doHorizontal, grfx);
 
-                int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
-
-                int iShiftY = 0;
-                if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
+                if (m_sysData.applicationData.bViewDataPanel == false)
                 {
-                    iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
-                    if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
+                    int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
+
+                    int iShiftY = 0;
+                    if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
+                    {
+                        iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
+                        if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
+                    }
+
+                    int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
+
+                    grfx.DrawString("Horizontal Profile", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 100 - iShiftY), m_strfrm);
+                    grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(2))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[2] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 80 - iShiftY), m_strfrm);
+                    grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(1))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[1] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 60 - iShiftY), m_strfrm);
+                    grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(0))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[0] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 40 - iShiftY), m_strfrm);
+                    if (m_sysData.ViewGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_sysData.HorizontalProfile.m_fCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 20 - iShiftY), m_strfrm);
+
+                    grfx.DrawString("Vertical Profile", myFont, PaletteBrush, new PointF(20 - iShiftX, 20 - iShiftY), m_strfrm);
+                    grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(2))) + "%" + " Width: " + m_sysData.VerticalProfile.strWidth[2] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 40 - iShiftY), m_strfrm);
+                    grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(1))) + "%" + " Width: " + m_sysData.VerticalProfile.strWidth[1] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 60 - iShiftY), m_strfrm);
+                    grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(0))) + "%" + " Width: " + m_sysData.VerticalProfile.strWidth[0] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 80 - iShiftY), m_strfrm);
+                    if (m_sysData.ViewGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_sysData.VerticalProfile.m_fCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, 100 - iShiftY), m_strfrm);
                 }
-
-                int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
-
-                grfx.DrawString("Horizontal Profile", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 100 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(2))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[2] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 80 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(1))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[1] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 60 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(0))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[0] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 40 - iShiftY), m_strfrm);
-                if (m_sysData.ViewGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_sysData.HorizontalProfile.m_fCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 20 - iShiftY), m_strfrm);
-
-                grfx.DrawString("Vertical Profile", myFont, PaletteBrush, new PointF(20 - iShiftX, 20 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(2))) + "%" + " Width: " + m_sysData.VerticalProfile.strWidth[2] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 40 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(1))) + "%" + " Width: " + m_sysData.VerticalProfile.strWidth[1] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 60 - iShiftY), m_strfrm);
-                grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(0))) + "%" + " Width: " + m_sysData.VerticalProfile.strWidth[0] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, 80 - iShiftY), m_strfrm);
-                if (m_sysData.ViewGaussian == true) grfx.DrawString("Gaussian Correlation: " + String.Format("{0:F1}", m_sysData.VerticalProfile.m_fCorrelation) + "%", myFont, PaletteBrush, new PointF(20 - iShiftX, 100 - iShiftY), m_strfrm);
             }
         }
 
@@ -630,8 +649,12 @@ namespace BeamOn_2K
                     pictureBoxData.Invalidate();
                     toolStripStatusLabelTimeStamp.Text = (1000f / (double)Timestamp).ToString("#.000") + " fps";
                     toolStripStatuslblDate.Text = DateTime.Now.ToString();
-                    toolStripStatuslblPower.Text = PowerData.GetValueStringFormat(m_sysData.powerData.mwPower, m_sysData.powerData.PowerUnits) + " " + PowerData.bufUnits[m_sysData.powerData.PowerUnits];
                     toolStripStatuslblRun.Text = (m_sysData.RunOn == true) ? "Run" : "Step";
+                    toolStripStatuslblWave.Text = "Wavelength: " + m_sysData.powerData.uiWavelenght + "nm";
+                    toolStripStatuslblFilter.Text = "Filter: " + m_strFilterName[m_sysData.powerData.currentFilter];
+                    toolStripStatuslblClip.Text = "Clip Level: " + m_sysData.ClipLevels.Level(0).ToString() + "%";
+                    toolStripStatuslblAverage.Text = "Average: " + ((m_sysData.AverageOn == true) ? m_sysData.Average.ToString() : "Off");
+
                 });
             }
             catch
@@ -673,7 +696,7 @@ namespace BeamOn_2K
                     else
                         Color = color;
 
-                    bm.pixelFormat = pixelFormat;
+                    if (m_sysData.SnapshotView == false) bm.pixelFormat = pixelFormat;
 
                     if (m_frm3D != null) m_frm3D.SetColorPalette(color);
 
@@ -687,15 +710,33 @@ namespace BeamOn_2K
 
         private void FormMain_Load(object sender, EventArgs e)
         {
+            DefaultSettings();
+
             m_sysData.DeserializeAppData(m_sysData.applicationData.m_strMyDataDir + "\\$$$.ini");
 
-            m_sysData.applicationData.m_FormErrorMessage = new FormErrorMessage();
-            m_sysData.applicationData.m_FormErrorMessage.Location = new Point(0, 0);
-            m_sysData.applicationData.m_FormErrorMessage.ErrorMessage = ErrorStatus.BA_OK;
-            m_sysData.applicationData.m_FormErrorMessage.Size = new System.Drawing.Size(160, 22);
-
-            if (bm.Start(PixelFormat.Format8bppIndexed) == true)
+            if (bm.Start(m_sysData.videoDeviceData.pixelFormat) == true)
             {
+                m_sysData.powerData.ReadSensitivitySensor(m_sysData.applicationData.m_strMyAppDir + "\\" + bm.SerialNumber + ".xml");
+
+                m_sysData.powerData.SetFilterSensitivityFile(0, m_sysData.applicationData.m_strMyAppDir, bm.SerialNumber + ".nd8");
+                m_sysData.powerData.SetFilterSensitivityFile(1, m_sysData.applicationData.m_strMyAppDir, bm.SerialNumber + ".nd64");
+                m_sysData.powerData.SetFilterSensitivityFile(2, m_sysData.applicationData.m_strMyAppDir, bm.SerialNumber + ".nd200");
+                m_sysData.powerData.SetFilterSensitivityFile(3, m_sysData.applicationData.m_strMyAppDir, bm.SerialNumber + ".nd1000");
+
+                m_sysData.powerData.ReadSAMFile();
+
+                bm.CameraFilter = m_sysData.powerData.currentFilter;
+
+                pImageWhellPosition.Offset(-m_sysData.powerData.currentFilter * 5 * rImageWhellRectangle.Width, 0);
+                if (pImageWhellPosition.X <= -(imageWhell.Width - 1)) pImageWhellPosition.X = 0;
+                if (pImageWhellPosition.X >= 1) pImageWhellPosition.X = -(imageWhell.Width - 1 - rImageWhellRectangle.Width);
+
+                m_sysData.powerData.ReadFilterFile(bm.CameraFilter);
+
+                m_sysData.powerData.SetSensitivity();
+                m_sysData.powerData.SetFilterFactor();
+                m_sysData.powerData.SetSAMFactor();
+
                 m_sw = Stopwatch.StartNew();
 
                 picturePaletteImage.Format = m_sysData.videoDeviceData.pixelFormat;
@@ -719,7 +760,14 @@ namespace BeamOn_2K
                 lineProfileToolStripButton.Checked = lineProfileToolStripMenuItem.Checked;
                 sumProfileToolStripButton.Checked = sumProfileToolStripMenuItem.Checked;
 
+                AngleLineProfileToolStripLabel.Enabled = lineProfileToolStripButton.Checked;
+                numericUpDownAngle.Enabled = lineProfileToolStripButton.Checked;
+
+                bm.lineProfileAngle = m_sysData.lineProfileAngle;
+
                 bm.typeProfile = m_sysData.ProfileType;
+
+                bm.LineProfileType = m_sysData.LineProfileType;
 
                 toolStripStatusLabelTypeProfile.Text = (sumProfileToolStripMenuItem.Checked) ? "Sum" : "Line";
 
@@ -732,8 +780,6 @@ namespace BeamOn_2K
                     if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
 
                     pictureBoxImage.Size = bm.ImageRectangle.Size;
-
-                    m_sysData.applicationData.m_FormErrorMessage.Dispose();
                 }
 
                 trackBarGain.Maximum = bm.MaxGain;
@@ -765,7 +811,19 @@ namespace BeamOn_2K
 
                 pointSensorCenter = new Point((int)(bm.MaxImageRectangle.Width / 2) - bm.ImageRectangle.X, (int)(bm.MaxImageRectangle.Height / 2) - (int)bm.ImageRectangle.Y);
 
-                toolStripStatuslblPower.Visible = m_sysData.applicationData.bStatusViewPower;
+                dataPanelToolStripMenuItem.Checked = m_sysData.applicationData.bViewDataPanel;
+                dataViewToolStripButton.Checked = dataPanelToolStripMenuItem.Checked;
+
+                mainSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
+                propertyBoxToolStripMenuItem.Enabled = m_sysData.applicationData.bViewDataPanel;
+
+                mnuOptionsSaveSettingsOnExit.Checked = m_sysData.applicationData.bSaveExit;
+                ViewToolStrip(m_sysData.applicationData.bViewToolbar);
+
+                statusBarToolStripMenuItem.Checked = m_sysData.applicationData.bViewStatusBar;
+                mainStatusStrip.Visible = statusBarToolStripMenuItem.Checked;
+
+                UpdateViewUnits();
             }
             else
             {
@@ -779,16 +837,32 @@ namespace BeamOn_2K
             }
 
             m_strSystemTitle = m_sysData.applicationData.ProductName;
+            m_sysData.applicationData.SystemNumber = bm.UserDefinedName;
             UpdateView();
 
             MenuToolEnabled();
         }
 
+        private void FormMain_Resize(object sender, EventArgs e)
+        {
+            if (dataSplitContainer.Panel1Collapsed == false) dataSplitContainer.SplitterDistance = dataSplitContainer.Panel1MinSize;
+        }
+
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (m_sysData.applicationData.bSaveExit == true) m_sysData.SerializeAppData(m_sysData.applicationData.m_strMyDataDir + "\\$$$.ini");
 
-            bm.Stop();
+            if (m_sysData.SnapshotView == true)
+            {
+                StopSnapshot();
+
+                e.Cancel = true;
+            }
+            else
+            {
+                if (m_sysData.applicationData.bSaveExit == true) m_sysData.SerializeAppData(m_sysData.applicationData.m_strMyDataDir + "\\$$$.ini");
+
+                bm.Stop();
+            }
         }
 
         private void trackBarTransparency_Scroll(object sender, EventArgs e)
@@ -823,14 +897,16 @@ namespace BeamOn_2K
             bm.typeProfile = m_sysData.ProfileType;
 
             toolStripStatusLabelTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum) ? "Sum" : "Line";
+            AngleLineProfileToolStripLabel.Enabled = lineProfileToolStripButton.Checked;
+            numericUpDownAngle.Enabled = lineProfileToolStripButton.Checked;
         }
 
         private void dataSplitContainer_Panel2_Paint(object sender, PaintEventArgs e)
         {
             if (m_sysData.Measure == true)
             {
-                labelPositionXValue.Text = GetStringFormat(m_sysData.positionData.RealPosition.X);
-                labelPositionYValue.Text = GetStringFormat(m_sysData.positionData.RealPosition.Y);
+                labelPositionXValue.Text = GetStringFormat(m_sysData.positionData.PositionX);
+                labelPositionYValue.Text = GetStringFormat(m_sysData.positionData.PositionY);
 
                 labelHorizontalValue1.Text = m_sysData.HorizontalProfile.strWidth[0];
                 labelHorizontalValue2.Text = m_sysData.HorizontalProfile.strWidth[1];
@@ -861,6 +937,8 @@ namespace BeamOn_2K
                 labelGaussianClipLevel3.Text = labelClipLevel3.Text;
                 labelGaussianClipLevel2.Text = labelClipLevel2.Text;
                 labelGaussianClipLevel1.Text = labelClipLevel1.Text;
+
+                labelPower.Text = m_sysData.powerData.ToString();
             }
         }
 
@@ -882,7 +960,7 @@ namespace BeamOn_2K
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmAboutBox aboutBox = new frmAboutBox();
+            frmAboutBox aboutBox = new frmAboutBox(bm.UserDefinedName);
             aboutBox.ShowDialog();
         }
 
@@ -1244,6 +1322,15 @@ namespace BeamOn_2K
                 Help.ShowHelp(this, ProductName + ".chm", HelpNavigator.KeywordIndex, ProductName);
         }
 
+        private void UpdateViewUnits()
+        {
+            groupBoxPosition.Text = (m_sysData.UnitMeasure == MeasureUnits.muMicro) ? "Position(µm)" : "Position(mrad)";
+            ProfileGroupBox.Text = (m_sysData.UnitMeasure == MeasureUnits.muMicro) ? "Profile(µm)" : "Profile(mrad)";
+            gaussGroupBox.Text = (m_sysData.UnitMeasure == MeasureUnits.muMicro) ? "Gaussian(µm)" : "Gaussian(mrad)";
+
+            groupBoxPower.Text = "Power(" + PowerData.bufUnits[m_sysData.powerData.PowerUnits] + ")";
+        }
+
         private void measuringToolStrip_Click(object sender, EventArgs e)
         {
             if (sender.GetType() == typeof(ToolStripButton))
@@ -1309,7 +1396,7 @@ namespace BeamOn_2K
             if (bEnable == true)
             {
                 mnuFileStartDataCollection.Checked = true;
-                mnuFileStartDataCollection.Image = global::BeamOn_2K.Properties.Resources.Hand;
+                mnuFileStartDataCollection.Image = global::BeamOn_U3.Properties.Resources.Hand;
                 mnuFileStartDataCollection.Text = "&Stop Log File";
                 mnuFileStartDataCollection.ToolTipText = "Stop Log File";
 
@@ -1322,7 +1409,7 @@ namespace BeamOn_2K
             else
             {
                 mnuFileStartDataCollection.Checked = false;
-                mnuFileStartDataCollection.Image = global::BeamOn_2K.Properties.Resources.Start;
+                mnuFileStartDataCollection.Image = global::BeamOn_U3.Properties.Resources.Start;
                 mnuFileStartDataCollection.Text = "&Start Log File";
                 mnuFileStartDataCollection.ToolTipText = "Start Log File";
 
@@ -1354,7 +1441,7 @@ namespace BeamOn_2K
                 this.Invoke((MethodInvoker)delegate
                 {
                     this.mnuFileStartDataCollection.Checked = false;
-                    this.mnuFileStartDataCollection.Image = global::BeamOn_2K.Properties.Resources.Start;
+                    this.mnuFileStartDataCollection.Image = global::BeamOn_U3.Properties.Resources.Start;
                     this.mnuFileStartDataCollection.Text = "Start Lo&g";
                     this.mnuFileStartDataCollection.ToolTipText = "Start Log";
 
@@ -1390,18 +1477,18 @@ namespace BeamOn_2K
                 this.Invoke((MethodInvoker)delegate
                 {
                     toolStripStatuslblError.SystemMessage = m_SystemMessage;
-                    m_sysData.applicationData.m_FormErrorMessage.SystemMessage = m_SystemMessage;
+                    formErrorMessage.SystemMessage = m_SystemMessage;
 
                     toolStripStatuslblError.LogTypeMessage = (Byte)m_sysData.logData.ftFile;
-                    m_sysData.applicationData.m_FormErrorMessage.LogTypeMessage = (Byte)m_sysData.logData.ftFile;
+                    formErrorMessage.LogTypeMessage = (Byte)m_sysData.logData.ftFile;
 
-                    if (((m_sysData.applicationData.m_FormErrorMessage.SystemMessage != 0) || (m_sysData.applicationData.m_FormErrorMessage.ErrorMessage != ErrorStatus.BA_OK) || (m_sysData.applicationData.m_FormErrorMessage.DemoVersion == true)) && (mainToolStrip.Visible == false))
+                    if (((formErrorMessage.SystemMessage != 0) || (formErrorMessage.ErrorMessage != ErrorStatus.BA_OK) || (formErrorMessage.DemoVersion == true)) && (mainToolStrip.Visible == false))
                     {
-                        m_sysData.applicationData.m_FormErrorMessage.Show();
-                        m_sysData.applicationData.m_FormErrorMessage.Focus();
+                        formErrorMessage.Visible = true;
+                        formErrorMessage.Focus();
                     }
                     else
-                        m_sysData.applicationData.m_FormErrorMessage.Hide();
+                        formErrorMessage.Visible = false;
                 });
 
             }
@@ -1487,8 +1574,6 @@ namespace BeamOn_2K
                         if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
 
                         pictureBoxImage.Size = bm.ImageRectangle.Size;
-
-                        m_sysData.applicationData.m_FormErrorMessage.Dispose();
                     }
                 }
 
@@ -1502,7 +1587,7 @@ namespace BeamOn_2K
 
                 gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
 
-                toolStripStatuslblPower.Visible = m_sysData.applicationData.bStatusViewPower;
+                UpdateViewUnits();
             }
         }
 
@@ -1540,26 +1625,75 @@ namespace BeamOn_2K
             pictureBoxFilterWhell.Invalidate();
         }
 
-        private void pictureBoxFilterWhell_MouseClick(object sender, MouseEventArgs e)
+        private void pictureBoxFilterWhell_MouseLeave(object sender, EventArgs e)
+        {
+            panelFilterName.Visible = false;
+            pictureBoxFilterWhell.Cursor = Cursors.Default;
+        }
+
+        void pictureBoxFilterWhell_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             int size2filter = 0;
+            int i = 0;
 
-            if ((e.Button == System.Windows.Forms.MouseButtons.Left) && (whellTimer == null))
+            if (whellTimer == null)
             {
-                for (int i = 0; i < m_pFilterPosition.Length; i++)
+                for (i = 0; i < m_pFilterPosition.Length; i++)
                 {
                     size2filter = (int)Math.Floor(Math.Sqrt(Math.Pow(Math.Abs(m_pFilterPosition[i].X - e.X), 2) + Math.Pow(Math.Abs(m_pFilterPosition[i].Y - e.Y), 2)));
                     if (size2filter <= m_iFilterRadius)
                     {
-                        m_iWhellDirection = (i <= 1) ? 1 : -1;
-                        m_iWhellStep = (i == 1) ? 10 : 5;
+                        m_iWhellDirection = (i == 3) ? 1 : ((i == 0) ? 0 : -1);
+                        m_iWhellStep = (i == 2) ? 10 : 5;
                         int iPos = (int)((pImageWhellPosition.X / rImageWhellRectangle.Width + m_iWhellStep * m_iWhellDirection) / 5);
                         if (iPos < -3) iPos += 4;
                         if (iPos > 0) iPos -= 4;
 
-                        bm.CameraFilter = Math.Abs(iPos);
-                        SetTimer();
+                        panelFilterName.Location = new Point(e.X + 30, e.Y + 40);
+                        pictureBoxFilterWhell.Cursor = Cursors.Hand;
+
+                        labelFilterName.Text = m_strFilterName[(UInt16)Math.Abs(iPos)];
+
                         break;
+                    }
+                }
+
+                panelFilterName.Visible = (i != m_pFilterPosition.Length);
+                pictureBoxFilterWhell.Cursor = (i != m_pFilterPosition.Length) ? Cursors.Hand : Cursors.Default;
+            }
+        }
+
+        private void pictureBoxFilterWhell_MouseClick(object sender, MouseEventArgs e)
+        {
+            int size2filter = 0;
+
+            if ((m_sysData.SnapshotView == false) && ((e.Button == System.Windows.Forms.MouseButtons.Left) && (whellTimer == null)))
+            {
+                panelFilterName.Visible = false;
+                pictureBoxFilterWhell.Cursor = Cursors.Default;
+
+                if (whellTimer == null)
+                {
+                    for (int i = 1; i < m_pFilterPosition.Length; i++)
+                    {
+                        size2filter = (int)Math.Floor(Math.Sqrt(Math.Pow(Math.Abs(m_pFilterPosition[i].X - e.X), 2) + Math.Pow(Math.Abs(m_pFilterPosition[i].Y - e.Y), 2)));
+                        if (size2filter <= m_iFilterRadius)
+                        {
+                            m_iWhellDirection = (i == 3) ? 1 : -1;
+                            m_iWhellStep = (i == 2) ? 10 : 5;
+                            int iPos = (int)((pImageWhellPosition.X / rImageWhellRectangle.Width + m_iWhellStep * m_iWhellDirection) / 5);
+                            if (iPos < -3) iPos += 4;
+                            if (iPos > 0) iPos -= 4;
+
+                            m_sysData.powerData.currentFilter = (UInt16)Math.Abs(iPos);
+                            bm.CameraFilter = m_sysData.powerData.currentFilter;
+                            SetTimer();
+
+                            m_sysData.powerData.ReadFilterFile(bm.CameraFilter);
+                            m_sysData.powerData.SetFilterFactor();
+
+                            break;
+                        }
                     }
                 }
             }
@@ -1568,7 +1702,8 @@ namespace BeamOn_2K
         private void buttonProperty_Click(object sender, EventArgs e)
         {
             dataSplitContainer.Panel1Collapsed = !dataSplitContainer.Panel1Collapsed;
-            dataSplitContainer.SplitterDistance = dataSplitContainer.Height - dataSplitContainer.Panel1MinSize - dataSplitContainer.SplitterWidth;
+            dataSplitContainer.SplitterDistance = dataSplitContainer.Panel1MinSize;
+            propertyBoxToolStripMenuItem.Checked = !dataSplitContainer.Panel1Collapsed;
         }
 
         private void powerToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1581,8 +1716,10 @@ namespace BeamOn_2K
                 m_formPowerCalibration = new FormPowerCalibration();
                 if (m_formPowerCalibration.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    m_sysData.powerData.PowerCalibr.InitializePowerCalibration(m_formPowerCalibration.PowerCalibration / m_dAveragePowerDataSum, bm.Exposure, bm.Gain);
+                    m_sysData.powerData.SetSensitivityFactor(m_formPowerCalibration.PowerCalibration, (float)m_dAveragePowerDataSum);
+                    m_sysData.powerData.PowerCalibr.InitializePowerCalibration(bm.Exposure, bm.Gain);
                     m_bPowerCalibration = false;
+                    m_sysData.powerData.SetSensitivity();
                 }
             }
         }
@@ -1612,11 +1749,11 @@ namespace BeamOn_2K
 
             this.Text = m_strSystemTitle;
 
+            this.Text += " " + bm.UserDefinedName;
             //if (m_sysData.linkData.Status == LinkStatus.lsClientMode)
             //    this.Text += " (Client Mode)";
 
-            //if (m_sysData.fSnapshotView == true)
-            //    this.Text += " (Snapshot View)";
+            if (m_sysData.SnapshotView == true) this.Text += " (Snapshot View)";
 
             if ((m_sysData.applicationData.m_strUserTitle != null) && (m_sysData.applicationData.m_strUserTitle.Equals("") == false))
                 this.Text += " [" + m_sysData.applicationData.m_strUserTitle + "]";
@@ -1748,41 +1885,43 @@ namespace BeamOn_2K
             FileStream fs = new FileStream(strFileName, FileMode.Create);
             BinaryWriter bw = new BinaryWriter(fs);
 
-            m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.currentFilterFactor) / m_sysData.powerData.currentSAMFactor;
-
             try
             {
                 bw.Write(m_sysData.applicationData.ProductName + " Snapshot");
                 bw.Write(m_sysData.applicationData.SystemNumber);
                 bw.Write(m_sysData.powerData.uiWavelenght);
-                bw.Write(m_sysData.positionData.iHeadTilt);
-                bw.Write(m_sysData.powerData.Power);
-                bw.Write(m_sysData.powerData.bIndFilter);
-                if (m_sysData.powerData.bIndFilter == true)
-                {
-                    bw.Write(m_sysData.powerData.strFilterName);
-                    bw.Write(m_sysData.powerData.currentFilterFactor);
-                }
-                bw.Write(m_sysData.positionData.RealPosition.X);
-                bw.Write(m_sysData.positionData.RealPosition.Y);
-                bw.Write(m_sysData.DetectorType.ToString());
-
-                for (int i = 0; i < Beam_Control.BeamCommunication.PrjNumberKnive[(UInt16)m_sysData.DetectorType]; i++)
-                {
-                    bw.Write(m_sysData.profData[i].m_IsProfileOK);
-                    bw.Write(m_sysData.profData[i].m_dUnit);
-                    bw.Write(m_sysData.profData[i].DiffDataArray.Length);
-                    for (int j = 0; j < m_sysData.profData[i].DiffDataArray.Length; j++)
-                    {
-                        bw.Write(m_sysData.profData[i].DiffDataArray[j]);
-                    }
-                }
+                bw.Write(m_sysData.powerData.currentFilter);
+                bw.Write(m_sysData.powerData.realFilterFactor);
 
                 bw.Write(m_sysData.powerData.bIndSAM);
                 if (m_sysData.powerData.bIndSAM == true)
                 {
                     bw.Write(m_sysData.powerData.strSAMName);
                     bw.Write(m_sysData.powerData.currentSAMFactor);
+                }
+
+                bw.Write(bm.Exposure);
+                bw.Write(bm.Gain);
+                bw.Write(m_sysData.powerData.PowerCalibr.PowerCalibrationExposure);
+                bw.Write(m_sysData.powerData.PowerCalibr.PowerCalibrationGain);
+
+                bw.Write((Byte)((m_sysData.videoDeviceData.pixelFormat == PixelFormat.Format8bppIndexed) ? 8 : 12));
+                bw.Write((UInt16)bm.ImageRectangle.Left);
+                bw.Write((UInt16)bm.ImageRectangle.Top);
+                bw.Write((UInt16)bm.ImageRectangle.Width);
+                bw.Write((UInt16)bm.ImageRectangle.Height);
+                bw.Write((UInt16)bm.MaxImageRectangle.Width);
+                bw.Write((UInt16)bm.MaxImageRectangle.Height);
+
+                for (int i = 0, iShift = 0; i < m_snapshot.Height; i++, iShift = i * m_snapshot.Width)
+                {
+                    for (int j = 0; j < m_snapshot.Width; j++, iShift++)
+                    {
+                        if (m_sysData.videoDeviceData.pixelFormat == PixelFormat.Format8bppIndexed)
+                            bw.Write((Byte)m_snapshot.GetPixelColor(iShift));
+                        else
+                            bw.Write(m_snapshot.GetPixelColor(iShift));
+                    }
                 }
 
                 bRet = true;
@@ -1799,6 +1938,227 @@ namespace BeamOn_2K
             }
 
             return bRet;
+        }
+
+        private void openSnapshotToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (openSnapshotToolStripMenuItem.Checked == true)
+            {
+                OpenFileDialog openSnapshotFile = new OpenFileDialog();
+
+                openSnapshotFile.Filter = "Snapshot files (*.snp)|*.snp";
+                openSnapshotFile.FileName = "*.snp";
+
+                openSnapshotFile.DefaultExt = "snp";
+                openSnapshotFile.AddExtension = true;
+                openSnapshotFile.CheckPathExists = true;
+                openSnapshotFile.CheckFileExists = true;
+
+                openSnapshotFile.InitialDirectory = m_sysData.applicationData.m_strMyDataDir;
+                openSnapshotFile.RestoreDirectory = true;
+                openSnapshotFile.FileOk += new CancelEventHandler(SnapshotFile_FileOk);
+                openSnapshotFile.Title = "Open Snapshot File";
+
+                if (openSnapshotFile.ShowDialog() == DialogResult.OK) StartSnapshot(openSnapshotFile.FileName);
+            }
+            else
+            {
+                StopSnapshot();
+            }
+        }
+
+        private void StartUpdateSnapshotTimer()
+        {
+            m_tUpdateSnapshot = new System.Timers.Timer();
+            m_tUpdateSnapshot.Elapsed += new System.Timers.ElapsedEventHandler(m_tUpdateSnapshot_Elapsed);
+            m_tUpdateSnapshot.Interval = 50;
+        }
+
+        void m_tUpdateSnapshot_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (m_sysData.SnapshotView == true) bm_OnImageReceved(sender, new BeamOnCL.MeasureCamera.NewDataRecevedEventArgs(m_snapshot, 0));
+        }
+
+        void StopSnapshot()
+        {
+            m_sysData.SnapshotView = false;
+
+            if (m_tUpdateSnapshot != null) m_tUpdateSnapshot.Stop();
+
+            m_SystemMessage = (Byte)(m_SystemMessage & (~(int)SystemStatus.M_SS_SNAPSHOT));
+
+            AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
+            asyncSM.BeginInvoke(null, null);
+
+            bm.OnImageReceved += new BeamOnCL.BeamOnCL.ImageReceved(bm_OnImageReceved);
+
+            FormMain_Load(this, new EventArgs());
+        }
+
+        void StartSnapshot(String strFileName)
+        {
+            if ((m_sysData.Simulation == false) && (m_sysData.SnapshotView == false))
+            {
+                bm.Stop();
+            }
+
+            m_sysData.SerializeAppData(m_sysData.applicationData.m_strMyDataDir + "\\$$$.ini");
+
+            if (m_tUpdateSnapshot != null) m_tUpdateSnapshot.Stop();
+
+            if (ReadSnapshotFile(strFileName) == true)
+            {
+                if (bm != null) bm.OnImageReceved -= new BeamOnCL.BeamOnCL.ImageReceved(bm_OnImageReceved);
+
+                DefaultSettings();
+
+                m_sysData.SnapshotView = true;
+
+                if (m_tUpdateSnapshot == null) StartUpdateSnapshotTimer();
+                m_tUpdateSnapshot.Start();
+
+                m_SystemMessage |= (Byte)SystemStatus.M_SS_SNAPSHOT;
+
+                AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
+                asyncSM.BeginInvoke(null, null);
+            }
+            else
+                StopSnapshot();
+        }
+
+        private Boolean ReadSnapshotFile(String strFileName)
+        {
+            Boolean bRet = false;
+
+            FileStream fs = new FileStream(strFileName, FileMode.Open, FileAccess.Read);
+            BinaryReader br = new BinaryReader(fs);
+
+            try
+            {
+                String pn = br.ReadString();
+
+                m_sysData.applicationData.SystemNumber = br.ReadString();
+                m_sysData.powerData.uiWavelenght = br.ReadUInt16();
+
+                m_sysData.powerData.currentFilter = br.ReadUInt16();
+                pImageWhellPosition.Offset(-m_sysData.powerData.currentFilter * 5 * rImageWhellRectangle.Width, 0);
+                if (pImageWhellPosition.X <= -(imageWhell.Width - 1)) pImageWhellPosition.X = 0;
+                if (pImageWhellPosition.X >= 1) pImageWhellPosition.X = -(imageWhell.Width - 1 - rImageWhellRectangle.Width);
+
+                m_sysData.powerData.realFilterFactor = br.ReadSingle();
+
+                m_sysData.powerData.bIndSAM = br.ReadBoolean();
+                if (m_sysData.powerData.bIndSAM == true)
+                {
+                    m_sysData.powerData.strSAMName = br.ReadString();
+                    m_sysData.powerData.realSAMFactor = br.ReadSingle();
+                    m_sysData.powerData.currentSAMFactor = m_sysData.powerData.realSAMFactor;
+                }
+                else
+                {
+                    m_sysData.powerData.strSAMName = "";
+                    m_sysData.powerData.realSAMFactor = 1;
+                    m_sysData.powerData.currentSAMFactor = 1;
+                }
+
+                m_sysData.powerData.bLoadSAM = m_sysData.powerData.bIndSAM;
+
+                trackBarExposure.Enabled = false;
+                labelExposureMin.Enabled = false;
+                labelExposureMax.Enabled = false;
+                labelExposureValue.Text = br.ReadInt32().ToString() + " µs";
+
+                trackBarGain.Enabled = false;
+                labelGainMin.Enabled = false;
+                labelGainMax.Enabled = false;
+                labelGainValue.Text = br.ReadInt32().ToString() + " dB";
+
+                m_sysData.powerData.PowerCalibr.PowerCalibrationExposure = br.ReadInt32();
+                m_sysData.powerData.PowerCalibr.PowerCalibrationGain = br.ReadInt32();
+
+                m_sysData.videoDeviceData.pixelFormat = (br.ReadByte() == 12) ? PixelFormat.Format24bppRgb : PixelFormat.Format8bppIndexed;
+                picturePaletteImage.Format = m_sysData.videoDeviceData.pixelFormat;
+
+                int iLeft = br.ReadUInt16();//Left
+                int iTop = br.ReadUInt16();//Top
+
+                pictureBoxImage.Size = new Size(br.ReadUInt16(), br.ReadUInt16());
+                pointSensorCenter = new Point((int)(br.ReadUInt16() / 2) - iLeft, (int)(br.ReadUInt16() / 2) - iTop);
+
+                m_bmp = new Bitmap(pictureBoxImage.Width, pictureBoxImage.Height, picturePaletteImage.Format);
+
+                if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed)
+                    m_bmp.Palette = picturePaletteImage.Palette;
+                else
+                    Color = picturePaletteImage.colorArray;
+
+                toolStripStatusLabelPixelFormat.Text = (m_sysData.videoDeviceData.pixelFormat == PixelFormat.Format8bppIndexed) ? "8 bpp" : "12 bpp";
+                /*
+
+                                for (int i = 0, iShift = 0; i < m_snapshot.Height; i++, iShift = i * m_snapshot.Width)
+                                {
+                                    for (int j = 0; j < m_snapshot.Width; j++, iShift++)
+                                    {
+                                        if (m_sysData.videoDeviceData.pixelFormat == PixelFormat.Format8bppIndexed)
+                                            bw.Write((Byte)m_snapshot.GetPixelColor(iShift));
+                                        else
+                                            bw.Write(m_snapshot.GetPixelColor(iShift));
+                                    }
+                                }
+                                */
+
+                UpdateView();
+
+                MenuToolEnabled();
+
+                bRet = true;
+            }
+            catch (Exception ex)
+            {
+                FileInfo fi = new FileInfo(strFileName);
+                CustomMessageBox.Show(ex + "Unable to open file " + fi.Name + " .", "Open Snapshot File Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                br.Close();
+                fs.Close();
+            }
+
+            return bRet;
+        }
+
+        private void dataPanelToolStrip_Click(object sender, EventArgs e)
+        {
+            if (sender.GetType() == typeof(ToolStripButton))
+                dataPanelToolStripMenuItem.Checked = dataViewToolStripButton.Checked;
+            else if (sender.GetType() == typeof(ToolStripMenuItem))
+                dataViewToolStripButton.Checked = dataPanelToolStripMenuItem.Checked;
+
+            m_sysData.applicationData.bViewDataPanel = dataPanelToolStripMenuItem.Checked;
+            mainSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
+            propertyBoxToolStripMenuItem.Enabled = m_sysData.applicationData.bViewDataPanel;
+        }
+
+        private void numericUpDownAngle_ValueChanged(object sender, EventArgs e)
+        {
+            AsyncChangeAngle asyncChangeAngle = new AsyncChangeAngle(UpdateAngleProfile);
+            asyncChangeAngle.BeginInvoke(Convert.ToDouble(numericUpDownAngle.Value), null, null);
+        }
+
+        private void UpdateAngleProfile(Double Angle)
+        {
+            try
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    m_sysData.lineProfileAngle = (float)(Angle * Math.PI / 180f);
+                    bm.lineProfileAngle = m_sysData.lineProfileAngle;
+                });
+
+            }
+            catch
+            {
+            }
         }
     }
 }

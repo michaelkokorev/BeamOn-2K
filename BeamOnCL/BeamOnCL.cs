@@ -18,15 +18,16 @@ namespace BeamOnCL
         double[] Cos = new double[NUM_POINTS];
         Point[] plArea = new Point[NUM_POINTS + 1];
 
-        float m_fPixelSize = 5.86f;
-
         Profile m_lpHorizontal = null;
         Profile m_lpVertical = null;
         Positioning m_pPositioning = null;
 
         Point m_pCrossPosition = new Point(0, 0);
         public enum TypeProfile { tpLIne, tpSum };
+        public enum TypeLineProfile { tpLineCentroid, tpLineFree, tpLineOffsetCentroid };
+
         TypeProfile m_tpProfile = TypeProfile.tpLIne;
+        TypeLineProfile m_tlpLine = TypeLineProfile.tpLineCentroid;
 
         public delegate void ImageReceved(object sender, MeasureCamera.NewDataRecevedEventArgs e);
         public event ImageReceved OnImageReceved;
@@ -105,12 +106,12 @@ namespace BeamOnCL
 
         public double MinorRadius
         {
-            get { return m_pPositioning.Ellipse.MinorRadius * m_fPixelSize; }
+            get { return m_pPositioning.Ellipse.MinorRadius; }
         }
 
         public double MajorRadius
         {
-            get { return m_pPositioning.Ellipse.MajorRadius * m_fPixelSize; }
+            get { return m_pPositioning.Ellipse.MajorRadius; }
         }
 
         public PointF Centroid
@@ -118,8 +119,8 @@ namespace BeamOnCL
             get
             {
                 return new PointF(
-                    (mc.ImageRectangle.X + m_pPositioning.Ellipse.Centroid.X - mc.MaxImageRectangle.Width / 2f) * m_fPixelSize,
-                    (mc.ImageRectangle.Y + m_pPositioning.Ellipse.Centroid.Y - mc.MaxImageRectangle.Height / 2f) * m_fPixelSize);
+                    (mc.ImageRectangle.X + m_pPositioning.Ellipse.Centroid.X - mc.MaxImageRectangle.Width / 2f),
+                    (mc.ImageRectangle.Y + m_pPositioning.Ellipse.Centroid.Y - mc.MaxImageRectangle.Height / 2f));
             }
         }
 
@@ -132,6 +133,12 @@ namespace BeamOnCL
         {
             get { return m_tpProfile; }
             set { m_tpProfile = value; }
+        }
+
+        public TypeLineProfile LineProfileType
+        {
+            get { return m_tlpLine; }
+            set { m_tlpLine = value; }
         }
 
         public Point CrossPosition
@@ -209,11 +216,21 @@ namespace BeamOnCL
             mc.Stop();
         }
 
+        public String SerialNumber
+        {
+            get { return mc.SerialNumber; }
+        }
+
+        public String UserDefinedName
+        {
+            get { return mc.UserDefinedName; }
+        }
+
         public Boolean Start(PixelFormat pixelFormat)
         {
             Boolean bRet = mc.Start(pixelFormat);
 
-            if (bRet == true) CreateProfile();
+            if (bRet == true) CreateProfile(mc.Snapshot);
 
             return bRet;
         }
@@ -228,7 +245,7 @@ namespace BeamOnCL
 
                 mc.pixelFormat = value;
 
-                CreateProfile();
+                CreateProfile(mc.Snapshot);
 
                 mc.StartGrabber();
             }
@@ -239,19 +256,19 @@ namespace BeamOnCL
             mc.SetImageDataArray(Data, colorArray);
         }
 
-        private void CreateProfile()
+        private void CreateProfile(SnapshotBase snp)
         {
             //m_lpHorizontal = new SumProfile(new Rectangle(0, 0, pictureBoxImage.Width, pictureBoxImage.Height));
-            m_lpHorizontal = new LineProfile(new Rectangle(0, 0, mc.Snapshot.Width, mc.Snapshot.Height), m_fPixelSize);
+            m_lpHorizontal = new LineProfile(new Rectangle(0, 0, snp.Width, snp.Height));
             m_lpHorizontal.CrossPoint = m_pCrossPosition;
             m_lpHorizontal.Angle = 0;
 
             //m_lpVertical = new SumProfile(new Rectangle(0, 0, pictureBoxImage.Width, pictureBoxImage.Height));
-            m_lpVertical = new LineProfile(new Rectangle(0, 0, mc.Snapshot.Width, mc.Snapshot.Height), m_fPixelSize);
+            m_lpVertical = new LineProfile(new Rectangle(0, 0, snp.Width, snp.Height));
             m_lpVertical.CrossPoint = m_pCrossPosition;
             m_lpVertical.Angle = Math.PI / 2f;
 
-            m_pPositioning = new Positioning(new Rectangle(0, 0, mc.Snapshot.Width, mc.Snapshot.Height), m_fPixelSize);
+            m_pPositioning = new Positioning(new Rectangle(0, 0, snp.Width, snp.Height));
         }
 
         public Rectangle ImageRectangle
@@ -264,7 +281,7 @@ namespace BeamOnCL
 
                 mc.ImageRectangle = value;
 
-                CreateProfile();
+                CreateProfile(mc.Snapshot);
 
                 mc.StartGrabber();
             }
@@ -295,7 +312,7 @@ namespace BeamOnCL
 
                 mc.Binning = value;
 
-                CreateProfile();
+                CreateProfile(mc.Snapshot);
 
                 mc.StartGrabber();
             }
@@ -335,7 +352,7 @@ namespace BeamOnCL
             set { mc.Exposure = value; }
         }
 
-        public int CameraFilter
+        public UInt16 CameraFilter
         {
             get { return mc.CameraFilter; }
             set { mc.CameraFilter = value; }

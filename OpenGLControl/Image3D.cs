@@ -314,7 +314,7 @@ namespace OpenGLControl
                     {
                         m_bImageData = value;
 
-                        //if ((m_rectViewing.Width == 0) || (m_rectViewing.Height == 0)) ViewingRect = new Rectangle(0, 0, m_bImageData.Width, m_bImageData.Height);
+                        if ((m_rectViewing.Width != m_bImageData.Width) || (m_rectViewing.Height != m_bImageData.Height)) ViewingRect = new Rectangle(0, 0, m_bImageData.Width, m_bImageData.Height);
 
                         //m_dStepGrid = (float)(m_wStepGrid / (float)m_rectViewing.Width);
                         //m_dHalfHeight = (float)(m_rectViewing.Height * m_dStepGrid / (2.0 * m_wStepGrid));
@@ -324,17 +324,19 @@ namespace OpenGLControl
 
                         if (m_tpDraw3DProjection != TypeProjection.NoneProjection)
                         {
-                            if ((m_wpVerticalBorderMin == null) || (m_wpVerticalBorderMin.Length != m_bImageData.Width))
-                                m_wpVerticalBorderMin = new UInt16[m_bImageData.Width];
+                            int iWidth = Math.Max(m_bImageData.Width, m_bImageData.Height);
 
-                            if ((m_wpVerticalBorderMax == null) || (m_wpVerticalBorderMax.Length != m_bImageData.Width))
-                                m_wpVerticalBorderMax = new UInt16[m_bImageData.Width];
+                            if ((m_wpVerticalBorderMin == null) || (m_wpVerticalBorderMin.Length != iWidth))
+                                m_wpVerticalBorderMin = new UInt16[iWidth];
 
-                            if ((m_wpHorizontalBorderMin == null) || (m_wpHorizontalBorderMin.Length != m_bImageData.Width))
-                                m_wpHorizontalBorderMin = new UInt16[m_bImageData.Width];
+                            if ((m_wpVerticalBorderMax == null) || (m_wpVerticalBorderMax.Length != iWidth))
+                                m_wpVerticalBorderMax = new UInt16[iWidth];
 
-                            if ((m_wpHorizontalBorderMax == null) || (m_wpHorizontalBorderMax.Length != m_bImageData.Width))
-                                m_wpHorizontalBorderMax = new UInt16[m_bImageData.Width];
+                            if ((m_wpHorizontalBorderMin == null) || (m_wpHorizontalBorderMin.Length != iWidth))
+                                m_wpHorizontalBorderMin = new UInt16[iWidth];
+
+                            if ((m_wpHorizontalBorderMax == null) || (m_wpHorizontalBorderMax.Length != iWidth))
+                                m_wpHorizontalBorderMax = new UInt16[iWidth];
 
                             Build3DProjection(m_bImageData);
                         }
@@ -830,7 +832,7 @@ namespace OpenGLControl
             {
                 //lock (this)
                 {
-                    for (int i = 0; i < m_bImageData.Width; i++)
+                    for (int i = 0; i < m_wpVerticalBorderMax.Length; i++)
                     {
                         m_wpVerticalBorderMax[i] = 0;
                         m_wpVerticalBorderMin[i] = (UInt16)colorArray.Length;
@@ -870,40 +872,52 @@ namespace OpenGLControl
 
                     if ((m_tpDraw3DProjection == TypeProjection.YZProjection) || (m_tpDraw3DProjection == TypeProjection.XZ_YZProjection))
                     {
+                        //glBegin(GL_QUAD_STRIP);
+
+                        //for (i = ViewingRect.Top, y = -m_dHalfHeight; (y < (m_dHalfHeight - dStepGrid)) && (i < ViewingRect.Bottom); y += dStepGrid, i++)
+                        //{
+                        //    glColor3ub(colorArray[m_wpVerticalBorderMin[i]].R, colorArray[m_wpVerticalBorderMin[i]].G, colorArray[m_wpVerticalBorderMin[i]].B);
+                        //    glVertex3d(y, m_wpVerticalBorderMin[i] * m_dz - m_dHalfWidth, -m_dHalfWidth);
+
+                        //    glColor3ub(colorArray[m_wpVerticalBorderMax[i]].R, colorArray[m_wpVerticalBorderMax[i]].G, colorArray[m_wpVerticalBorderMax[i]].B);
+                        //    glVertex3d(y, m_wpVerticalBorderMax[i] * m_dz - m_dHalfWidth, -m_dHalfWidth);
+                        //}
+
+                        //glEnd();
+                        glBegin(GL_LINE_STRIP);
+
                         for (i = ViewingRect.Top, y = -m_dHalfHeight; (y < (m_dHalfHeight - dStepGrid)) && (i < ViewingRect.Bottom); y += dStepGrid, i++)
                         {
-                            glBegin(GL_TRIANGLE_STRIP);
-
-                            for (int k = m_wpVerticalBorderMin[i]; k < m_wpVerticalBorderMax[i]; k++)
-                            {
-                                glColor3ub(colorArray[k].R, colorArray[k].G, colorArray[k].B);
-                                glVertex3d(y - dStepGrid, k * m_dz - m_dHalfWidth, -m_dHalfWidth);
-
-                                glColor3ub(colorArray[k].R, colorArray[k].G, colorArray[k].B);
-                                glVertex3d(y, k * m_dz - m_dHalfWidth, -m_dHalfWidth);
-                            }
-
-                            glEnd();
+                            glColor3ub(colorArray[m_wpVerticalBorderMax[i]].R, colorArray[m_wpVerticalBorderMax[i]].G, colorArray[m_wpVerticalBorderMax[i]].B);
+                            glVertex3d(y, m_wpVerticalBorderMax[i] * m_dz - m_dHalfWidth, -m_dHalfWidth);
                         }
+
+                        glEnd();
                     }
 
                     if ((m_tpDraw3DProjection == TypeProjection.XZProjection) || (m_tpDraw3DProjection == TypeProjection.XZ_YZProjection))
                     {
+                        //glBegin(GL_QUAD_STRIP);
+
+                        //for (j = ViewingRect.Left, x = -m_dHalfWidth; ((x < (m_dHalfWidth - dStepGrid)) && (j < ViewingRect.Right)); x += dStepGrid, j++)
+                        //{
+                        //    glColor3ub(colorArray[m_wpHorizontalBorderMin[j]].R, colorArray[m_wpHorizontalBorderMin[j]].G, colorArray[m_wpHorizontalBorderMin[j]].B);
+                        //    glVertex3d(-m_dHalfWidth, m_wpHorizontalBorderMin[j] * m_dz - m_dHalfWidth, x);
+
+                        //    glColor3ub(colorArray[m_wpHorizontalBorderMax[j]].R, colorArray[m_wpHorizontalBorderMax[j]].G, colorArray[m_wpHorizontalBorderMax[j]].B);
+                        //    glVertex3d(-m_dHalfWidth, m_wpHorizontalBorderMax[j] * m_dz - m_dHalfWidth, x);
+                        //}
+
+                        //glEnd();
+                        glBegin(GL_LINE_STRIP);
+
                         for (j = ViewingRect.Left, x = -m_dHalfWidth; ((x < (m_dHalfWidth - dStepGrid)) && (j < ViewingRect.Right)); x += dStepGrid, j++)
                         {
-                            glBegin(GL_TRIANGLE_STRIP);
-
-                            for (int k = m_wpHorizontalBorderMin[j]; k < m_wpHorizontalBorderMax[j]; k++)
-                            {
-                                glColor3ub(colorArray[k].R, colorArray[k].G, colorArray[k].B);
-                                glVertex3d(-m_dHalfWidth, k * m_dz - m_dHalfWidth, x + dStepGrid);
-
-                                glColor3ub(colorArray[k].R, colorArray[k].G, colorArray[k].B);
-                                glVertex3d(-m_dHalfWidth, k * m_dz - m_dHalfWidth, x);
-                            }
-
-                            glEnd();
+                            glColor3ub(colorArray[m_wpHorizontalBorderMax[j]].R, colorArray[m_wpHorizontalBorderMax[j]].G, colorArray[m_wpHorizontalBorderMax[j]].B);
+                            glVertex3d(-m_dHalfWidth, m_wpHorizontalBorderMax[j] * m_dz - m_dHalfWidth, x);
                         }
+
+                        glEnd();
                     }
 
                     glPopMatrix();

@@ -31,6 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.lblMeasurementSystem = new System.Windows.Forms.Label();
+            this.logoPictureBox = new System.Windows.Forms.PictureBox();
             this.labelProductName = new System.Windows.Forms.Label();
             this.labelVersion = new System.Windows.Forms.Label();
             this.labelSerialNumber = new System.Windows.Forms.Label();
@@ -39,7 +40,6 @@
             this.lblCheckLevel = new System.Windows.Forms.Label();
             this.checkProgress = new System.Windows.Forms.ProgressBar();
             this.timerSplash = new System.Windows.Forms.Timer(this.components);
-            this.logoPictureBox = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.logoPictureBox)).BeginInit();
             this.SuspendLayout();
@@ -93,6 +93,19 @@
             this.lblMeasurementSystem.Text = "Measurement System";
             this.lblMeasurementSystem.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // logoPictureBox
+            // 
+            this.tableLayoutPanel.SetColumnSpan(this.logoPictureBox, 2);
+            this.logoPictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.logoPictureBox.Image = global::BeamOn_U3.Properties.Resources.WELCOME;
+            this.logoPictureBox.Location = new System.Drawing.Point(3, 3);
+            this.logoPictureBox.Name = "logoPictureBox";
+            this.tableLayoutPanel.SetRowSpan(this.logoPictureBox, 8);
+            this.logoPictureBox.Size = new System.Drawing.Size(234, 219);
+            this.logoPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.logoPictureBox.TabIndex = 12;
+            this.logoPictureBox.TabStop = false;
+            // 
             // labelProductName
             // 
             this.labelProductName.AutoSize = true;
@@ -132,7 +145,7 @@
             this.labelSerialNumber.Name = "labelSerialNumber";
             this.labelSerialNumber.Size = new System.Drawing.Size(320, 20);
             this.labelSerialNumber.TabIndex = 35;
-            this.labelSerialNumber.Text = "Serial Number: DO000";
+            this.labelSerialNumber.Text = "Serial Number: ";
             this.labelSerialNumber.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labelCopyright
@@ -188,19 +201,6 @@
             // 
             this.timerSplash.Interval = 25;
             this.timerSplash.Tick += new System.EventHandler(this.timerSplash_Tick);
-            // 
-            // logoPictureBox
-            // 
-            this.tableLayoutPanel.SetColumnSpan(this.logoPictureBox, 2);
-            this.logoPictureBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.logoPictureBox.Image = global::BeamOn_2K.Properties.Resources.WELCOME;
-            this.logoPictureBox.Location = new System.Drawing.Point(3, 3);
-            this.logoPictureBox.Name = "logoPictureBox";
-            this.tableLayoutPanel.SetRowSpan(this.logoPictureBox, 8);
-            this.logoPictureBox.Size = new System.Drawing.Size(234, 219);
-            this.logoPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.logoPictureBox.TabIndex = 12;
-            this.logoPictureBox.TabStop = false;
             // 
             // FormWellcome
             // 

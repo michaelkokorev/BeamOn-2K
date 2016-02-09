@@ -8,8 +8,8 @@ namespace BeamOnCL
 {
     class SumProfile : Profile
     {
-        public SumProfile(Rectangle rArea, float fPixelSize = 5.86f)
-            : base(rArea, fPixelSize)
+        public SumProfile(Rectangle rArea)
+            : base(rArea)
         {
             CrossPoint = new Point(0, 0);
         }

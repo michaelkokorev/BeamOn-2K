@@ -32,15 +32,15 @@
             // 
             // FormErrorMessage
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+//            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+//            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(292, 31);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+//            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "FormErrorMessage";
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
-            this.TopMost = true;
-            this.TransparencyKey = System.Drawing.SystemColors.Control;
+//            this.ShowInTaskbar = false;
+//            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+//            this.TopMost = true;
+//            this.TransparencyKey = System.Drawing.SystemColors.Control;
             this.ResumeLayout(false);
 
         }

@@ -10,7 +10,7 @@ namespace BeamOn_2K
 {
     partial class frmAboutBox : Form
     {
-        public frmAboutBox()
+        public frmAboutBox(String strUserDefinedName)
         {
             InitializeComponent();
             this.Text = String.Format("About {0}", AssemblyTitle);
@@ -19,6 +19,7 @@ namespace BeamOn_2K
             this.labelCopyright.Text = AssemblyCopyright;
             this.labelCompanyName.Text = AssemblyCompany;
             this.textBoxDescription.Text = AssemblyDescription;
+            this.labelSerialNumber.Text = "Serial Number: " + strUserDefinedName;
         }
 
         #region Assembly Attribute Accessors

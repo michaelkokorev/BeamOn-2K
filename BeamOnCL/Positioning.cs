@@ -12,8 +12,6 @@ namespace BeamOnCL
         const float MAX_POWER_OFFSET = 0.05f;
         const float MIN_POWER = 0.8f;
 
-        float m_fPixelSize = 5.86f;
-
         SumProfile m_dProfileHorizontal = null;
         SumProfile m_dProfileVertical = null;
 
@@ -55,24 +53,17 @@ namespace BeamOnCL
             set { if ((value > 0) && (value < 100)) m_fLevel = value; }
         }
 
-        public Single PixelSize
+        public Positioning(Rectangle rect)
         {
-            get { return m_fPixelSize; }
-        }
-
-        public Positioning(Rectangle rect, float fPixelSize = 5.86f)
-        {
-            m_fPixelSize = fPixelSize;
-
             m_AreaRect = rect;
 
             m_WorkingAreaRect = m_AreaRect;
             m_WorkingAreaRect.Type = Area.Figure.enRectangle;
 
-            m_dProfileHorizontal = new SumProfile(m_AreaRect, m_fPixelSize);
+            m_dProfileHorizontal = new SumProfile(m_AreaRect);
             m_dProfileHorizontal.Angle = 0f;
 
-            m_dProfileVertical = new SumProfile(m_AreaRect, m_fPixelSize);
+            m_dProfileVertical = new SumProfile(m_AreaRect);
             m_dProfileVertical.Angle = Math.PI / 2f;
 
             m_dProfile45 = new double[m_AreaRect.Width + m_AreaRect.Height];
@@ -100,7 +91,7 @@ namespace BeamOnCL
 
             while (true)
             {
-                if (m_WorkingAreaRect != m_AreaRect)
+                if (WorkingArea != m_AreaRect)
                 {
                     if (bFlagFirst)
                     {
@@ -156,8 +147,8 @@ namespace BeamOnCL
                 else
                 {
                     m_WorkingAreaRect = SerchRectangle(snapshot);
-                    bFlagFirst = (m_WorkingAreaRect != m_AreaRect);
-                    if (bFlagFirst == true) continue;
+                    bFlagFirst = (WorkingArea != m_AreaRect);
+                    if (bFlagFirst == false) break;
                 }
             }
 
@@ -374,16 +365,17 @@ namespace BeamOnCL
                 if (Y < 0) Si = -Si;
 
                 Co = Math.Sqrt((1 + Co2) / 2.0);
+                //Old Version Ellipse
+                //m_EllipseArea.MajorRadius = X + U;
+                //m_EllipseArea.MinorRadius = X - U;
 
-                //		m_ElipseArea.SetMajorRadius(X + U);
-                //		m_ElipseArea.SetMinorRadius(X - U);
+                //if (m_EllipseArea.MinorRadius <= 0.01 * m_EllipseArea.MajorRadius)
+                //    m_EllipseArea.MinorRadius = Math.Sqrt(0.01 * m_EllipseArea.MajorRadius);
+                //else
+                //    m_EllipseArea.MinorRadius = Math.Sqrt(m_EllipseArea.MinorRadius);
 
-                //		if (m_ElipseArea.GetMinorRadius() <= 0.01 * m_ElipseArea.GetMajorRadius())
-                //			m_ElipseArea.SetMinorRadius(sqrt(0.01 * m_ElipseArea.GetMajorRadius()));
-                //		else
-                //			m_ElipseArea.SetMinorRadius(sqrt(m_ElipseArea.GetMinorRadius()));
-
-                //		m_ElipseArea.SetMajorRadius(sqrt(m_ElipseArea.GetMajorRadius()));
+                //m_EllipseArea.MajorRadius = Math.Sqrt(m_EllipseArea.MajorRadius);
+                //
             }
 
             //			m_Area.SetAngle(-atan(Si/Co));
@@ -396,7 +388,7 @@ namespace BeamOnCL
             }
             else
                 m_EllipseArea.Angle = -Math.Atan(Si / Co) - Math.PI / 4f;
-
+            //New Version 
             GetAxesEllipse(snapshot);
         }
 
@@ -414,16 +406,17 @@ namespace BeamOnCL
             UInt16 wColorValue = 0;
             double n_MaxColor;
             double n_MinColor;
+            Rectangle rect = m_WorkingAreaRect;
 
             double[] tmpProfH = new double[m_AreaRect.Width + m_AreaRect.Height];
             double[] tmpProfV = new double[m_AreaRect.Width + m_AreaRect.Height];
 
             if (Math.Abs(m_EllipseArea.Angle) == Math.PI / 2f)
             {
-                l_fLeft = (float)m_AreaRect.Top;
-                l_fRight = (float)m_AreaRect.Bottom;
-                l_fTop = (float)m_AreaRect.Left;
-                l_fBottom = (float)m_AreaRect.Right;
+                l_fLeft = (float)rect.Top;
+                l_fRight = (float)rect.Bottom;
+                l_fTop = (float)rect.Left;
+                l_fBottom = (float)rect.Right;
 
                 l_lSizeH = (int)Math.Ceiling(l_fRight - l_fLeft);
                 l_lSizeV = (int)Math.Ceiling(l_fBottom - l_fTop);
@@ -443,10 +436,10 @@ namespace BeamOnCL
             }
             else if (m_EllipseArea.Angle == 0)
             {
-                l_fLeft = (float)m_AreaRect.Left;
-                l_fRight = (float)m_AreaRect.Right;
-                l_fTop = (float)m_AreaRect.Top;
-                l_fBottom = (float)m_AreaRect.Bottom;
+                l_fLeft = (float)rect.Left;
+                l_fRight = (float)rect.Right;
+                l_fTop = (float)rect.Top;
+                l_fBottom = (float)rect.Bottom;
 
                 l_lSizeH = (int)Math.Ceiling((l_fRight - l_fLeft));
                 l_lSizeV = (int)Math.Ceiling((l_fBottom - l_fTop));
@@ -470,41 +463,41 @@ namespace BeamOnCL
                 l_dSinAlfa = Math.Sin(m_EllipseArea.Angle);
                 l_dTanAlfa = Math.Tan(m_EllipseArea.Angle);
 
-                l_fLeft = (float)(m_AreaRect.Top - m_EllipseArea.Centroid.Y);
-                l_fRight = (float)(m_AreaRect.Bottom - m_EllipseArea.Centroid.Y);
+                l_fLeft = (float)(rect.Top - m_EllipseArea.Centroid.Y);
+                l_fRight = (float)(rect.Bottom - m_EllipseArea.Centroid.Y);
 
-                l_fTop = (float)((m_AreaRect.Top - m_EllipseArea.Centroid.Y) * l_dTanAlfa);
-                l_fBottom = (float)((m_AreaRect.Bottom - m_EllipseArea.Centroid.Y) * l_dTanAlfa);
+                l_fTop = (float)((rect.Top - m_EllipseArea.Centroid.Y) * l_dTanAlfa);
+                l_fBottom = (float)((rect.Bottom - m_EllipseArea.Centroid.Y) * l_dTanAlfa);
 
-                if (l_fTop < (m_AreaRect.Left - m_EllipseArea.Centroid.X))
-                    l_fLeft = (float)((m_AreaRect.Left - m_EllipseArea.Centroid.X) / l_dTanAlfa);
+                if (l_fTop < (rect.Left - m_EllipseArea.Centroid.X))
+                    l_fLeft = (float)((rect.Left - m_EllipseArea.Centroid.X) / l_dTanAlfa);
 
-                if (l_fTop > (m_AreaRect.Right - m_EllipseArea.Centroid.X))
-                    l_fLeft = (float)((m_AreaRect.Right - m_EllipseArea.Centroid.X) / l_dTanAlfa);
+                if (l_fTop > (rect.Right - m_EllipseArea.Centroid.X))
+                    l_fLeft = (float)((rect.Right - m_EllipseArea.Centroid.X) / l_dTanAlfa);
 
-                if (l_fBottom < (m_AreaRect.Left - m_EllipseArea.Centroid.X))
-                    l_fRight = (float)((m_AreaRect.Left - m_EllipseArea.Centroid.X) / l_dTanAlfa);
+                if (l_fBottom < (rect.Left - m_EllipseArea.Centroid.X))
+                    l_fRight = (float)((rect.Left - m_EllipseArea.Centroid.X) / l_dTanAlfa);
 
-                if (l_fBottom > (m_AreaRect.Right - m_EllipseArea.Centroid.X))
-                    l_fRight = (float)((m_AreaRect.Right - m_EllipseArea.Centroid.X) / l_dTanAlfa);
+                if (l_fBottom > (rect.Right - m_EllipseArea.Centroid.X))
+                    l_fRight = (float)((rect.Right - m_EllipseArea.Centroid.X) / l_dTanAlfa);
 
-                l_fBottom = (float)(m_AreaRect.Right - m_EllipseArea.Centroid.X);
-                l_fTop = (float)(m_AreaRect.Left - m_EllipseArea.Centroid.X);
+                l_fBottom = (float)(rect.Right - m_EllipseArea.Centroid.X);
+                l_fTop = (float)(rect.Left - m_EllipseArea.Centroid.X);
 
-                l_fLeftP = (float)((m_AreaRect.Left - m_EllipseArea.Centroid.X) * l_dTanAlfa);
-                l_fRightP = (float)((m_AreaRect.Right - m_EllipseArea.Centroid.X) * l_dTanAlfa);
+                l_fLeftP = (float)((rect.Left - m_EllipseArea.Centroid.X) * l_dTanAlfa);
+                l_fRightP = (float)((rect.Right - m_EllipseArea.Centroid.X) * l_dTanAlfa);
 
-                if (l_fLeftP < (m_AreaRect.Top - m_EllipseArea.Centroid.Y))
-                    l_fTop = (float)((m_AreaRect.Top - m_EllipseArea.Centroid.Y) / l_dTanAlfa);
+                if (l_fLeftP < (rect.Top - m_EllipseArea.Centroid.Y))
+                    l_fTop = (float)((rect.Top - m_EllipseArea.Centroid.Y) / l_dTanAlfa);
 
-                if (l_fLeftP > (m_AreaRect.Bottom - m_EllipseArea.Centroid.Y))
-                    l_fTop = (float)((m_AreaRect.Bottom - m_EllipseArea.Centroid.Y) / l_dTanAlfa);
+                if (l_fLeftP > (rect.Bottom - m_EllipseArea.Centroid.Y))
+                    l_fTop = (float)((rect.Bottom - m_EllipseArea.Centroid.Y) / l_dTanAlfa);
 
-                if (l_fRightP < (m_AreaRect.Top - m_EllipseArea.Centroid.Y))
-                    l_fBottom = (float)((m_AreaRect.Top - m_EllipseArea.Centroid.Y) / l_dTanAlfa);
+                if (l_fRightP < (rect.Top - m_EllipseArea.Centroid.Y))
+                    l_fBottom = (float)((rect.Top - m_EllipseArea.Centroid.Y) / l_dTanAlfa);
 
-                if (l_fRightP > (m_AreaRect.Bottom - m_EllipseArea.Centroid.Y))
-                    l_fBottom = (float)((m_AreaRect.Bottom - m_EllipseArea.Centroid.Y) / l_dTanAlfa);
+                if (l_fRightP > (rect.Bottom - m_EllipseArea.Centroid.Y))
+                    l_fBottom = (float)((rect.Bottom - m_EllipseArea.Centroid.Y) / l_dTanAlfa);
 
                 l_lSizeV = (int)Math.Ceiling((l_fRight - l_fLeft) / l_dCosAlfa);
                 l_lSizeH = (int)Math.Ceiling((l_fBottom - l_fTop) / l_dCosAlfa);
@@ -517,7 +510,7 @@ namespace BeamOnCL
                         Xl = l_fTop + K;
                         Yl = l_dTanAlfa * Xl - K / (l_dCosAlfa * l_dSinAlfa);
                         Xlg = Xl + m_EllipseArea.Centroid.X;
-                        Ylg = Yl + m_EllipseArea.Centroid.X;
+                        Ylg = Yl + m_EllipseArea.Centroid.Y;
 
                         iShift = (int)Ylg * m_AreaRect.Width + (int)Xlg;
 
@@ -556,11 +549,10 @@ namespace BeamOnCL
                 for (iLeft = 0; (iLeft < n_Peak) && (tmpProfH[iLeft] < f_Threshold); iLeft++) ;
                 for (iRight = l_lSizeH - 1; (iRight > n_Peak) && (tmpProfH[iRight] < f_Threshold); iRight--) ;
 
-                if ((iLeft > 0) && (iRight < (l_lSizeH - 1)))
-                    m_EllipseArea.MajorRadius = (iRight - iLeft + (tmpProfH[iRight] - f_Threshold) / (tmpProfH[iRight] - tmpProfH[iRight + 1]) + (tmpProfH[iLeft] - f_Threshold) / (tmpProfH[iLeft] - tmpProfH[iLeft - 1])) / 2f;
-                else
-                    m_EllipseArea.MajorRadius = l_lSizeH - 1;
+                m_EllipseArea.MajorRadius = iRight - iLeft;
 
+                if ((iLeft > 0) && (iRight < (l_lSizeH - 1)))
+                    m_EllipseArea.MajorRadius = (m_EllipseArea.MajorRadius + (tmpProfH[iRight] - f_Threshold) / (tmpProfH[iRight] - tmpProfH[iRight + 1]) + (tmpProfH[iLeft] - f_Threshold) / (tmpProfH[iLeft] - tmpProfH[iLeft - 1])) / 2f;
             }
 
             if (l_lSizeV > 0)
@@ -584,10 +576,10 @@ namespace BeamOnCL
                 for (iLeft = 0; (iLeft < n_Peak) && (tmpProfV[iLeft] < f_Threshold); iLeft++) ;
                 for (iRight = l_lSizeV - 1; (iRight > n_Peak) && (tmpProfV[iRight] < f_Threshold); iRight--) ;
 
+                m_EllipseArea.MinorRadius = iRight - iLeft;
+
                 if ((iLeft > 0) && (iRight < (l_lSizeV - 1)))
-                    m_EllipseArea.MinorRadius = (iRight - iLeft + (tmpProfV[iRight] - f_Threshold) / (tmpProfV[iRight] - tmpProfV[iRight + 1]) + (tmpProfV[iLeft] - f_Threshold) / (tmpProfV[iLeft] - tmpProfV[iLeft - 1])) / 2f;
-                else
-                    m_EllipseArea.MinorRadius = l_lSizeV - 1;
+                    m_EllipseArea.MinorRadius = (m_EllipseArea.MinorRadius + (tmpProfV[iRight] - f_Threshold) / (tmpProfV[iRight] - tmpProfV[iRight + 1]) + (tmpProfV[iLeft] - f_Threshold) / (tmpProfV[iLeft] - tmpProfV[iLeft - 1])) / 2f;
             }
         }
 
@@ -771,10 +763,22 @@ namespace BeamOnCL
             if (m_EllipseArea.LikeBucket == true)
             {
                 m_EllipseArea.GetMaxY(ref fBottom, ref fTop);
+                if (fBottom < m_AreaRect.Top) fBottom = m_AreaRect.Top;
+                if (fBottom > m_AreaRect.Bottom) fBottom = m_AreaRect.Bottom;
+
+                if (fTop < m_AreaRect.Top) fTop = m_AreaRect.Top;
+                if (fTop < m_AreaRect.Bottom) fTop = m_AreaRect.Bottom;
+
                 for (int j = (int)Math.Ceiling(fBottom); j < (int)Math.Floor(fTop); j++)
                 {
                     if (m_EllipseArea.GetCrossX(j, ref fLeft, ref fRight))
                     {
+                        if (fLeft < m_AreaRect.Left) fLeft = m_AreaRect.Left;
+                        if (fLeft > m_AreaRect.Right) fLeft = m_AreaRect.Right;
+
+                        if (fRight < m_AreaRect.Left) fRight = m_AreaRect.Left;
+                        if (fRight > m_AreaRect.Right) fRight = m_AreaRect.Right;
+
                         for (int i = (int)Math.Ceiling(fLeft), iShift = i + j * snapshot.Width; i <= (int)Math.Floor(fRight); i++, iShift++)
                         {
                             lCount++;
@@ -812,9 +816,9 @@ namespace BeamOnCL
             return fRet;
         }
 
-        public float CurrentAreaIntensity 
-        { 
-            get{return m_fCurrentAreaIntensity;}
+        public float CurrentAreaIntensity
+        {
+            get { return m_fCurrentAreaIntensity; }
         }
 
         public long CurrentAreaPoins

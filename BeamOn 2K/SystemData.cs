@@ -9,6 +9,8 @@ using System.Globalization;
 using System.Drawing;
 using System.Runtime.Serialization;
 using System.Drawing.Imaging;
+using System.Xml;
+using System.Collections;
 
 namespace BeamOn_2K
 {
@@ -22,6 +24,8 @@ namespace BeamOn_2K
         {
             public Boolean m_bGetStep = false;
             public Boolean m_bRunOn = true;
+            public Boolean bSimulation = false;
+            public Boolean fSnapshotView = false;
             [DataMember(Name = "ScaleProfile")]
             public Boolean m_bScaleProfile = false;
             [DataMember(Name = "Gaussian")]
@@ -62,6 +66,12 @@ namespace BeamOn_2K
             public MeasureUnits m_muUnits = MeasureUnits.muMicro;
             [DataMember(Name = "TypeProfile")]
             public BeamOnCL.BeamOnCL.TypeProfile m_tpProfile = BeamOnCL.BeamOnCL.TypeProfile.tpSum;
+            [DataMember(Name = "LineProfileAngle")]
+            public Single lineProfileAngle = 0f;
+            [DataMember(Name = "TypeLineProfile")]
+            public BeamOnCL.BeamOnCL.TypeLineProfile m_tlpLine = BeamOnCL.BeamOnCL.TypeLineProfile.tpLineCentroid;
+            [DataMember(Name = "PixelSize")]
+            public Single m_fPixelSize = 5.86f;
 
             public Data()
             {
@@ -79,6 +89,10 @@ namespace BeamOn_2K
                 m_applicationData.InitializeComponent();
                 m_projectionData.InitializeComponent();
                 m_videoDevice.InitializeComponent();
+
+                m_profDataHorizontal.PixelSize = m_fPixelSize;
+                m_profDataVertical.PixelSize = m_fPixelSize;
+                m_positionData.PixelSize = m_fPixelSize;
 
                 string strProgramDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
                 string strProgramFilePath = Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFiles);
@@ -111,6 +125,29 @@ namespace BeamOn_2K
                 if (Directory.Exists(m_applicationData.m_strMyTempDir) == false) Directory.CreateDirectory(m_applicationData.m_strMyTempDir);
 
                 m_bRunOn = true;
+
+                bSimulation = false;
+                fSnapshotView = false;
+
+                FocalLens = m_sFocalLens;
+                OpticalFactor = m_sOpticalFactor;
+            }
+
+            public Single OpticalFactor
+            {
+                get { return m_sOpticalFactor; }
+
+                set
+                {
+                    m_sOpticalFactor = value;
+                    m_positionData.OpticalFactor = m_sOpticalFactor;
+                    //                projectionData.OpticalFactor = m_sOpticalFactor;
+
+                    m_profDataHorizontal.OpticalFactor = m_sOpticalFactor;
+                    m_profDataVertical.OpticalFactor = m_sOpticalFactor;
+
+                    m_sUnitsCoeff = (m_muUnits == MeasureUnits.muMiliRad) ? 1f / (m_sFocalLens * m_sOpticalFactor) : 1f / m_sOpticalFactor;
+                }
             }
 
             public MeasureUnits UnitMeasure
@@ -135,7 +172,7 @@ namespace BeamOn_2K
                 set
                 {
                     m_sFocalLens = value;
-                    m_sUnitsCoeff = (m_muUnits == MeasureUnits.muMiliRad) ? 1f / (m_sFocalLens * m_sOpticalFactor) : 1f / m_sOpticalFactor;
+                    UnitMeasure = m_muUnits;
 
                     m_positionData.FocalLens = m_sFocalLens;
                     //projectionData.FocalLens = m_sFocalLens;
@@ -146,10 +183,28 @@ namespace BeamOn_2K
             }
         }
 
+        public Single PixelSize
+        {
+            get { return m_data.m_fPixelSize; }
+            set { m_data.m_fPixelSize = value; }
+        }
+
+        public BeamOnCL.BeamOnCL.TypeLineProfile LineProfileType
+        {
+            get { return m_data.m_tlpLine; }
+            set { m_data.m_tlpLine = value; }
+        }
+
         public BeamOnCL.BeamOnCL.TypeProfile ProfileType
         {
             get { return m_data.m_tpProfile; }
             set { m_data.m_tpProfile = value; }
+        }
+
+        public Single lineProfileAngle
+        {
+            get { return m_data.lineProfileAngle; }
+            set { m_data.lineProfileAngle = value; }
         }
 
         public Boolean ViewGaussian
@@ -168,6 +223,18 @@ namespace BeamOn_2K
         {
             get { return m_data.m_bRunOn; }
             set { m_data.m_bRunOn = value; }
+        }
+
+        public Boolean Simulation
+        {
+            get { return m_data.bSimulation; }
+            set { m_data.bSimulation = value; }
+        }
+
+        public Boolean SnapshotView
+        {
+            get { return m_data.fSnapshotView; }
+            set { m_data.fSnapshotView = value; }
         }
 
         public Boolean ScaleProfile
@@ -311,7 +378,7 @@ namespace BeamOn_2K
         [DataMember(Name = "Video")]
         public UInt16 uiBinning = 1;
         [DataMember(Name = "PixelFormat")]
-        public PixelFormat pixelFormat = PixelFormat.Format8bppIndexed;
+        public PixelFormat pixelFormat = PixelFormat.Format24bppRgb;
 
         public void InitializeComponent()
         {
@@ -335,8 +402,8 @@ namespace BeamOn_2K
         [DataMember(Name = "SaveExit")]
         public Boolean bSaveExit = true;
 
-        [DataMember(Name = "ViewPower")]
-        public Boolean bStatusViewPower;
+        [DataMember(Name = "DataPanel")]
+        public bool bViewDataPanel;
 
         public String m_strMyDataDir;
         public String m_strMySADataDir;
@@ -352,7 +419,6 @@ namespace BeamOn_2K
         public String ProductVersion;
         public String Copyright;
         public String CompanyName;
-        public FormErrorMessage m_FormErrorMessage = null;
 
         String m_strHelpNamespace;
 
@@ -564,23 +630,32 @@ namespace BeamOn_2K
     [DataContract(Name = "PowerCalibration")]
     public class PowerCalibration
     {
-        [DataMember(Name = "PowerCalibrationCoef")]
-        private double m_dPowerCalibrationCoeff = 1;
         [DataMember(Name = "PowerCalibrationExposure")]
         private int m_iPowerCalibrationExposure = 1;
         [DataMember(Name = "PowerCalibrationGain")]
         private int m_iPowerCalibrationGain = 1;
 
-        public void InitializePowerCalibration(double dCoeff, int iExposure, int iGain)
+        public void InitializePowerCalibration(int iExposure, int iGain)
         {
-            m_dPowerCalibrationCoeff = dCoeff;
             m_iPowerCalibrationExposure = iExposure;
             m_iPowerCalibrationGain = iGain;
         }
 
         public double PowerCoeff(int iExposure, int iGain)
         {
-            return m_dPowerCalibrationCoeff * (iExposure / (float)m_iPowerCalibrationExposure) * ((iGain + 1) / (float)(m_iPowerCalibrationGain + 1));
+            return (iExposure / (float)m_iPowerCalibrationExposure) * ((iGain + 1) / (float)(m_iPowerCalibrationGain + 1));
+        }
+
+        public int PowerCalibrationExposure
+        {
+            get { return m_iPowerCalibrationExposure; }
+            set { m_iPowerCalibrationExposure = value; }
+        }
+
+        public int PowerCalibrationGain
+        {
+            get { return m_iPowerCalibrationGain; }
+            set { m_iPowerCalibrationGain = value; }
         }
     }
 
@@ -590,33 +665,42 @@ namespace BeamOn_2K
         [DataMember(Name = "PowerCalibrationValue")]
         public PowerCalibration PowerCalibr = new PowerCalibration();
 
-        public float fSensFactor = 1.0f;                                             /* Sensitivity factor */
-        public float fSensitivity = 0.387f;                                          /* Overral sensitivity */
-        public FilterData[] headData = null;
+        [DataMember(Name = "PowerCalibrationSensitivity")]
+        public float fSensFactor;                                              /* Sensitivity factor */
+        public float fSensitivity;                                             /* Overral sensitivity */
+
+        FilterData[] headData = null;
+        FilterData[] filterData = null;
+        FilterData[] SAMData = null;
 
         public Boolean bLoadFilter;
         public Boolean bLoadSAM;
-        public Boolean bIndFilter = false;
         public Boolean bIndSAM = false;
         public Boolean bIndOffset = false;
 
         [DataMember(Name = "Wavelenght")]
         public UInt16 uiWavelenght;
+        [DataMember(Name = "WavelenghtMin")]
+        public UInt16 uiWavelenghtMin;
+        [DataMember(Name = "WavelenghtMax")]
+        public UInt16 uiWavelenghtMax;
 
-        public String strFilterName;
-        public String strFilterPath;
+        private String[] m_strFilterName = new String[4];
+        private String[] m_strFilterPath = new String[4];
+
         public String strSAMName;
         public String strSAMPath;
+
         public String strSensitivityName;
         public String strSensitivityPath;
+
         public Single realSAMFactor = 1f;
         public Single realFilterFactor = 1f;
-        [DataMember(Name = "FilterFactor")]
-        public Single currentFilterFactor = 1f;
+        [DataMember(Name = "CurrentFilter")]
+        public UInt16 currentFilter;
         [DataMember(Name = "SAMFactor")]
         public Single currentSAMFactor = 1f;
-        public FilterData[] filterData = null;
-        public FilterData[] SAMData = null;
+
         private UInt16 iPowerUnits;
 
         public Single Power;
@@ -627,10 +711,79 @@ namespace BeamOn_2K
         public Single dMax;
         public static String[] bufUnits = { "mW", "µW", "nm", "dBm", "W", "kW" };
 
+        public Boolean SetFilterSensitivityFile(UInt16 iIndex, String strFilterPath, String strFilterName)
+        {
+            Boolean bRet = false;
+
+            if ((m_strFilterPath != null) && (iIndex < m_strFilterPath.Length) && (File.Exists(strFilterPath + "//" + strFilterName) == true))
+            {
+                m_strFilterName[iIndex] = strFilterName;
+                m_strFilterPath[iIndex] = strFilterPath;
+            }
+
+            return bRet;
+        }
+
         public UInt16 PowerUnits
         {
             get { return iPowerUnits; }
             set { iPowerUnits = value; }
+        }
+
+        public class WavelenghtCaomparer : IComparer
+        {
+            int IComparer.Compare(Object x, Object y)
+            {
+                FilterData fd1 = (FilterData)x;
+                FilterData fd2 = (FilterData)y;
+
+                return (fd1.Wavelength > fd2.Wavelength) ? 1 : (fd1.Wavelength < fd2.Wavelength) ? -1 : 0;
+            }
+        }
+
+        public FilterData[] ReadSensitivity(String strFileName)
+        {
+            FilterData[] fdRet = null;
+            FilterData fdTemp = new FilterData();
+            ArrayList alDataSensitivity = null;
+
+            if (File.Exists(strFileName) == true)
+            {
+                alDataSensitivity = null;
+
+                try
+                {
+                    using (XmlTextReader reader = new XmlTextReader(strFileName))
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader.IsStartElement())
+                            {
+                                switch (reader.Name)
+                                {
+                                    case "Point":
+                                        reader.Read();
+                                        fdTemp.Wavelength = Convert.ToUInt16(reader.ReadString());
+                                        reader.Read();
+                                        fdTemp.Sensitivity = Convert.ToSingle(reader.ReadString());
+                                        if (alDataSensitivity == null) alDataSensitivity = new ArrayList();
+                                        alDataSensitivity.Add(fdTemp);
+                                        break;
+                                }
+                            }
+                        }
+                    }
+
+                    if ((alDataSensitivity != null) && (alDataSensitivity.Count > 0))
+                    {
+                        alDataSensitivity.Sort(new WavelenghtCaomparer());
+                        fdRet = (FilterData[])alDataSensitivity.ToArray(typeof(FilterData));
+                    }
+                }
+                catch { }
+            }
+
+            return fdRet;
         }
 
         private String GetScaleStringFormat(Single Value)
@@ -785,16 +938,16 @@ namespace BeamOn_2K
             return strValue;
         }
 
-        public void SetSensitivityFactor(Single fPowerCalibration)
+        public void SetSensitivityFactor(Single fPowerCalibration, Single fPowerMeasure)
         {
-            fSensFactor *= Power / ((fPowerCalibration + mwOffsetPower * Math.Abs(Convert.ToInt16(bIndOffset))) * currentFilterFactor * currentSAMFactor);
+            fSensFactor *= fPowerMeasure / ((fPowerCalibration + mwOffsetPower * Math.Abs(Convert.ToInt16(bIndOffset))) * realFilterFactor * currentSAMFactor);
         }
 
         public void SetPointSensitivityFactor(Single fPowerCalibration, UInt16 uiNumStep)
         {
             int i = 0;
 
-            Single fPointSensFactor = Power / ((fPowerCalibration + mwOffsetPower * Math.Abs(Convert.ToInt16(bIndOffset))) * currentFilterFactor * currentSAMFactor);
+            Single fPointSensFactor = Power / ((fPowerCalibration + mwOffsetPower * Math.Abs(Convert.ToInt16(bIndOffset))) * realFilterFactor * currentSAMFactor);
 
             for (i = 0; (i < headData.Length) && (headData[i].Wavelength <= uiWavelenght); i++) headData[i].Sensitivity *= fPointSensFactor;
 
@@ -857,7 +1010,7 @@ namespace BeamOn_2K
         {
             int i = 0;
 
-            Single fPointSensFactor = Power / ((fPowerCalibration * 1000f + mwOffsetPower * Math.Abs(Convert.ToInt16(bIndOffset))) * currentFilterFactor * currentSAMFactor);
+            Single fPointSensFactor = Power / ((fPowerCalibration * 1000f + mwOffsetPower * Math.Abs(Convert.ToInt16(bIndOffset))) * realFilterFactor * currentSAMFactor);
 
             for (i = 0; (i < SAMData.Length) && (SAMData[i].Wavelength < uiWavelenght); i++) ;
 
@@ -923,184 +1076,62 @@ namespace BeamOn_2K
                 realSAMFactor = 1f;
         }
 
-        public Boolean ReadSensitivityFile()
-        {
-            Boolean bRet = true;
-
-            String strData;
-            int lastLocation;
-
-            if (File.Exists(strSensitivityPath + "\\" + strSensitivityName) == false)
-            {
-                strSensitivityName = "";
-                strSensitivityPath = "";
-            }
-            else
-            {
-                using (StreamReader sr = new StreamReader(strSensitivityPath + "\\" + strSensitivityName))
-                {
-                    strData = sr.ReadLine();
-                    strData = strData.Trim(' ');
-                    lastLocation = strData.IndexOf(" ");
-                    if (lastLocation >= 0) strData = strData.Substring(lastLocation + 1);
-
-                    headData = new FilterData[Convert.ToUInt16(strData)];
-
-                    try
-                    {
-                        for (int i = 0; i < headData.Length; i++)
-                        {
-                            strData = sr.ReadLine();
-                            strData = strData.Trim(' ');
-                            lastLocation = strData.LastIndexOf(" ");
-
-                            headData[i].Wavelength = Convert.ToUInt16(strData.Substring(0, lastLocation));
-                            headData[i].Sensitivity = Convert.ToSingle(strData.Substring(lastLocation + 1).Normalize(), CultureInfo.InvariantCulture.NumberFormat);
-                        }
-                    }
-                    catch
-                    {
-                        CustomMessageBox.Show("Error in the sensitivity file " + strSensitivityName + " .", "Error reading sensitivity file.", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                        strSensitivityName = "";
-                        strSensitivityPath = "";
-
-                        bRet = false;
-                    }
-                    finally
-                    {
-                        sr.Close();
-                    }
-                }
-            }
-
-            return bRet;
-        }
-
         public Boolean ReadSAMFile()
         {
-            Boolean bRet = true;
+            SAMData = ReadSensitivity(strSAMPath + "\\" + strSAMName);
 
-            String strData;
-            int lastLocation;
+            bLoadSAM = (SAMData != null);
 
-            if (File.Exists(strSAMPath + "\\" + strSAMName) == false)
+            if (bLoadSAM == false)
             {
+                //CustomMessageBox.Show("Error in the SAM file " + ((strSAMName != null) ? strSAMName : "") + " .", "Error reading SAM file.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
                 strSAMName = "";
                 strSAMPath = "";
                 bIndSAM = false;
-                bLoadSAM = false;
                 realSAMFactor = 1.0f;
             }
-            else
-            {
-                using (StreamReader sr = new StreamReader(strSAMPath + "\\" + strSAMName))
-                {
-                    strData = sr.ReadLine();
-                    strData = strData.Trim(' ');
-                    lastLocation = strData.IndexOf(" ");
-                    if (lastLocation >= 0) strData = strData.Substring(lastLocation + 1);
 
-                    SAMData = new FilterData[Convert.ToUInt16(strData)];
-
-                    try
-                    {
-                        for (int i = 0; i < SAMData.Length; i++)
-                        {
-                            strData = sr.ReadLine();
-                            strData = strData.Trim(' ');
-                            lastLocation = strData.LastIndexOf(" ");
-
-                            SAMData[i].Wavelength = Convert.ToUInt16(strData.Substring(0, lastLocation));
-                            SAMData[i].Sensitivity = Convert.ToSingle(strData.Substring(lastLocation + 1).Normalize(), CultureInfo.InvariantCulture.NumberFormat);
-                            bLoadSAM = true;
-                        }
-                    }
-                    catch
-                    {
-                        CustomMessageBox.Show("Error in the SAM file " + strSAMName + " .", "Error reading SAM file.", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                        strSAMName = "";
-                        strSAMPath = "";
-                        bIndSAM = false;
-                        bLoadSAM = false;
-                        realSAMFactor = 1.0f;
-
-                        bRet = false;
-                    }
-                    finally
-                    {
-                        sr.Close();
-                    }
-                }
-            }
-
-            return bRet;
+            return bLoadSAM;
         }
 
-        public Boolean ReadFilterFile()
+        public Boolean ReadSensitivitySensor(String strFileName)
         {
-            Boolean bRet = true;
+            if (strFileName != null)
+                headData = ReadSensitivity(strFileName);
+            else
+                headData = null;
 
-            String strData;
-            int lastLocation;
+            return (headData != null);
+        }
 
-            if (File.Exists(strFilterPath + "\\" + strFilterName) == false)
+        public Boolean ReadFilterFile(UInt16 uiIndex)
+        {
+            if ((m_strFilterPath != null) && (m_strFilterName != null))
+                filterData = ReadSensitivity(m_strFilterPath[uiIndex] + "//" + m_strFilterName[uiIndex]);
+            else
+                filterData = null;
+
+            bLoadFilter = (filterData != null);
+
+            if (bLoadFilter == false)
             {
-                strFilterName = "";
-                strFilterPath = "";
-                bIndFilter = false;
-                bLoadFilter = false;
+                //                CustomMessageBox.Show("Error in the filter file " + ((m_strFilterName[uiIndex] != null) ? m_strFilterName[uiIndex] : "") + " .", "Error reading filter file.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                m_strFilterName[uiIndex] = "";
+                m_strFilterPath[uiIndex] = "";
                 realFilterFactor = 1.0f;
             }
-            else
-            {
-                using (StreamReader sr = new StreamReader(strFilterPath + "\\" + strFilterName))
-                {
-                    strData = sr.ReadLine();
-                    strData = strData.Trim(' ');
-                    lastLocation = strData.IndexOf(" ");
-                    if (lastLocation >= 0) strData = strData.Substring(lastLocation + 1);
 
-                    filterData = new FilterData[Convert.ToUInt16(strData)];
-
-                    try
-                    {
-                        for (int i = 0; i < filterData.Length; i++)
-                        {
-                            strData = sr.ReadLine();
-                            strData = strData.Trim(' ');
-                            lastLocation = strData.LastIndexOf(" ");
-
-                            filterData[i].Wavelength = Convert.ToUInt16(strData.Substring(0, lastLocation));
-                            filterData[i].Sensitivity = Convert.ToSingle(strData.Substring(lastLocation + 1).Normalize(), CultureInfo.InvariantCulture.NumberFormat);
-                            bLoadFilter = true;
-                        }
-                    }
-                    catch
-                    {
-                        CustomMessageBox.Show("Error in the filter file " + strFilterName + " .", "Error reading filter file.", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                        strFilterName = "";
-                        strFilterPath = "";
-                        bIndFilter = false;
-                        bLoadFilter = false;
-                        realFilterFactor = 1.0f;
-
-                        bRet = false;
-                    }
-                    finally
-                    {
-                        sr.Close();
-                    }
-                }
-            }
-
-            return bRet;
+            return bLoadFilter;
         }
 
         internal void InitializeComponent()
         {
+            m_strFilterName = new String[4];
+            m_strFilterPath = new String[4];
+
+            bufUnits = new String[] { "mW", "µW", "nm", "dBm", "W", "kW" };
             //PowerCalibr = new PowerCalibration();
         }
     }
@@ -1202,17 +1233,18 @@ namespace BeamOn_2K
         private double m_dMinorRadius = 0f;
         private double m_dAngleOrientation = 0f;
         private double m_dAngleOrientationRad = 0f;
+        private Single m_fPixelSize = 5.86f;
 
         public double Major
         {
             get { return m_dMajorRadius; }
-            set { m_dMajorRadius = value; }
+            set { m_dMajorRadius = value * m_fPixelSize; }
         }
 
         public double Minor
         {
             get { return m_dMinorRadius; }
-            set { m_dMinorRadius = value; }
+            set { m_dMinorRadius = value * m_fPixelSize; }
         }
 
         public double Orientation
@@ -1228,6 +1260,12 @@ namespace BeamOn_2K
         }
 
         public bool EllipseError { get; set; }
+
+        public Single PixelSize
+        {
+            get { return m_fPixelSize; }
+            set { m_fPixelSize = value; }
+        }
     }
 
     [DataContract]
@@ -1258,6 +1296,8 @@ namespace BeamOn_2K
         private Single m_sOpticalFactor = 1f;
         private EllipseData m_edEllipse = new EllipseData();
 
+        private Single m_fPixelSize = 5.86f;
+
         public void InitializeComponent()
         {
             m_realPosition = new PointF();
@@ -1279,6 +1319,17 @@ namespace BeamOn_2K
             m_sUnitsCoeff = 1f;
             m_sOpticalFactor = 1f;
             m_edEllipse = new EllipseData();
+            m_edEllipse.PixelSize = m_fPixelSize;
+        }
+
+        public Single PixelSize
+        {
+            get { return m_fPixelSize; }
+            set
+            {
+                m_fPixelSize = value;
+                m_edEllipse.PixelSize = m_fPixelSize;
+            }
         }
 
         public EllipseData Ellipse
@@ -1336,10 +1387,10 @@ namespace BeamOn_2K
 
             set
             {
-                m_realPosition = value;
+                m_realPosition = new PointF(value.X * m_fPixelSize, value.Y * m_fPixelSize);
 
-                PositionX = (Single)(m_realPosition.X * Math.Cos(Math.PI * iHeadTilt / 180f) - m_realPosition.Y * Math.Sin(Math.PI * iHeadTilt / 180f));
-                PositionY = (Single)(m_realPosition.X * Math.Sin(Math.PI * iHeadTilt / 180f) + m_realPosition.Y * Math.Cos(Math.PI * iHeadTilt / 180f));
+                PositionX = (Single)((m_realPosition.X * Math.Cos(Math.PI * iHeadTilt / 180f) - m_realPosition.Y * Math.Sin(Math.PI * iHeadTilt / 180f)) * m_sUnitsCoeff);
+                PositionY = (Single)((m_realPosition.X * Math.Sin(Math.PI * iHeadTilt / 180f) + m_realPosition.Y * Math.Cos(Math.PI * iHeadTilt / 180f)) * m_sUnitsCoeff);
             }
         }
 
@@ -1425,6 +1476,8 @@ namespace BeamOn_2K
         private Single m_sUnitsCoeff = 1f;
         private Single m_sOpticalFactor = 1f;
 
+        private Single m_fPixelSize = 5.86f;
+
         public const UInt16 NUM_LEVELS = 3;
         public double m_fCorrelation;
 
@@ -1457,6 +1510,12 @@ namespace BeamOn_2K
             m_strRadGaussWidth = new String[NUM_LEVELS];
         }
 
+        public Single PixelSize
+        {
+            get { return m_fPixelSize; }
+            set { m_fPixelSize = value; }
+        }
+
         public double[] Width
         {
             get { return m_fWidth; }
@@ -1479,7 +1538,7 @@ namespace BeamOn_2K
 
         public void SetWidthProfile(int iIndex, Double dValue)
         {
-            m_fWidth[iIndex] = dValue;
+            m_fWidth[iIndex] = dValue * m_fPixelSize;
 
             m_strFormat[iIndex] = GetValueStringFormat(m_fWidth[iIndex] * m_sUnitsCoeff);
 
@@ -1492,7 +1551,7 @@ namespace BeamOn_2K
 
         public void SetWidthGauss(int iIndex, Double dValue)
         {
-            m_fGaussWidth[iIndex] = dValue;
+            m_fGaussWidth[iIndex] = dValue * m_fPixelSize;
 
             m_strGaussFormat[iIndex] = GetValueStringFormat(m_fGaussWidth[iIndex] * m_sUnitsCoeff);
 

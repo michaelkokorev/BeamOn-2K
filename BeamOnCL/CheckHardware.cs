@@ -17,15 +17,22 @@ namespace BeamOnCL
         public class NewCheckLevelEventArgs : EventArgs
         {
             private CheckStatus chStatus = CheckStatus.csHardware;
+            private string m_strUserDefinedName;
 
-            public NewCheckLevelEventArgs(CheckStatus chStatus)
+            public NewCheckLevelEventArgs(CheckStatus chStatus, string strUserDefinedName)
             {
                 this.chStatus = chStatus;
+                this.m_strUserDefinedName = strUserDefinedName;
             }
 
             public CheckStatus Status
             {
                 get { return chStatus; }
+            }
+
+            public String UserDefinedName
+            {
+                get { return m_strUserDefinedName; }
             }
         }
 
@@ -39,14 +46,21 @@ namespace BeamOnCL
         List<ICameraInfo> cameraList = null;
 
         const int cTimeOutMs = 2000;
+        private string m_strSerialNumber;
+        private string m_strUserDefinedName;
+
+        public String UserDefinedName
+        {
+            get { return m_strUserDefinedName;}
+        }
 
         public Boolean StartCheck()
         {
             Boolean bRet = false;
             UInt16 nCount = 0;
 
-            chStatus = CheckStatus.csHardware; 
-            OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csHardware));
+            chStatus = CheckStatus.csHardware;
+            OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csHardware, m_strUserDefinedName));
 
             cameraList = CameraFinder.Enumerate(DeviceType.Usb);
 
@@ -54,10 +68,12 @@ namespace BeamOnCL
             {
                 m_camera = new Camera(cameraList.ElementAt(0));
 
+                if (m_camera.CameraInfo.ContainsKey(CameraInfoKey.DefaultGateway)) m_strSerialNumber = m_camera.CameraInfo[CameraInfoKey.DefaultGateway];
+
                 if (m_camera != null)
                 {
                     chStatus = CheckStatus.csHead;
-                    OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csHead));
+                    OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csHead, m_strUserDefinedName));
 
                     // Set the acquisition mode to free running continuous acquisition when the camera is opened.
                     m_camera.CameraOpened += Configuration.AcquireContinuous;
@@ -66,6 +82,8 @@ namespace BeamOnCL
                     m_camera.ConnectionLost += OnConnectionLost;
 
                     m_camera.Open();
+
+                    m_strUserDefinedName = m_camera.Parameters[PLCamera.DeviceUserID].GetValueOrDefault("No Name"); 
 
                     // Start the grabbing.
                     m_camera.StreamGrabber.Start();
@@ -89,12 +107,12 @@ namespace BeamOnCL
                                     if (nCount > 50)
                                     {
                                         chStatus = CheckStatus.csOk;
-                                        OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csOk));
+                                        OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csOk, m_strUserDefinedName));
                                     }
                                     else if (nCount == 0)
                                     {
                                         chStatus = CheckStatus.csTypeHead;
-                                        OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csTypeHead));
+                                        OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csTypeHead, m_strUserDefinedName));
                                         nCount++;
                                     }
                                     else
@@ -106,13 +124,13 @@ namespace BeamOnCL
                         }
                         catch (Exception)
                         {
-                            OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus));
+                            OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus, m_strUserDefinedName));
                         }
                     }
                 }
             }
             else
-                OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus));
+                OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus, m_strUserDefinedName));
 
             if (m_camera != null)
             {
@@ -128,7 +146,7 @@ namespace BeamOnCL
         public void OnConnectionLost(Object sender, EventArgs e)
         {
             // For demonstration purposes, print a message.
-            OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus));
+            OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus, m_strUserDefinedName));
         }
     }
 }

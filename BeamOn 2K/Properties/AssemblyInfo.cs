@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BeamOn 2K")]
+[assembly: AssemblyTitle("BeamOn U3")]
 [assembly: AssemblyDescription("Warning: This computer program is protected by copyright law and international treaties. Unauthorized reproduction or distribution of this program, or any portion of it, may result in severe civil and critical penalties, and will be prosecuted to the maximum extent possible under law.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Duma Optronics Ltd.")]
-[assembly: AssemblyProduct("BeamOn 2K")]
-[assembly: AssemblyCopyright("Copyright ©  2015 Duma Optronics Ltd., Israel")]
+[assembly: AssemblyProduct("BeamOn U3")]
+[assembly: AssemblyCopyright("Copyright ©  2015-2016 Duma Optronics Ltd., Israel")]
 [assembly: AssemblyTrademark("BeamOn Series")]
 [assembly: AssemblyCulture("")]
 

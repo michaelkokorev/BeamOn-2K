@@ -85,7 +85,9 @@ namespace BeamOnCL
 
         SnapshotBase m_snapshot = null;
         Rectangle m_rImageRectangle = new Rectangle();
-        int m_iCameraFilter = 0;
+        UInt16 m_iCameraFilter = 0;
+        private string m_strSerialNumber;
+        private string m_strUserDefinedName;
 
 #if WATCHDOG
         static EventWaitHandle evHardwareFailure = new AutoResetEvent(false);
@@ -118,6 +120,16 @@ namespace BeamOnCL
             }
         }
 
+        public String SerialNumber
+        {
+            get { return m_strSerialNumber; }
+        }
+
+        public String UserDefinedName
+        {
+            get { return m_strUserDefinedName; }
+        }
+
         public SnapshotBase Snapshot
         {
             get { return m_snapshot; }
@@ -133,6 +145,9 @@ namespace BeamOnCL
                 try
                 {
                     m_camera.Open(5000, TimeoutHandling.ThrowException);
+
+                    if (m_camera.CameraInfo.ContainsKey(CameraInfoKey.SerialNumber)) m_strSerialNumber = m_camera.CameraInfo[CameraInfoKey.SerialNumber];
+                    m_strUserDefinedName = m_camera.Parameters[PLCamera.DeviceUserID].GetValueOrDefault("No Name"); 
 
                     m_camera.Parameters[PLCamera.GainAuto].TrySetValue(PLCamera.GainAuto.Off);
                     m_camera.Parameters[PLCamera.ExposureAuto].TrySetValue(PLCamera.ExposureAuto.Off);
@@ -478,13 +493,14 @@ namespace BeamOnCL
             }
         }
 
-        public int CameraFilter
+        public UInt16 CameraFilter
         {
             get { return m_iCameraFilter; }
             set
             {
-                if ((value < 4) && (m_iCameraFilter != value))
-                {
+                //if ((value < 4) && (m_iCameraFilter != value))
+                    if (value < 4)
+                    {
                     m_iCameraFilter = value;
                     if (m_camera.Parameters[PLCamera.LineSelector].IsWritable == true)
                     {
@@ -492,19 +508,21 @@ namespace BeamOnCL
                         m_camera.Parameters[PLCamera.LineMode].SetValue(PLCamera.LineMode.Output);
                         m_camera.Parameters[PLCamera.LineSource].SetValue(PLCamera.LineSource.UserOutput2);
                         m_camera.Parameters[PLCamera.UserOutputSelector].SetValue(PLCamera.UserOutputSelector.UserOutput2);
+                        m_camera.Parameters[PLCamera.LineInverter].SetValue(true);
                         m_camera.Parameters[PLCamera.UserOutputValue].SetValue(true);
-                        //m_camera.Parameters[PLCamera.LineInverter].SetValue(true);
 
                         m_camera.Parameters[PLCamera.LineSelector].SetValue(PLCamera.LineSelector.Line4);
                         m_camera.Parameters[PLCamera.LineMode].SetValue(PLCamera.LineMode.Output);
                         m_camera.Parameters[PLCamera.LineSource].SetValue(PLCamera.LineSource.UserOutput3);
                         m_camera.Parameters[PLCamera.UserOutputSelector].SetValue(PLCamera.UserOutputSelector.UserOutput3);
-                        for (int i = 0; i < m_iCameraFilter + 1; i++)
+
+                        Thread.Sleep(100);
+                        for (int i = 0; i < m_iCameraFilter;/* + 1;*/ i++)
                         {
-                            Thread.Sleep(100);
-                            m_camera.Parameters[PLCamera.UserOutputValue].SetValue(true);
-                            Thread.Sleep(100);
+                           m_camera.Parameters[PLCamera.UserOutputValue].SetValue(true);
+                            Thread.Sleep(50);
                             m_camera.Parameters[PLCamera.UserOutputValue].SetValue(false);
+                            Thread.Sleep(100);
                         }
 
                         m_camera.Parameters[PLCamera.LineSelector].SetValue(PLCamera.LineSelector.Line3);

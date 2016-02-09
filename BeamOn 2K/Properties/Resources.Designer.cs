@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BeamOn_2K.Properties {
+namespace BeamOn_U3.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace BeamOn_2K.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BeamOn_2K.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BeamOn_U3.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -93,6 +93,26 @@ namespace BeamOn_2K.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Faq_icon {
+            get {
+                object obj = ResourceManager.GetObject("Faq-icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Files_View_File_icon {
+            get {
+                object obj = ResourceManager.GetObject("Files-View-File-icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Hand {
             get {
                 object obj = ResourceManager.GetObject("Hand", resourceCulture);
@@ -136,6 +156,16 @@ namespace BeamOn_2K.Properties {
         internal static System.Drawing.Bitmap Print {
             get {
                 object obj = ResourceManager.GetObject("Print", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap printer_icon {
+            get {
+                object obj = ResourceManager.GetObject("printer-icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -216,6 +246,16 @@ namespace BeamOn_2K.Properties {
         internal static System.Drawing.Bitmap Setup {
             get {
                 object obj = ResourceManager.GetObject("Setup", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Sidebar_Window_icon {
+            get {
+                object obj = ResourceManager.GetObject("Sidebar-Window-icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

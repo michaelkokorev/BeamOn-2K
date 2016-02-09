@@ -8,8 +8,6 @@ namespace BeamOnCL
 {
     public class Profile
     {
-        float m_fPixelSize = 5.86f;
-
         public Double[] m_sDataProfile = null;
         public Gaussian m_sGaussian = null;
 
@@ -42,11 +40,6 @@ namespace BeamOnCL
             get { return m_sDataProfile; }
         }
 
-        public Single PixelSize
-        {
-            get { return m_fPixelSize; }
-        }
-
         public Profile(Profile prf)
         {
             m_sDataProfile = new double[prf.DataProfile.Length];
@@ -55,14 +48,12 @@ namespace BeamOnCL
             m_sMaxProfile = prf.MaxProfile;
 
             m_sGaussian = new Gaussian(prf.GaussianData);
-            m_fPixelSize = prf.PixelSize;
         }
 
-        public Profile(Rectangle rArea, float fPixelSize = 5.86f)
+        public Profile(Rectangle rArea)
         {
             m_rArea = rArea;
             Angle = 0;
-            m_fPixelSize = fPixelSize;
         }
 
         public Point CrossPoint
@@ -133,7 +124,7 @@ namespace BeamOnCL
             f_Right = iRight + (m_sDataProfile[iRight] - f_Board) / (m_sDataProfile[iRight] - m_sDataProfile[iRight + 1]);
             //}
 
-            return (f_Right - f_Left) * m_fPixelSize;
+            return (f_Right - f_Left);
         }
 
         public virtual void Create(SnapshotBase snapshot)

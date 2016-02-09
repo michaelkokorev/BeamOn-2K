@@ -123,7 +123,6 @@ namespace BeamOn_2K
             }
         }
 
-
         private void CheckHardware()
         {
             this.DialogResult = DialogResult.OK;
@@ -131,8 +130,9 @@ namespace BeamOn_2K
             lblCheckLevel.Text = "Checking hardware ...";
 
             BeamOnCL.CheckHardware beamOnCheck = new BeamOnCL.CheckHardware();
-            beamOnCheck.OnGetCheckError +=new BeamOnCL.CheckHardware.GetCheckError(beamOnCheck_OnGetCheckError);
-            beamOnCheck.OnGetCheckLevel +=new BeamOnCL.CheckHardware.GetCheckLevel(beamOnCheck_OnGetCheckLevel);
+            beamOnCheck.OnGetCheckError += new BeamOnCL.CheckHardware.GetCheckError(beamOnCheck_OnGetCheckError);
+            beamOnCheck.OnGetCheckLevel += new BeamOnCL.CheckHardware.GetCheckLevel(beamOnCheck_OnGetCheckLevel);
+
             beamOnCheck.StartCheck();
 
             timerSplash.Enabled = true;
@@ -143,18 +143,22 @@ namespace BeamOn_2K
             switch (e.Status)
             {
                 case BeamOnCL.CheckHardware.CheckStatus.csHardware:
+                    this.labelSerialNumber.Text = "Serial Number: "+ e.UserDefinedName;
                     lblCheckLevel.Text = "Checking hardware ...";
                     checkProgress.Value = 25;
                     break;
                 case BeamOnCL.CheckHardware.CheckStatus.csHead:
+                    this.labelSerialNumber.Text = "Serial Number: " + e.UserDefinedName;
                     lblCheckLevel.Text = "Checking head ...";
                     checkProgress.Value = 50;
                     break;
                 case BeamOnCL.CheckHardware.CheckStatus.csTypeHead:
+                    this.labelSerialNumber.Text = "Serial Number: " + e.UserDefinedName;
                     lblCheckLevel.Text = "Checking head type ...";
                     checkProgress.Value = 75;
                     break;
                 case BeamOnCL.CheckHardware.CheckStatus.csOk:
+                    this.labelSerialNumber.Text = "Serial Number: " + e.UserDefinedName;
                     lblCheckLevel.Text = "Complete hardware test ...";
                     checkProgress.Value = 100;
                     timerSplash.Enabled = true;

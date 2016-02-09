@@ -9,7 +9,7 @@ using System.Timers;
 
 namespace BeamOn_2K
 {
-    public partial class FormErrorMessage : Form
+    public partial class FormErrorMessage : Panel
     {
         private MyLabel lblErrorStatus = null;
 
@@ -18,7 +18,7 @@ namespace BeamOn_2K
             InitializeComponent();
 
             this.BackColor = SystemColors.Control;
-            this.TransparencyKey = BackColor;
+//            this.TransparencyKey = BackColor;
             lblErrorStatus = new MyLabel();
             // 
             // tslblErrorStatus

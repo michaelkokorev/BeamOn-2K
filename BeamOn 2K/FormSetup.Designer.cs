@@ -70,8 +70,6 @@
             this.rbUnitsdB = new System.Windows.Forms.RadioButton();
             this.rbUnitsuW = new System.Windows.Forms.RadioButton();
             this.rbUnitsmW = new System.Windows.Forms.RadioButton();
-            this.gbStatusPower = new System.Windows.Forms.GroupBox();
-            this.chkToolbarPower = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.gbClipLevels = new System.Windows.Forms.GroupBox();
             this.lblLevel0 = new System.Windows.Forms.Label();
@@ -152,7 +150,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.WaveUpDown)).BeginInit();
             this.tabPage3.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.gbStatusPower.SuspendLayout();
             this.tabPage4.SuspendLayout();
             this.gbClipLevels.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Level0UpDown)).BeginInit();
@@ -237,6 +234,7 @@
             // 
             this.groupBoxPixelFormat.Controls.Add(this.radioButton8bpp);
             this.groupBoxPixelFormat.Controls.Add(this.radioButton12bpp);
+            this.groupBoxPixelFormat.Enabled = false;
             this.groupBoxPixelFormat.Location = new System.Drawing.Point(3, 290);
             this.groupBoxPixelFormat.Name = "groupBoxPixelFormat";
             this.groupBoxPixelFormat.Size = new System.Drawing.Size(389, 50);
@@ -273,6 +271,7 @@
             this.groupBoxBinning.Controls.Add(this.radioButtonBinning4);
             this.groupBoxBinning.Controls.Add(this.radioButtonBinningOff);
             this.groupBoxBinning.Controls.Add(this.radioButtonBinning2);
+            this.groupBoxBinning.Enabled = false;
             this.groupBoxBinning.Location = new System.Drawing.Point(3, 174);
             this.groupBoxBinning.Name = "groupBoxBinning";
             this.groupBoxBinning.Size = new System.Drawing.Size(389, 110);
@@ -593,7 +592,6 @@
             // gbWaveLength
             // 
             this.gbWaveLength.Controls.Add(this.WaveUpDown);
-            this.gbWaveLength.Enabled = false;
             this.gbWaveLength.Location = new System.Drawing.Point(3, 118);
             this.gbWaveLength.Name = "gbWaveLength";
             this.gbWaveLength.Size = new System.Drawing.Size(166, 50);
@@ -628,7 +626,6 @@
             // 
             this.tabPage3.BackColor = System.Drawing.Color.Transparent;
             this.tabPage3.Controls.Add(this.groupBox1);
-            this.tabPage3.Controls.Add(this.gbStatusPower);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
@@ -704,26 +701,6 @@
             this.rbUnitsmW.TabStop = true;
             this.rbUnitsmW.Text = "mW";
             this.rbUnitsmW.UseVisualStyleBackColor = true;
-            // 
-            // gbStatusPower
-            // 
-            this.gbStatusPower.Controls.Add(this.chkToolbarPower);
-            this.gbStatusPower.Location = new System.Drawing.Point(7, 67);
-            this.gbStatusPower.Name = "gbStatusPower";
-            this.gbStatusPower.Size = new System.Drawing.Size(385, 55);
-            this.gbStatusPower.TabIndex = 13;
-            this.gbStatusPower.TabStop = false;
-            this.gbStatusPower.Text = "Status Power";
-            // 
-            // chkToolbarPower
-            // 
-            this.chkToolbarPower.AutoSize = true;
-            this.chkToolbarPower.Location = new System.Drawing.Point(149, 19);
-            this.chkToolbarPower.Name = "chkToolbarPower";
-            this.chkToolbarPower.Size = new System.Drawing.Size(59, 17);
-            this.chkToolbarPower.TabIndex = 2;
-            this.chkToolbarPower.Text = "On/Off";
-            this.chkToolbarPower.UseVisualStyleBackColor = true;
             // 
             // tabPage4
             // 
@@ -1022,7 +999,7 @@
             // checkName9
             // 
             this.checkName9.AutoSize = true;
-            this.checkName9.Location = new System.Drawing.Point(28, 310);
+            this.checkName9.Location = new System.Drawing.Point(16, 310);
             this.checkName9.Name = "checkName9";
             this.checkName9.Size = new System.Drawing.Size(73, 17);
             this.checkName9.TabIndex = 78;
@@ -1075,7 +1052,7 @@
             // checkName8
             // 
             this.checkName8.AutoSize = true;
-            this.checkName8.Location = new System.Drawing.Point(28, 284);
+            this.checkName8.Location = new System.Drawing.Point(16, 284);
             this.checkName8.Name = "checkName8";
             this.checkName8.Size = new System.Drawing.Size(73, 17);
             this.checkName8.TabIndex = 74;
@@ -1099,11 +1076,11 @@
             // checkName7
             // 
             this.checkName7.AutoSize = true;
-            this.checkName7.Location = new System.Drawing.Point(28, 258);
+            this.checkName7.Location = new System.Drawing.Point(16, 258);
             this.checkName7.Name = "checkName7";
-            this.checkName7.Size = new System.Drawing.Size(98, 17);
+            this.checkName7.Size = new System.Drawing.Size(134, 17);
             this.checkName7.TabIndex = 71;
-            this.checkName7.Text = "Gaussian Fit W";
+            this.checkName7.Text = "Gaussian Fit Horizontal";
             this.checkName7.UseVisualStyleBackColor = true;
             // 
             // MaxUpDown6
@@ -1142,11 +1119,11 @@
             // checkName6
             // 
             this.checkName6.AutoSize = true;
-            this.checkName6.Location = new System.Drawing.Point(28, 232);
+            this.checkName6.Location = new System.Drawing.Point(16, 232);
             this.checkName6.Name = "checkName6";
-            this.checkName6.Size = new System.Drawing.Size(115, 17);
+            this.checkName6.Size = new System.Drawing.Size(151, 17);
             this.checkName6.TabIndex = 67;
-            this.checkName6.Text = "Gaussian Width W";
+            this.checkName6.Text = "Gaussian Width Horizontal";
             this.checkName6.UseVisualStyleBackColor = true;
             // 
             // MaxUpDown5
@@ -1185,11 +1162,11 @@
             // checkName5
             // 
             this.checkName5.AutoSize = true;
-            this.checkName5.Location = new System.Drawing.Point(28, 206);
+            this.checkName5.Location = new System.Drawing.Point(16, 206);
             this.checkName5.Name = "checkName5";
-            this.checkName5.Size = new System.Drawing.Size(68, 17);
+            this.checkName5.Size = new System.Drawing.Size(104, 17);
             this.checkName5.TabIndex = 63;
-            this.checkName5.Text = "Width W";
+            this.checkName5.Text = "Width Horizontal";
             this.checkName5.UseVisualStyleBackColor = true;
             // 
             // MaxUpDown4
@@ -1209,11 +1186,11 @@
             // checkName4
             // 
             this.checkName4.AutoSize = true;
-            this.checkName4.Location = new System.Drawing.Point(28, 180);
+            this.checkName4.Location = new System.Drawing.Point(16, 180);
             this.checkName4.Name = "checkName4";
-            this.checkName4.Size = new System.Drawing.Size(94, 17);
+            this.checkName4.Size = new System.Drawing.Size(122, 17);
             this.checkName4.TabIndex = 60;
-            this.checkName4.Text = "Gaussian Fit V";
+            this.checkName4.Text = "Gaussian Fit Vertical";
             this.checkName4.UseVisualStyleBackColor = true;
             // 
             // MaxUpDown3
@@ -1252,11 +1229,11 @@
             // checkName3
             // 
             this.checkName3.AutoSize = true;
-            this.checkName3.Location = new System.Drawing.Point(28, 154);
+            this.checkName3.Location = new System.Drawing.Point(16, 154);
             this.checkName3.Name = "checkName3";
-            this.checkName3.Size = new System.Drawing.Size(111, 17);
+            this.checkName3.Size = new System.Drawing.Size(139, 17);
             this.checkName3.TabIndex = 56;
-            this.checkName3.Text = "Gaussian Width V";
+            this.checkName3.Text = "Gaussian Width Vertical";
             this.checkName3.UseVisualStyleBackColor = true;
             // 
             // MaxUpDown2
@@ -1295,11 +1272,11 @@
             // checkName2
             // 
             this.checkName2.AutoSize = true;
-            this.checkName2.Location = new System.Drawing.Point(28, 128);
+            this.checkName2.Location = new System.Drawing.Point(16, 128);
             this.checkName2.Name = "checkName2";
-            this.checkName2.Size = new System.Drawing.Size(64, 17);
+            this.checkName2.Size = new System.Drawing.Size(92, 17);
             this.checkName2.TabIndex = 52;
-            this.checkName2.Text = "Width V";
+            this.checkName2.Text = "Width Vertical";
             this.checkName2.UseVisualStyleBackColor = true;
             // 
             // MaxUpDown1
@@ -1350,7 +1327,7 @@
             // checkName1
             // 
             this.checkName1.AutoSize = true;
-            this.checkName1.Location = new System.Drawing.Point(28, 102);
+            this.checkName1.Location = new System.Drawing.Point(16, 102);
             this.checkName1.Name = "checkName1";
             this.checkName1.Size = new System.Drawing.Size(56, 17);
             this.checkName1.TabIndex = 48;
@@ -1500,8 +1477,6 @@
             this.tabPage3.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.gbStatusPower.ResumeLayout(false);
-            this.gbStatusPower.PerformLayout();
             this.tabPage4.ResumeLayout(false);
             this.gbClipLevels.ResumeLayout(false);
             this.gbClipLevels.PerformLayout();
@@ -1582,8 +1557,6 @@
         private System.Windows.Forms.RadioButton rbUnitsdB;
         private System.Windows.Forms.RadioButton rbUnitsuW;
         private System.Windows.Forms.RadioButton rbUnitsmW;
-        private System.Windows.Forms.GroupBox gbStatusPower;
-        private System.Windows.Forms.CheckBox chkToolbarPower;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.GroupBox gbClipLevels;
         private System.Windows.Forms.Label lblLevel0;
