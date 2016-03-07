@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataExcel.cs" />
+    <Compile Include="FastModeData.cs" />
     <Compile Include="Form3DProjection.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -71,6 +72,12 @@
     </Compile>
     <Compile Include="FormSetup.Designer.cs">
       <DependentUpon>FormSetup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSetupFastMode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSetupFastMode.Designer.cs">
+      <DependentUpon>FormSetupFastMode.cs</DependentUpon>
     </Compile>
     <Compile Include="FormSetupLog.cs">
       <SubType>Form</SubType>
@@ -124,6 +131,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormSetup.resx">
       <DependentUpon>FormSetup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSetupFastMode.resx">
+      <DependentUpon>FormSetupFastMode.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormSetupLog.resx">
       <DependentUpon>FormSetupLog.cs</DependentUpon>
@@ -189,6 +199,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\Setting-Running-Rabbit-icon1.png" />
+    <None Include="Resources\Setting-Running-Rabbit-icon.png" />
+    <None Include="Resources\Animals-Running-Rabbit-icon.png" />
     <None Include="Resources\Snowflake-24.png" />
     <None Include="Resources\printer-icon.png" />
     <None Include="Resources\Faq-icon.png" />

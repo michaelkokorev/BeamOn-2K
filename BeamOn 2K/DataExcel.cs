@@ -5,7 +5,7 @@ using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Reflection;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     class DataExcel
     {

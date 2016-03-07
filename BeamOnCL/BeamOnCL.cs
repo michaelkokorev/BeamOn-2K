@@ -120,7 +120,7 @@ namespace BeamOnCL
             {
                 return new PointF(
                     (mc.ImageRectangle.X + m_pPositioning.Ellipse.Centroid.X - mc.MaxImageRectangle.Width / 2f),
-                    (mc.ImageRectangle.Y + m_pPositioning.Ellipse.Centroid.Y - mc.MaxImageRectangle.Height / 2f));
+                    (mc.MaxImageRectangle.Height / 2f - mc.ImageRectangle.Y - m_pPositioning.Ellipse.Centroid.Y));
             }
         }
 
@@ -221,6 +221,12 @@ namespace BeamOnCL
             get { return mc.SerialNumber; }
         }
 
+        public Boolean FastMode
+        {
+            get { return mc.FastMode; }
+            set { mc.FastMode = value; }
+        }
+
         public String UserDefinedName
         {
             get { return mc.UserDefinedName; }
@@ -254,6 +260,17 @@ namespace BeamOnCL
         public void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
         {
             mc.SetImageDataArray(Data, colorArray);
+        }
+
+        public void AverageReset()
+        {
+            mc.AverageReset();
+        }
+
+        public UInt16 AverageNum
+        {
+            get { return mc.AverageNum; }
+            set { mc.AverageNum = value; }
         }
 
         private void CreateProfile(SnapshotBase snp)

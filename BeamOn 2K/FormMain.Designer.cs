@@ -1,4 +1,4 @@
-﻿namespace BeamOn_2K
+﻿namespace BeamOn_U3
 {
     partial class FormMain
     {
@@ -34,6 +34,7 @@
             this.mnuFilePrintWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFilePrintScreen = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFilePageSetup = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -93,6 +94,7 @@
             this.AngleLineProfileToolStripLabel = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator21 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator19 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
             this.mainSplitContainer = new System.Windows.Forms.SplitContainer();
@@ -156,8 +158,8 @@
             this.printPreviewDialog = new System.Windows.Forms.PrintPreviewDialog();
             this.pageSetupDialog = new System.Windows.Forms.PageSetupDialog();
             this.numericUpDownAngle = new System.Windows.Forms.NumericUpDown();
-            this.formErrorMessage = new BeamOn_2K.FormErrorMessage();
-            this.toolStripStatuslblError = new BeamOn_2K.MyToolStripLabel();
+            this.formErrorMessage = new BeamOn_U3.FormErrorMessage();
+            this.toolStripStatuslblError = new BeamOn_U3.MyToolStripLabel();
             this.picturePaletteImage = new PaletteImage.PaletteImage();
             this.pictureBoxImage = new System.Windows.Forms.PictureBox();
             this.pictureBoxData = new System.Windows.Forms.PictureBox();
@@ -175,11 +177,15 @@
             this.lineProfileToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.propertyToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.freezeToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.runningSetupToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.runningToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.dataViewToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.tbHelpActiveWindow = new System.Windows.Forms.ToolStripButton();
             this.mnuFilePrint = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFilePrintText = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFilePrintBMP = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuFileStartRunningMode = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuFileSetupRunningMode = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFileStartDataCollection = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFileSetupDataCollection = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
@@ -239,6 +245,9 @@
             this.mnuFilePrintWindow,
             this.mnuFilePrintScreen,
             this.mnuFilePageSetup,
+            this.toolStripSeparator20,
+            this.mnuFileStartRunningMode,
+            this.mnuFileSetupRunningMode,
             this.toolStripSeparator1,
             this.mnuFileStartDataCollection,
             this.mnuFileSetupDataCollection,
@@ -276,6 +285,11 @@
             this.mnuFilePageSetup.Text = "P&age Setup...";
             this.mnuFilePageSetup.ToolTipText = "Page Setup";
             this.mnuFilePageSetup.Click += new System.EventHandler(this.mnuFilePageSetup_Click);
+            // 
+            // toolStripSeparator20
+            // 
+            this.toolStripSeparator20.Name = "toolStripSeparator20";
+            this.toolStripSeparator20.Size = new System.Drawing.Size(186, 6);
             // 
             // toolStripSeparator1
             // 
@@ -724,6 +738,9 @@
             this.propertyToolStripButton,
             this.toolStripSeparator2,
             this.freezeToolStripButton,
+            this.toolStripSeparator21,
+            this.runningSetupToolStripButton,
+            this.runningToolStripButton,
             this.toolStripSeparator19,
             this.dataViewToolStripButton,
             this.toolStripSeparator12,
@@ -773,6 +790,11 @@
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 48);
             // 
+            // toolStripSeparator21
+            // 
+            this.toolStripSeparator21.Name = "toolStripSeparator21";
+            this.toolStripSeparator21.Size = new System.Drawing.Size(6, 48);
+            // 
             // toolStripSeparator19
             // 
             this.toolStripSeparator19.Name = "toolStripSeparator19";
@@ -821,6 +843,7 @@
             this.imageSplitContainer.Panel2.AutoScroll = true;
             this.imageSplitContainer.Panel2.Controls.Add(this.formErrorMessage);
             this.imageSplitContainer.Panel2.Controls.Add(this.pictureBoxImage);
+            this.imageSplitContainer.Panel2.Scroll += new System.Windows.Forms.ScrollEventHandler(this.imageSplitContainer_Panel2_Scroll);
             this.imageSplitContainer.Panel2MinSize = 480;
             this.imageSplitContainer.Size = new System.Drawing.Size(1055, 633);
             this.imageSplitContainer.SplitterDistance = 25;
@@ -838,7 +861,6 @@
             // dataSplitContainer.Panel1
             // 
             this.dataSplitContainer.Panel1.Controls.Add(this.propertyGroupBox);
-            this.dataSplitContainer.Panel1Collapsed = true;
             this.dataSplitContainer.Panel1MinSize = 395;
             // 
             // dataSplitContainer.Panel2
@@ -866,7 +888,7 @@
             this.propertyGroupBox.Font = new System.Drawing.Font("Arial Rounded MT Bold", 15.75F);
             this.propertyGroupBox.Location = new System.Drawing.Point(0, 0);
             this.propertyGroupBox.Name = "propertyGroupBox";
-            this.propertyGroupBox.Size = new System.Drawing.Size(150, 395);
+            this.propertyGroupBox.Size = new System.Drawing.Size(321, 395);
             this.propertyGroupBox.TabIndex = 6;
             this.propertyGroupBox.TabStop = false;
             this.propertyGroupBox.Text = "Control";
@@ -951,6 +973,7 @@
             // trackBarGain
             // 
             this.trackBarGain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.trackBarGain.LargeChange = 1;
             this.trackBarGain.Location = new System.Drawing.Point(3, 19);
             this.trackBarGain.Name = "trackBarGain";
             this.trackBarGain.Size = new System.Drawing.Size(303, 45);
@@ -1004,11 +1027,11 @@
             // trackBarExposure
             // 
             this.trackBarExposure.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.trackBarExposure.LargeChange = 500000;
+            this.trackBarExposure.LargeChange = 500;
             this.trackBarExposure.Location = new System.Drawing.Point(3, 19);
             this.trackBarExposure.Name = "trackBarExposure";
             this.trackBarExposure.Size = new System.Drawing.Size(303, 45);
-            this.trackBarExposure.SmallChange = 100000;
+            this.trackBarExposure.SmallChange = 10;
             this.trackBarExposure.TabIndex = 6;
             this.trackBarExposure.TickFrequency = 1000000;
             this.trackBarExposure.Scroll += new System.EventHandler(this.trackBarExposure_Scroll);
@@ -1065,7 +1088,7 @@
             this.powerGroupBox.Font = new System.Drawing.Font("Arial Rounded MT Bold", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.powerGroupBox.Location = new System.Drawing.Point(0, 495);
             this.powerGroupBox.Name = "powerGroupBox";
-            this.powerGroupBox.Size = new System.Drawing.Size(321, 68);
+            this.powerGroupBox.Size = new System.Drawing.Size(304, 68);
             this.powerGroupBox.TabIndex = 11;
             this.powerGroupBox.TabStop = false;
             this.powerGroupBox.Text = "Power(mW)";
@@ -1101,7 +1124,7 @@
             this.gaussGroupBox.Font = new System.Drawing.Font("Arial Rounded MT Bold", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.gaussGroupBox.Location = new System.Drawing.Point(0, 270);
             this.gaussGroupBox.Name = "gaussGroupBox";
-            this.gaussGroupBox.Size = new System.Drawing.Size(321, 225);
+            this.gaussGroupBox.Size = new System.Drawing.Size(304, 225);
             this.gaussGroupBox.TabIndex = 9;
             this.gaussGroupBox.TabStop = false;
             this.gaussGroupBox.Text = "Gaussian(µm)";
@@ -1265,7 +1288,7 @@
             this.ProfileGroupBox.Font = new System.Drawing.Font("Arial Rounded MT Bold", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ProfileGroupBox.Location = new System.Drawing.Point(0, 97);
             this.ProfileGroupBox.Name = "ProfileGroupBox";
-            this.ProfileGroupBox.Size = new System.Drawing.Size(321, 173);
+            this.ProfileGroupBox.Size = new System.Drawing.Size(304, 173);
             this.ProfileGroupBox.TabIndex = 8;
             this.ProfileGroupBox.TabStop = false;
             this.ProfileGroupBox.Text = "Profile(µm)";
@@ -1391,7 +1414,7 @@
             this.groupBoxPosition.Font = new System.Drawing.Font("Arial Rounded MT Bold", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBoxPosition.Location = new System.Drawing.Point(0, 29);
             this.groupBoxPosition.Name = "groupBoxPosition";
-            this.groupBoxPosition.Size = new System.Drawing.Size(321, 68);
+            this.groupBoxPosition.Size = new System.Drawing.Size(304, 68);
             this.groupBoxPosition.TabIndex = 7;
             this.groupBoxPosition.TabStop = false;
             this.groupBoxPosition.Text = "Position(µm)";
@@ -1445,7 +1468,7 @@
             this.panelTopData.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTopData.Location = new System.Drawing.Point(0, 0);
             this.panelTopData.Name = "panelTopData";
-            this.panelTopData.Size = new System.Drawing.Size(321, 29);
+            this.panelTopData.Size = new System.Drawing.Size(304, 29);
             this.panelTopData.TabIndex = 12;
             // 
             // printDialog
@@ -1502,7 +1525,7 @@
             // 
             this.formErrorMessage.BackColor = System.Drawing.SystemColors.Control;
             this.formErrorMessage.DemoVersion = false;
-            this.formErrorMessage.ErrorMessage = BeamOn_2K.ErrorStatus.BA_OK;
+            this.formErrorMessage.ErrorMessage = BeamOn_U3.ErrorStatus.BA_OK;
             this.formErrorMessage.ErrorMessageBeep = false;
             this.formErrorMessage.Location = new System.Drawing.Point(3, 3);
             this.formErrorMessage.LogTypeMessage = ((byte)(0));
@@ -1519,7 +1542,7 @@
             this.toolStripStatuslblError.AutoSize = false;
             this.toolStripStatuslblError.BackColor = System.Drawing.Color.Black;
             this.toolStripStatuslblError.DemoVersion = false;
-            this.toolStripStatuslblError.ErrorMessage = BeamOn_2K.ErrorStatus.BA_OK;
+            this.toolStripStatuslblError.ErrorMessage = BeamOn_U3.ErrorStatus.BA_OK;
             this.toolStripStatuslblError.ErrorMessageBeep = false;
             this.toolStripStatuslblError.ForeColor = System.Drawing.Color.Black;
             this.toolStripStatuslblError.LogTypeMessage = ((byte)(0));
@@ -1585,7 +1608,7 @@
             this.buttonProperty.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonProperty.Image = global::BeamOn_U3.Properties.Resources.PropertyS;
             this.buttonProperty.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.buttonProperty.Location = new System.Drawing.Point(266, 0);
+            this.buttonProperty.Location = new System.Drawing.Point(226, 0);
             this.buttonProperty.Name = "buttonProperty";
             this.buttonProperty.Size = new System.Drawing.Size(36, 33);
             this.buttonProperty.TabIndex = 10;
@@ -1644,6 +1667,7 @@
             this.measuringToolStripButton.Size = new System.Drawing.Size(56, 45);
             this.measuringToolStripButton.Text = "Measure";
             this.measuringToolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.measuringToolStripButton.ToolTipText = "Enable/Disable Measuring";
             this.measuringToolStripButton.Click += new System.EventHandler(this.measuringToolStrip_Click);
             // 
             // tbOptionsSetupDataCollection
@@ -1654,6 +1678,7 @@
             this.tbOptionsSetupDataCollection.Size = new System.Drawing.Size(64, 45);
             this.tbOptionsSetupDataCollection.Text = "Log Setup";
             this.tbOptionsSetupDataCollection.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.tbOptionsSetupDataCollection.ToolTipText = "Open Log Setup";
             this.tbOptionsSetupDataCollection.Click += new System.EventHandler(this.mnuOptionsSetupDataCollection_Click);
             // 
             // tbOptionsStartDataCollection
@@ -1666,6 +1691,7 @@
             this.tbOptionsStartDataCollection.Size = new System.Drawing.Size(58, 45);
             this.tbOptionsStartDataCollection.Text = "Start Log";
             this.tbOptionsStartDataCollection.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.tbOptionsStartDataCollection.ToolTipText = "Start/Stop Log File";
             this.tbOptionsStartDataCollection.Click += new System.EventHandler(this.mnuOptionsStartDataCollection_Click);
             // 
             // tbViewProjection
@@ -1716,6 +1742,7 @@
             this.propertyToolStripButton.Size = new System.Drawing.Size(45, 45);
             this.propertyToolStripButton.Text = "Setup";
             this.propertyToolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.propertyToolStripButton.ToolTipText = "Open Setup Window";
             this.propertyToolStripButton.Click += new System.EventHandler(this.propertyToolStripButton_Click);
             // 
             // freezeToolStripButton
@@ -1727,7 +1754,32 @@
             this.freezeToolStripButton.Size = new System.Drawing.Size(44, 45);
             this.freezeToolStripButton.Text = "Freeze";
             this.freezeToolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.freezeToolStripButton.ToolTipText = "Freeze Mode";
             this.freezeToolStripButton.Click += new System.EventHandler(this.freezeToolStripButton_Click);
+            // 
+            // runningSetupToolStripButton
+            // 
+            this.runningSetupToolStripButton.Image = global::BeamOn_U3.Properties.Resources.Setting_Running_Rabbit_icon1;
+            this.runningSetupToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.runningSetupToolStripButton.Name = "runningSetupToolStripButton";
+            this.runningSetupToolStripButton.Size = new System.Drawing.Size(89, 45);
+            this.runningSetupToolStripButton.Text = "Setup Running";
+            this.runningSetupToolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.runningSetupToolStripButton.ToolTipText = "Setup Running Mode";
+            this.runningSetupToolStripButton.Click += new System.EventHandler(this.runningSetupToolStripItem_Click);
+            // 
+            // runningToolStripButton
+            // 
+            this.runningToolStripButton.CheckOnClick = true;
+            this.runningToolStripButton.Enabled = false;
+            this.runningToolStripButton.Image = global::BeamOn_U3.Properties.Resources.Animals_Running_Rabbit_icon;
+            this.runningToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.runningToolStripButton.Name = "runningToolStripButton";
+            this.runningToolStripButton.Size = new System.Drawing.Size(83, 45);
+            this.runningToolStripButton.Text = "Start Running";
+            this.runningToolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.runningToolStripButton.ToolTipText = "Start Running Mode";
+            this.runningToolStripButton.Click += new System.EventHandler(this.runningToolStripButton_Click);
             // 
             // dataViewToolStripButton
             // 
@@ -1739,6 +1791,7 @@
             this.dataViewToolStripButton.Size = new System.Drawing.Size(45, 45);
             this.dataViewToolStripButton.Text = "Data";
             this.dataViewToolStripButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.dataViewToolStripButton.ToolTipText = "View Data Panel";
             this.dataViewToolStripButton.Click += new System.EventHandler(this.dataPanelToolStrip_Click);
             // 
             // tbHelpActiveWindow
@@ -1781,6 +1834,24 @@
             this.mnuFilePrintBMP.Text = "&Image File";
             this.mnuFilePrintBMP.ToolTipText = "Print Image File";
             this.mnuFilePrintBMP.Click += new System.EventHandler(this.mnuFilePrint_Click);
+            // 
+            // mnuFileStartRunningMode
+            // 
+            this.mnuFileStartRunningMode.CheckOnClick = true;
+            this.mnuFileStartRunningMode.Enabled = false;
+            this.mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Animals_Running_Rabbit_icon;
+            this.mnuFileStartRunningMode.Name = "mnuFileStartRunningMode";
+            this.mnuFileStartRunningMode.Size = new System.Drawing.Size(189, 22);
+            this.mnuFileStartRunningMode.Text = "Start &Running Mode";
+            this.mnuFileStartRunningMode.Click += new System.EventHandler(this.runningToolStripButton_Click);
+            // 
+            // mnuFileSetupRunningMode
+            // 
+            this.mnuFileSetupRunningMode.Image = global::BeamOn_U3.Properties.Resources.Setting_Running_Rabbit_icon1;
+            this.mnuFileSetupRunningMode.Name = "mnuFileSetupRunningMode";
+            this.mnuFileSetupRunningMode.Size = new System.Drawing.Size(189, 22);
+            this.mnuFileSetupRunningMode.Text = "Setup Running Mode";
+            this.mnuFileSetupRunningMode.Click += new System.EventHandler(this.runningSetupToolStripItem_Click);
             // 
             // mnuFileStartDataCollection
             // 
@@ -1975,7 +2046,7 @@
         private System.Windows.Forms.ToolStripButton tbOptionsSetupDataCollection;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
         private System.Windows.Forms.ToolStripButton tbOptionsStartDataCollection;
-        private BeamOn_2K.MyToolStripLabel toolStripStatuslblError;
+        private BeamOn_U3.MyToolStripLabel toolStripStatuslblError;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatuslblDate;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatuslblWave;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatuslblClip;
@@ -2026,6 +2097,12 @@
         private System.Windows.Forms.Panel panelTopData;
         private System.Windows.Forms.ToolStripMenuItem powerToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton freezeToolStripButton;
+        private System.Windows.Forms.ToolStripButton runningToolStripButton;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator20;
+        private System.Windows.Forms.ToolStripMenuItem mnuFileStartRunningMode;
+        private System.Windows.Forms.ToolStripButton runningSetupToolStripButton;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator21;
+        private System.Windows.Forms.ToolStripMenuItem mnuFileSetupRunningMode;
     }
 }
 

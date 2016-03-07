@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Timers;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     public partial class FormErrorMessage : Panel
     {
@@ -241,6 +241,12 @@ namespace BeamOn_2K
                 {
                     if (strText != "") strText += "&& ";
                     strText += "Saving Data ";
+                }
+
+                if ((m_esSystemMessage & (UInt16)(SystemStatus.M_SS_FAST_MODE)) > 0)
+                {
+                    if (strText != "") strText += "&& ";
+                    strText += "Running Mode ";
                 }
 
                 strText += "in progress";

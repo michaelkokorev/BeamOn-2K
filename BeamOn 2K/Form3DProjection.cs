@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     public partial class Form3DProjection : Form
     {

@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     public partial class FormSetupLog : Form
     {

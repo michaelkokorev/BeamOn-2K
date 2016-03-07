@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     public partial class FormSetup : Form
     {
@@ -87,6 +87,10 @@ namespace BeamOn_2K
                     break;
             }
 
+            //Average
+            AverageUpDown.Value = (AverageUpDown.Minimum > m_sysData.Average) ? AverageUpDown.Minimum : m_sysData.Average;
+            AverageUpDown.Enabled = m_sysData.AverageOn;
+            checkAverage.Checked = m_sysData.AverageOn;
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -137,6 +141,10 @@ namespace BeamOn_2K
              else if(rbUnitskW.Checked == true)
                 m_sysData.powerData.PowerUnits = 5;
 
+            //Average
+            m_sysData.AverageOn = checkAverage.Checked;
+            if (m_sysData.AverageOn == true) m_sysData.Average = Decimal.ToUInt16(AverageUpDown.Value);
+
             this.DialogResult = DialogResult.OK;
         }
 
@@ -154,6 +162,11 @@ namespace BeamOn_2K
         {
             Level2UpDown.Minimum = Level1UpDown.Value + 0.1M;
             Level0UpDown.Maximum = Level1UpDown.Value - 0.1M;
+        }
+
+        private void checkAverage_Click(object sender, EventArgs e)
+        {
+            AverageUpDown.Enabled = checkAverage.Checked;
         }
     }
 }

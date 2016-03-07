@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     partial class frmAboutBox : Form
     {

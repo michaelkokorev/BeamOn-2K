@@ -9,6 +9,32 @@ namespace BeamOnCL
     public class SnapshotBase : System.ICloneable
     {
         protected Rectangle m_rArea;
+        protected bool m_fStart = true;
+        protected UInt16 m_uiCounter = 0;
+        protected ushort m_uiAverageNum = 0;
+        protected uint[] m_uiAverageDataSum = null;
+        protected long m_lTimeStamp = 0;
+
+        public void AverageReset()
+        {
+            m_fStart = true;
+            m_uiCounter = 0;
+        }
+
+        public UInt16 AverageNum
+        {
+            get { return m_uiAverageNum; }
+            set
+            {
+                AverageReset();
+                m_uiAverageNum = value;
+            }
+        }
+
+        public long TimeStamp
+        {
+            get { return m_lTimeStamp; }
+        }
 
         public UInt16 Width
         {
@@ -30,8 +56,11 @@ namespace BeamOnCL
             get { return (UInt16)m_rArea.Left; }
         }
 
-        public virtual unsafe void GetData(byte[] bData)
+        public virtual unsafe Boolean GetData(byte[] bData, long timeStamp)
         {
+            m_lTimeStamp = timeStamp;
+
+            return true;
         }
 
         public virtual void SetData(IntPtr Data)

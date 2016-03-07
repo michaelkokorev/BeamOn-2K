@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Xml.Xsl;
 using System.Xml.XPath;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     #region LogStatistic
 

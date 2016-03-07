@@ -6,6 +6,7 @@ using Basler.Pylon;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
+using System.Collections;
 
 namespace BeamOnCL
 {
@@ -13,6 +14,8 @@ namespace BeamOnCL
     {
         Camera m_camera = null;
         List<ICameraInfo> cameraList = null;
+        IGrabResult m_grabResult = null;
+
 
         public delegate void ChangeStatusCamera(object sender, EventArgs e);
         public event ChangeStatusCamera OnChangeStatusCamera;
@@ -20,18 +23,13 @@ namespace BeamOnCL
         public class NewDataRecevedEventArgs : EventArgs, ICloneable
         {
             private SnapshotBase m_snapshot = null;
-            private long m_timeStamp = 0;
+            private Boolean m_bFastMode = false;
             private bool m_bClone = false;
 
-            public NewDataRecevedEventArgs(SnapshotBase snapshot, long timeStamp)
+            public NewDataRecevedEventArgs(SnapshotBase snapshot, Boolean bFastMode)
             {
                 m_snapshot = snapshot;
-                m_timeStamp = timeStamp;
-            }
-
-            public long Timestamp
-            {
-                get { return m_timeStamp; }
+                m_bFastMode = bFastMode;
             }
 
             public SnapshotBase Snapshot
@@ -44,10 +42,15 @@ namespace BeamOnCL
                 return this.Clone();
             }
 
+            public Boolean FastMode
+            {
+                get { return m_bFastMode; }
+                set { m_bFastMode = value; }
+            }
             //
             // Summary:
             //     Indicates if the event arguments have been created by calling NewDataRecevedEventArgs.Clone().
-            public bool IsClone { get{return m_bClone;} }
+            public bool IsClone { get { return m_bClone; } }
 
             // Summary:
             //     Clones the event arguments including the Snapshot & Timestamp result.
@@ -61,7 +64,7 @@ namespace BeamOnCL
             public NewDataRecevedEventArgs Clone()
             {
                 NewDataRecevedEventArgs ret = this.MemberwiseClone() as NewDataRecevedEventArgs; ;
-            
+
                 ret.m_snapshot = this.m_snapshot.Clone();
 
                 return ret;
@@ -72,11 +75,7 @@ namespace BeamOnCL
             //     calling NewDataRecevedEventArgs.Clone().
             public void DisposeDataRecevedIfClone()
             {
-                if (m_bClone == true)
-                {
-                    m_snapshot = null;
-                    m_timeStamp = 0;
-                }
+                if (m_bClone == true) m_snapshot = null;
             }
         }
 
@@ -88,6 +87,8 @@ namespace BeamOnCL
         UInt16 m_iCameraFilter = 0;
         private string m_strSerialNumber;
         private string m_strUserDefinedName;
+        private UInt16 m_uiAverageNum = 1;
+        private Boolean m_bFastMode = false;
 
 #if WATCHDOG
         static EventWaitHandle evHardwareFailure = new AutoResetEvent(false);
@@ -120,6 +121,12 @@ namespace BeamOnCL
             }
         }
 
+        public Boolean FastMode
+        {
+            get { return m_bFastMode; }
+            set { m_bFastMode = value; }
+        }
+
         public String SerialNumber
         {
             get { return m_strSerialNumber; }
@@ -135,6 +142,21 @@ namespace BeamOnCL
             get { return m_snapshot; }
         }
 
+        public void AverageReset()
+        {
+            m_snapshot.AverageReset();
+        }
+
+        public UInt16 AverageNum
+        {
+            get { return m_uiAverageNum; }
+            set
+            {
+                m_uiAverageNum = value;
+                if (m_snapshot != null) m_snapshot.AverageNum = m_uiAverageNum;
+            }
+        }
+
         public Boolean Start(PixelFormat pixelFormat)
         {
             Boolean bRet = false;
@@ -144,10 +166,10 @@ namespace BeamOnCL
                 m_camera.CameraOpened += Configuration.AcquireContinuous;
                 try
                 {
-                    m_camera.Open(5000, TimeoutHandling.ThrowException);
+                    m_camera.Open();//(5000, TimeoutHandling.ThrowException);
 
                     if (m_camera.CameraInfo.ContainsKey(CameraInfoKey.SerialNumber)) m_strSerialNumber = m_camera.CameraInfo[CameraInfoKey.SerialNumber];
-                    m_strUserDefinedName = m_camera.Parameters[PLCamera.DeviceUserID].GetValueOrDefault("No Name"); 
+                    m_strUserDefinedName = m_camera.Parameters[PLCamera.DeviceUserID].GetValueOrDefault("No Name");
 
                     m_camera.Parameters[PLCamera.GainAuto].TrySetValue(PLCamera.GainAuto.Off);
                     m_camera.Parameters[PLCamera.ExposureAuto].TrySetValue(PLCamera.ExposureAuto.Off);
@@ -203,6 +225,8 @@ namespace BeamOnCL
             {
                 StopGrabber();
                 m_camera.Close();
+                m_camera.Dispose();
+                m_camera = null;
             }
         }
 
@@ -279,12 +303,17 @@ namespace BeamOnCL
         // Shows exceptions in a message box.
         private void ShowException(Exception exception)
         {
- //           System.Windows.Form.MessageBox.Show("Exception caught:\n" + exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //           System.Windows.Form.MessageBox.Show("Exception caught:\n" + exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         public void StartGrabber()
         {
-            if ((m_camera != null) && (m_camera.StreamGrabber.IsGrabbing == false)) m_camera.StreamGrabber.Start(GrabStrategy.LatestImages/*.OneByOne*/, GrabLoop.ProvidedByStreamGrabber);
+            if ((m_camera != null) && (m_camera.StreamGrabber.IsGrabbing == false))
+            {
+                m_camera.Parameters[PLCamera.AcquisitionMode].SetValue(PLCamera.AcquisitionMode.Continuous);
+
+                m_camera.StreamGrabber.Start(GrabStrategy.LatestImages/*.OneByOne*/, GrabLoop.ProvidedByStreamGrabber);
+            }
         }
 
         public void StopGrabber()
@@ -315,9 +344,8 @@ namespace BeamOnCL
             {
                 if (m_snapshot != null)
                 {
-                    m_snapshot.GetData(grabResult.PixelData as byte[]);
-
-                    OnNewDataReceved(this, new NewDataRecevedEventArgs(m_snapshot, grabResult.Timestamp));
+                    if (m_snapshot.GetData(grabResult.PixelData as byte[], grabResult.Timestamp) == true)
+                        OnNewDataReceved(this, new NewDataRecevedEventArgs(m_snapshot, m_bFastMode));
                 }
             }
             else
@@ -334,7 +362,19 @@ namespace BeamOnCL
 
         public Rectangle MaxImageRectangle
         {
-            get { return (m_camera != null) ? new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.WidthMax/*.SensorWidth*/].GetValue(), (int)m_camera.Parameters[PLCamera.HeightMax/*.SensorHeight*/].GetValue()) : new Rectangle(); }
+            get
+            {
+                Rectangle rect = new Rectangle(0, 0, 0, 0);
+                try
+                {
+                    if (m_camera != null) rect = new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.WidthMax/*.SensorWidth*/].GetValue(), (int)m_camera.Parameters[PLCamera.HeightMax/*.SensorHeight*/].GetValue());
+                }
+                catch
+                {
+                }
+
+                return rect;
+            }
         }
 
         public Rectangle ImageRectangle
@@ -377,9 +417,9 @@ namespace BeamOnCL
                     m_camera.Parameters[PLCamera.OffsetY].SetValue(iOffsetY);
 
                     m_rImageRectangle = new Rectangle(
-                                                        (int)m_camera.Parameters[PLCamera.OffsetX].GetValue(), 
-                                                        (int)m_camera.Parameters[PLCamera.OffsetY].GetValue(), 
-                                                        (int)m_camera.Parameters[PLCamera.Width].GetValue(), 
+                                                        (int)m_camera.Parameters[PLCamera.OffsetX].GetValue(),
+                                                        (int)m_camera.Parameters[PLCamera.OffsetY].GetValue(),
+                                                        (int)m_camera.Parameters[PLCamera.Width].GetValue(),
                                                         (int)m_camera.Parameters[PLCamera.Height].GetValue()
                                                       );
                     CreateSnapshot();
@@ -395,7 +435,7 @@ namespace BeamOnCL
             {
                 if (m_camera != null)
                 {
-                    m_camera.Parameters[PLCamera.PixelFormat].TrySetValue((value == PixelFormat.Format8bppIndexed) ? PLCamera.PixelFormat.Mono8 : PLCamera.PixelFormat.Mono12);
+                    m_camera.Parameters[PLCamera.PixelFormat].TrySetValue((value == PixelFormat.Format8bppIndexed) ? PLCamera.PixelFormat.Mono8 : PLCamera.PixelFormat.Mono12/*.Mono12p*/);
 
                     CreateSnapshot();
                 }
@@ -439,6 +479,8 @@ namespace BeamOnCL
                 m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
             else
                 m_snapshot = new Snapshot<ushort>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
+
+            m_snapshot.AverageNum = m_uiAverageNum;
         }
 
         public int MaxGain
@@ -499,8 +541,8 @@ namespace BeamOnCL
             set
             {
                 //if ((value < 4) && (m_iCameraFilter != value))
-                    if (value < 4)
-                    {
+                if (value < 4)
+                {
                     m_iCameraFilter = value;
                     if (m_camera.Parameters[PLCamera.LineSelector].IsWritable == true)
                     {
@@ -519,7 +561,7 @@ namespace BeamOnCL
                         Thread.Sleep(100);
                         for (int i = 0; i < m_iCameraFilter;/* + 1;*/ i++)
                         {
-                           m_camera.Parameters[PLCamera.UserOutputValue].SetValue(true);
+                            m_camera.Parameters[PLCamera.UserOutputValue].SetValue(true);
                             Thread.Sleep(50);
                             m_camera.Parameters[PLCamera.UserOutputValue].SetValue(false);
                             Thread.Sleep(100);

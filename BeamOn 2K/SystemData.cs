@@ -12,7 +12,7 @@ using System.Drawing.Imaging;
 using System.Xml;
 using System.Collections;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     public enum FileType { ftLog, ftExcel, ftXML };
     public enum LogType { ltTime, ltPoints, ltManual };
@@ -42,6 +42,8 @@ namespace BeamOn_2K
             public LevelsData m_ldLevels = new LevelsData();
             [DataMember(Name = "LogData")]
             public LogData m_logData = new LogData();
+            [DataMember(Name = "FastModeData")]
+            public FastModeData m_fastModeData = new FastModeData();
             [DataMember(Name = "PowerData")]
             public PowerData m_powerData = new PowerData();
             [DataMember(Name = "ApplicationData")]
@@ -83,6 +85,7 @@ namespace BeamOn_2K
                 m_positionData.InitializeComponent();
                 m_ldLevels.InitializeComponent();
                 m_logData.InitializeComponent();
+                m_fastModeData.InitializeComponent();
                 m_powerData.InitializeComponent();
                 m_applicationData.InitializeComponent();
                 m_projectionData.InitializeComponent();
@@ -308,6 +311,11 @@ namespace BeamOn_2K
             get { return m_data.m_logData; }
         }
 
+        public FastModeData fastModeData
+        {
+            get { return m_data.m_fastModeData; }
+        }
+
         private Data m_data = null;
 
         private static readonly SystemData myInstance = new SystemData();
@@ -391,6 +399,9 @@ namespace BeamOn_2K
 
         [DataMember(Name = "DataPanel")]
         public bool bViewDataPanel;
+
+        [DataMember(Name = "ControlPanel")]
+        public bool bViewControlPanel;
 
         public String m_strMyDataDir;
         public String m_strMySADataDir;
@@ -533,6 +544,30 @@ namespace BeamOn_2K
         public ApplicationData()
         {
             InitializeComponent();
+        }
+    }
+
+    [DataContract]
+    public class FastModeData
+    {
+        //File
+        [DataMember]
+        public FileType ftFile = FileType.ftLog;
+        public String strFileName;
+
+        //Data
+        [DataMember]
+        public LogType ltMode = LogType.ltTime;
+        [DataMember]
+        public UInt32 LogDuration = 5;
+        [DataMember]
+        public UInt32 LogNumPoints = 1;
+
+        //Last Time
+        public long LastMeasureTime = 0;
+
+        public void InitializeComponent()
+        {
         }
     }
 
@@ -927,7 +962,7 @@ namespace BeamOn_2K
 
         public void SetSensitivityFactor(Single fPowerCalibration, Single fPowerMeasure)
         {
-            fSensFactor *= fPowerMeasure / ((fPowerCalibration + mwOffsetPower * Math.Abs(Convert.ToInt16(bIndOffset))) * realFilterFactor * currentSAMFactor);
+            fSensFactor = fPowerMeasure / ((fPowerCalibration + mwOffsetPower * Math.Abs(Convert.ToInt16(bIndOffset))) * realFilterFactor * currentSAMFactor);
         }
 
         public void SetPointSensitivityFactor(Single fPowerCalibration, UInt16 uiNumStep)
@@ -962,7 +997,7 @@ namespace BeamOn_2K
                     fSensitivity = headData[i - 1].Sensitivity + (uiWavelenght - headData[i - 1].Wavelength) * (headData[i].Sensitivity - headData[i - 1].Sensitivity) / (headData[i].Wavelength - headData[i - 1].Wavelength);
                 }
 
-                fSensitivity *= fSensFactor;
+//                fSensitivity *= fSensFactor;
             }
         }
 
@@ -1142,11 +1177,11 @@ namespace BeamOn_2K
 
         public void InitializeComponent()
         {
-            m_ld[0].LevelBrush = new SolidBrush(Color.Red);
+            m_ld[0].LevelBrush = new SolidBrush(Color.Pink);
             m_ld[0].LevelPen = new Pen(m_ld[0].LevelBrush, 0.1f);
-            m_ld[1].LevelBrush = new SolidBrush(Color.Blue);
+            m_ld[1].LevelBrush = new SolidBrush(Color.LightBlue);
             m_ld[1].LevelPen = new Pen(m_ld[1].LevelBrush, 0.1f);
-            m_ld[2].LevelBrush = new SolidBrush(Color.Green);
+            m_ld[2].LevelBrush = new SolidBrush(Color.LightGreen);
             m_ld[2].LevelPen = new Pen(m_ld[2].LevelBrush, 0.1f);
         }
 

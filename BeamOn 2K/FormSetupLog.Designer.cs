@@ -1,4 +1,4 @@
-﻿namespace BeamOn_2K
+﻿namespace BeamOn_U3
 {
     partial class FormSetupLog
     {
@@ -56,9 +56,9 @@
             this.rbPoints = new System.Windows.Forms.RadioButton();
             this.rbTime = new System.Windows.Forms.RadioButton();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.checkedListBoxDataLog = new System.Windows.Forms.CheckedListBox();
             this.btnClearAll = new System.Windows.Forms.Button();
             this.btnSelectAll = new System.Windows.Forms.Button();
-            this.checkedListBoxDataLog = new System.Windows.Forms.CheckedListBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.gbFileName.SuspendLayout();
@@ -446,26 +446,6 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Data";
             // 
-            // btnClearAll
-            // 
-            this.btnClearAll.Location = new System.Drawing.Point(179, 324);
-            this.btnClearAll.Name = "btnClearAll";
-            this.btnClearAll.Size = new System.Drawing.Size(70, 20);
-            this.btnClearAll.TabIndex = 10;
-            this.btnClearAll.Text = "Clear All";
-            this.btnClearAll.UseVisualStyleBackColor = true;
-            this.btnClearAll.Click += new System.EventHandler(this.btnClearAll_Click);
-            // 
-            // btnSelectAll
-            // 
-            this.btnSelectAll.Location = new System.Drawing.Point(106, 324);
-            this.btnSelectAll.Name = "btnSelectAll";
-            this.btnSelectAll.Size = new System.Drawing.Size(70, 20);
-            this.btnSelectAll.TabIndex = 9;
-            this.btnSelectAll.Text = "Select All";
-            this.btnSelectAll.UseVisualStyleBackColor = true;
-            this.btnSelectAll.Click += new System.EventHandler(this.btnSelectAll_Click);
-            // 
             // checkedListBoxDataLog
             // 
             this.checkedListBoxDataLog.FormattingEnabled = true;
@@ -494,6 +474,26 @@
             this.checkedListBoxDataLog.Name = "checkedListBoxDataLog";
             this.checkedListBoxDataLog.Size = new System.Drawing.Size(236, 304);
             this.checkedListBoxDataLog.TabIndex = 11;
+            // 
+            // btnClearAll
+            // 
+            this.btnClearAll.Location = new System.Drawing.Point(179, 324);
+            this.btnClearAll.Name = "btnClearAll";
+            this.btnClearAll.Size = new System.Drawing.Size(70, 20);
+            this.btnClearAll.TabIndex = 10;
+            this.btnClearAll.Text = "Clear All";
+            this.btnClearAll.UseVisualStyleBackColor = true;
+            this.btnClearAll.Click += new System.EventHandler(this.btnClearAll_Click);
+            // 
+            // btnSelectAll
+            // 
+            this.btnSelectAll.Location = new System.Drawing.Point(106, 324);
+            this.btnSelectAll.Name = "btnSelectAll";
+            this.btnSelectAll.Size = new System.Drawing.Size(70, 20);
+            this.btnSelectAll.TabIndex = 9;
+            this.btnSelectAll.Text = "Select All";
+            this.btnSelectAll.UseVisualStyleBackColor = true;
+            this.btnSelectAll.Click += new System.EventHandler(this.btnSelectAll_Click);
             // 
             // FormSetupLog
             // 

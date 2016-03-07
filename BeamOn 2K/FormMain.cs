@@ -13,8 +13,9 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml;
+using System.Collections;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     public enum ErrorStatus
     {
@@ -32,6 +33,7 @@ namespace BeamOn_2K
         M_SS_SERVERMODE = 32,
         M_SS_STEP = 64,
         M_SS_SAVEDATA = 128,
+        M_SS_FAST_MODE = 256
     };
 
     public partial class FormMain : Form
@@ -61,11 +63,14 @@ namespace BeamOn_2K
         Font myFont = new Font("Arial", 10, FontStyle.Bold);
         Brush PaletteBrush = new SolidBrush(System.Drawing.Color.DarkGray);
         StringFormat m_strfrm = new StringFormat();
+        StringFormat m_strfrmVertical = new StringFormat(StringFormatFlags.DirectionVertical);
         Pen m_PenGrid = new Pen(System.Drawing.Color.DarkGray, 0.1f);
+        Pen m_PenLineProfile = new Pen(System.Drawing.Color.Red, 0.1f);
+        Brush CentroidSensorBrush = new SolidBrush(System.Drawing.Color.Yellow);
 
         public enum DrawOrientation { doHorizontal, doVertical };
 
-        public const UInt16 DELTA = 1;
+        public const UInt16 DELTA = 2;
         private int iLevelSelected = -1;
         private int iLevelCurrent = -1;
 
@@ -90,8 +95,9 @@ namespace BeamOn_2K
 
         SystemData m_sysData = SystemData.MyInstance;
         FileLogData m_fldLog = null;
+        FileFastModeData m_ffmddLog = null;
 
-        Byte m_SystemMessage = 0;
+        UInt16 m_SystemMessage = 0;
         Form3DProjection m_frm3D = null;
 
         Image imageWhell = null;
@@ -114,6 +120,8 @@ namespace BeamOn_2K
         public String m_strSystemTitle;
         private BeamOnCL.SnapshotBase m_snapshot = null;
         private bool m_bFreezePicture = false;
+
+        ArrayList m_arraySapshot = null;
 
         public FormMain(String strArgument)
         {
@@ -151,6 +159,14 @@ namespace BeamOn_2K
 
         void bm_OnImageReceved(object sender, BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e)
         {
+            if (e.FastMode == true)
+            {
+                if (m_ffmddLog != null) m_ffmddLog.AddData(e.Snapshot.TimeStamp);
+                if (m_arraySapshot == null) m_arraySapshot = new ArrayList();
+                m_arraySapshot.Add(e.Snapshot.Clone());
+                return;
+            }
+
             //if (InvokeRequired)
             //{
             //    // If called from a different thread, we must use the Invoke method to marshal the call to the proper GUI thread.
@@ -162,32 +178,32 @@ namespace BeamOn_2K
 
             if (m_bFreezePicture == false)
             {
-                m_snapshot = e.Snapshot.Clone();
+                    m_snapshot = e.Snapshot.Clone();
 
-                if (m_bmp != null)
-                {
-                    lock (m_lLockBMP)
+                    if (m_bmp != null)
                     {
-                        try
+                        lock (m_lLockBMP)
                         {
-                            BitmapData bmpData = m_bmp.LockBits(
-                                                                new Rectangle(new Point(0, 0), m_snapshot.ImageRectangle.Size),
-                                                                System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                                                                m_bmp.PixelFormat
-                                                                );
+                            try
+                            {
+                                BitmapData bmpData = m_bmp.LockBits(
+                                                                    new Rectangle(new Point(0, 0), m_snapshot.ImageRectangle.Size),
+                                                                    System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                                                    m_bmp.PixelFormat
+                                                                    );
 
-                            e.Snapshot.SetImageDataArray(bmpData.Scan0, m_colorArray);
+                                e.Snapshot.SetImageDataArray(bmpData.Scan0, m_colorArray);
 
-                            m_bmp.UnlockBits(bmpData);
-                        }
-                        catch { }
-                        finally
-                        {
-                            // Dispose the DataReceved result if needed for returning it to the grab loop.
-                            e.DisposeDataRecevedIfClone();
+                                m_bmp.UnlockBits(bmpData);
+                            }
+                            catch { }
+                            finally
+                            {
+                                // Dispose the DataReceved result if needed for returning it to the grab loop.
+                                e.DisposeDataRecevedIfClone();
+                            }
                         }
                     }
-                }
             }
 
             if (m_snapshot != null)
@@ -231,7 +247,7 @@ namespace BeamOn_2K
 
                     if ((m_fldLog != null) && (m_fldLog.IsOpen() == true))
                     {
-                        m_sysData.logData.LastMeasureTime = e.Timestamp;
+                        m_sysData.logData.LastMeasureTime = m_snapshot.TimeStamp;
                         m_fldLog.AddData();
                     }
 
@@ -255,21 +271,21 @@ namespace BeamOn_2K
                     }
                     else
                     {
-                        m_sysData.powerData.Power = (float)((bm.CurrentAreaPower / m_sysData.powerData.fSensitivity) / m_sysData.powerData.PowerCalibr.PowerCoeff(bm.Exposure, bm.Gain));
+                        m_sysData.powerData.Power = (float)((bm.CurrentAreaPower / m_sysData.powerData.fSensitivity) / m_sysData.powerData.fSensFactor / m_sysData.powerData.PowerCalibr.PowerCoeff(bm.Exposure, bm.Gain));
                         m_sysData.powerData.mwPower = (m_sysData.powerData.Power / m_sysData.powerData.realFilterFactor) / m_sysData.powerData.currentSAMFactor - m_sysData.powerData.mwOffsetPower * Math.Abs(Convert.ToInt16(m_sysData.powerData.bIndOffset));
                     }
                 }
             }
 
-            m_sw.Stop();
+            //m_sw.Stop();
 
             AsyncTimeStamp asyncTimeStamp = new AsyncTimeStamp(UpdateVisibleAsync);
             asyncTimeStamp.BeginInvoke(m_sw.ElapsedMilliseconds, null, null);
 
-            System.Threading.Thread.Sleep(100);
+            //System.Threading.Thread.Sleep(10);
 
-            m_sw = Stopwatch.StartNew();
-            m_sw.Start();
+            //m_sw = Stopwatch.StartNew();
+            //m_sw.Start();
             /*
                         this.Invalidate();
                         dataSplitContainer.Panel2.Invalidate();
@@ -334,7 +350,7 @@ namespace BeamOn_2K
         void pictureBoxData_MouseMove(object sender, MouseEventArgs e)
         {
             int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
-            int iHeightProfile = (int)(iHeight / 3f);
+            int iHeightProfile = (int)(iHeight / 4f);
 
             int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
             int iShiftY = 0;
@@ -412,6 +428,17 @@ namespace BeamOn_2K
             m_sysData.logData.ltMode = LogType.ltTime;
             m_sysData.logData.ftFile = FileType.ftLog;
             m_sysData.logData.strFileName = m_sysData.applicationData.m_strMyDataDir + "\\" + m_sysData.applicationData.ProductName + ".log";
+
+            //Fast Mode
+            m_sysData.fastModeData.LogDuration = 5;
+            m_sysData.fastModeData.ltMode = LogType.ltTime;
+            m_sysData.fastModeData.ftFile = FileType.ftLog;
+            m_sysData.fastModeData.strFileName = m_sysData.applicationData.m_strMyDataDir + "\\" + m_sysData.applicationData.ProductName + ".fst";
+
+            m_sysData.videoDeviceData.pixelFormat = PixelFormat.Format24bppRgb;
+            m_sysData.Measure = true;
+            m_sysData.applicationData.bViewDataPanel = true;
+            m_sysData.applicationData.bViewControlPanel = true;
         }
 
         private void SetClipLevel(int iIndex, float fValue)
@@ -425,7 +452,7 @@ namespace BeamOn_2K
 
         public void ChangeStatusLabel()
         {
-            toolStripStatuslblClip.Text = "Clip Level: " + m_sysData.ClipLevels.Level(0) + "%";
+            toolStripStatuslblClip.Text = "Clip Level: " + m_sysData.ClipLevels.Level(0).ToString("f1") + "%";
         }
 
         void pictureBoxData_MouseDown(object sender, MouseEventArgs e)
@@ -478,6 +505,7 @@ namespace BeamOn_2K
 
             if (m_sysData.Measure == true)
             {
+                //Centroid
                 Point OldPoint = new Point((int)bm.PixelCentroid.X - 20, (int)bm.PixelCentroid.Y - 20);
                 Point NewPoint = new Point((int)bm.PixelCentroid.X + 20, (int)bm.PixelCentroid.Y + 20);
 
@@ -488,6 +516,7 @@ namespace BeamOn_2K
 
                 grfx.DrawLine(m_PenCentroid, OldPoint, NewPoint);
 
+                //Sensor Center
                 OldPoint = new Point(0, pointSensorCenter.Y);
                 NewPoint = new Point(bm.ImageRectangle.Width, pointSensorCenter.Y);
 
@@ -498,14 +527,36 @@ namespace BeamOn_2K
 
                 grfx.DrawLine(m_PenSensor, OldPoint, NewPoint);
 
+                //
+                int iiHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
+
+                int iiShiftY = 0;
+                if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
+                {
+                    iiShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
+                    if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iiShiftY += 20;
+                }
+
+                int iiShiftX = 0;
+                if (imageSplitContainer.Panel2.Width < pictureBoxData.Width)
+                {
+                    iiShiftX += -imageSplitContainer.Panel2.AutoScrollPosition.X;
+                }
+
+                grfx.DrawString("0" + ((m_sysData.UnitMeasure == MeasureUnits.muMicro) ? "(µm)" : "(mrad)"), myFont, CentroidSensorBrush, new PointF(iiShiftX + 5, pointSensorCenter.Y), m_strfrm);
+                grfx.DrawString("0" + ((m_sysData.UnitMeasure == MeasureUnits.muMicro) ? "(µm)" : "(mrad)"), myFont, CentroidSensorBrush, new PointF(pointSensorCenter.X, iiHeight - iiShiftY - 20), m_strfrm);
+
+                //Ellipse
                 if (plArea != null) grfx.DrawLines(m_PenEllipse, plArea);
 
-                grfx.DrawRectangle(m_PenCentroid, bm.WorkingArea);
+                //Main ROI
+                //grfx.DrawRectangle(m_PenCentroid, bm.WorkingArea);
 
+                //Line Profile Line
                 if (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpLIne)
                 {
-                    grfx.DrawLine(m_PenGrid, bm.lineProfileHorizontalLeft, bm.lineProfileHorizontalRight);
-                    grfx.DrawLine(m_PenGrid, bm.lineProfileVerticalLeft, bm.lineProfileVerticalRight);
+                    grfx.DrawLine(m_PenLineProfile, bm.lineProfileHorizontalLeft, bm.lineProfileHorizontalRight);
+                    grfx.DrawLine(m_PenLineProfile, bm.lineProfileVerticalLeft, bm.lineProfileVerticalRight);
                 }
 
                 DrawProfile(m_profileVertical, m_PenGrid, DrawOrientation.doVertical, grfx);
@@ -548,7 +599,8 @@ namespace BeamOn_2K
             Point NewPointGaussian;
 
             int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
-            int iHeightProfile = (int)(iHeight / 3f);
+            //int iHeightProfile = (int)(iHeight / 3f);
+            int iHeightProfile = (int)(iHeight / 4f);
 
             if (dataProfile != null)
             {
@@ -584,6 +636,9 @@ namespace BeamOn_2K
                         }
                     }
 
+                    int iShiftX = imageSplitContainer.Panel2.Width - 60;
+                    if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftX += -imageSplitContainer.Panel2.AutoScrollPosition.X;
+
                     if (m_sysData.ScaleProfile == true)
                     {
                         int iLineLevel1 = iHeight - (int)(iHeightProfile * Decimal.ToSingle(m_sysData.ClipLevels.Level(0)) / 100f) - iShiftY;
@@ -596,6 +651,10 @@ namespace BeamOn_2K
                             grfx.DrawLine(m_sysData.ClipLevels.LevelPen(1), i, iLineLevel2, i + 3, iLineLevel2);
                             grfx.DrawLine(m_sysData.ClipLevels.LevelPen(2), i, iLineLevel3, i + 3, iLineLevel3);
                         }
+
+                        grfx.DrawString(m_sysData.ClipLevels.Level(0).ToString("f1") + "%", myFont, m_sysData.ClipLevels.LevelBrush(0), new PointF(iShiftX, iLineLevel1 - 15), m_strfrm);
+                        grfx.DrawString(m_sysData.ClipLevels.Level(1).ToString("f1") + "%", myFont, m_sysData.ClipLevels.LevelBrush(1), new PointF(iShiftX, iLineLevel2 - 15), m_strfrm);
+                        grfx.DrawString(m_sysData.ClipLevels.Level(2).ToString("f1") + "%", myFont, m_sysData.ClipLevels.LevelBrush(2), new PointF(iShiftX, iLineLevel3 - 15), m_strfrm);
                     }
                 }
                 else
@@ -633,6 +692,10 @@ namespace BeamOn_2K
                             grfx.DrawLine(m_sysData.ClipLevels.LevelPen(1), iLineLevel2, i, iLineLevel2, i + 3);
                             grfx.DrawLine(m_sysData.ClipLevels.LevelPen(2), iLineLevel3, i, iLineLevel3, i + 3);
                         }
+
+                        grfx.DrawString(m_sysData.ClipLevels.Level(0).ToString("f1") + "%", myFont, m_sysData.ClipLevels.LevelBrush(0), new PointF(iLineLevel1, 0), m_strfrmVertical);
+                        grfx.DrawString(m_sysData.ClipLevels.Level(1).ToString("f1") + "%", myFont, m_sysData.ClipLevels.LevelBrush(1), new PointF(iLineLevel2, 0), m_strfrmVertical);
+                        grfx.DrawString(m_sysData.ClipLevels.Level(2).ToString("f1") + "%", myFont, m_sysData.ClipLevels.LevelBrush(2), new PointF(iLineLevel3, 0), m_strfrmVertical);
                     }
                 }
             }
@@ -652,9 +715,9 @@ namespace BeamOn_2K
                     toolStripStatuslblDate.Text = DateTime.Now.ToString();
                     toolStripStatuslblWave.Text = "Wavelength: " + m_sysData.powerData.uiWavelenght + "nm";
                     toolStripStatuslblFilter.Text = "Filter: " + m_strFilterName[m_sysData.powerData.currentFilter];
-                    toolStripStatuslblClip.Text = "Clip Level: " + m_sysData.ClipLevels.Level(0).ToString() + "%";
+                    toolStripStatuslblClip.Text = "Clip Level: " + m_sysData.ClipLevels.Level(0).ToString("f1") + "%";
                     toolStripStatuslblAverage.Text = "Average: " + ((m_sysData.AverageOn == true) ? m_sysData.Average.ToString() : "Off");
-
+                    toolStripStatusLabelTypeProfile.Text = (m_sysData.ProfileType == BeamOnCL.BeamOnCL.TypeProfile.tpSum) ? "Sum" : "Line " + ((m_sysData.LineProfileType == BeamOnCL.BeamOnCL.TypeLineProfile.tpLineCentroid) ? "Centroid" : "Free");
                 });
             }
             catch
@@ -773,8 +836,6 @@ namespace BeamOn_2K
 
                 bm.LineProfileType = m_sysData.LineProfileType;
 
-                toolStripStatusLabelTypeProfile.Text = (sumProfileToolStripMenuItem.Checked) ? "Sum" : "Line";
-
                 bm.Binning = m_sysData.videoDeviceData.uiBinning;
 
                 if (bm.Binning == m_sysData.videoDeviceData.uiBinning)
@@ -814,15 +875,22 @@ namespace BeamOn_2K
                 gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
                 powerGroupBox.Enabled = m_sysData.Measure;
 
-                dataSplitContainer.Panel1Collapsed = !propertyBoxToolStripMenuItem.Checked;
-
                 pointSensorCenter = new Point((int)(bm.MaxImageRectangle.Width / 2) - bm.ImageRectangle.X, (int)(bm.MaxImageRectangle.Height / 2) - (int)bm.ImageRectangle.Y);
 
                 dataPanelToolStripMenuItem.Checked = m_sysData.applicationData.bViewDataPanel;
                 dataViewToolStripButton.Checked = dataPanelToolStripMenuItem.Checked;
 
+                if (m_sysData.applicationData.bViewDataPanel)
+                {
+                    dataSplitContainer.Panel1Collapsed = !m_sysData.applicationData.bViewControlPanel;
+                    dataSplitContainer.SplitterDistance = dataSplitContainer.Panel1MinSize;
+                    propertyBoxToolStripMenuItem.Checked = !dataSplitContainer.Panel1Collapsed;
+                }
+
                 mainSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
                 propertyBoxToolStripMenuItem.Enabled = m_sysData.applicationData.bViewDataPanel;
+
+                dataSplitContainer.Panel1Collapsed = !propertyBoxToolStripMenuItem.Checked;
 
                 mnuOptionsSaveSettingsOnExit.Checked = m_sysData.applicationData.bSaveExit;
                 ViewToolStrip(m_sysData.applicationData.bViewToolbar);
@@ -903,7 +971,6 @@ namespace BeamOn_2K
             m_sysData.ProfileType = (sumProfileToolStripMenuItem.Checked == true) ? BeamOnCL.BeamOnCL.TypeProfile.tpSum : BeamOnCL.BeamOnCL.TypeProfile.tpLIne;
             bm.typeProfile = m_sysData.ProfileType;
 
-            toolStripStatusLabelTypeProfile.Text = (bm.typeProfile == BeamOnCL.BeamOnCL.TypeProfile.tpSum) ? "Sum" : "Line";
             AngleLineProfileToolStripLabel.Enabled = lineProfileToolStripButton.Checked;
             numericUpDownAngle.Enabled = lineProfileToolStripButton.Checked;
 
@@ -1160,7 +1227,7 @@ namespace BeamOn_2K
             using (Graphics g = Graphics.FromImage(MyImage))
                 g.CopyFromScreen(new Point(scrR.Left, scrR.Top), Point.Empty, new Size(scrR.Width, scrR.Height));
 
-            //m_SystemMessage |= (Byte)SystemStatus.M_SS_SAVEDATA;
+            //m_SystemMessage |= (UInt16)SystemStatus.M_SS_SAVEDATA;
 
             return MyImage;
         }
@@ -1364,6 +1431,11 @@ namespace BeamOn_2K
             mnuFileSetupDataCollection.Enabled = measuringToolStripMenuItem.Checked;
             tbOptionsStartDataCollection.Checked = measuringToolStripMenuItem.Checked;
             mnuFileStartDataCollection.Checked = measuringToolStripMenuItem.Checked;
+
+            mnuFileSetupRunningMode.Enabled = measuringToolStripMenuItem.Checked;
+            runningSetupToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
+            runningToolStripButton.Checked = measuringToolStripMenuItem.Checked;
+            mnuFileStartRunningMode.Checked = measuringToolStripMenuItem.Checked;
         }
 
         private void measuringToolStrip_CheckedChanged(object sender, EventArgs e)
@@ -1415,7 +1487,7 @@ namespace BeamOn_2K
                 m_fldLog.OnStopLogFile += new FileLogData.StopLogFile(m_fldLog_OnStopLogFile);
                 m_fldLog.CreateHeader();
 
-                m_SystemMessage |= (Byte)SystemStatus.M_SS_LOG;
+                m_SystemMessage |= (UInt16)SystemStatus.M_SS_LOG;
             }
             else
             {
@@ -1428,7 +1500,7 @@ namespace BeamOn_2K
 
                 m_fldLog = null;
 
-                m_SystemMessage = (Byte)(m_SystemMessage & (~(int)SystemStatus.M_SS_LOG));
+                m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_LOG));
             }
 
             m_sysData.logData.bStart = bEnable;
@@ -1464,7 +1536,7 @@ namespace BeamOn_2K
                     this.mnuFileSetupDataCollection.Enabled = !this.mnuFileStartDataCollection.Checked;
                     this.tbOptionsSetupDataCollection.Enabled = this.mnuFileSetupDataCollection.Enabled;
 
-                    m_SystemMessage = (Byte)(m_SystemMessage & (~(int)SystemStatus.M_SS_LOG));
+                    m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_LOG));
 
                     AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
                     asyncSM.BeginInvoke(null, null);
@@ -1596,6 +1668,8 @@ namespace BeamOn_2K
                 gaussGroupBox.Enabled = m_sysData.Measure && m_sysData.ViewGaussian;
                 gaussGroupBox.Visible = m_sysData.ViewGaussian;
 
+                bm.AverageNum = (m_sysData.AverageOn == true) ? m_sysData.Average : (UInt16)1;
+
                 UpdateViewUnits();
             }
         }
@@ -1710,7 +1784,9 @@ namespace BeamOn_2K
 
         private void buttonProperty_Click(object sender, EventArgs e)
         {
-            dataSplitContainer.Panel1Collapsed = !dataSplitContainer.Panel1Collapsed;
+            m_sysData.applicationData.bViewControlPanel = !m_sysData.applicationData.bViewControlPanel;
+
+            dataSplitContainer.Panel1Collapsed = !m_sysData.applicationData.bViewControlPanel;
             dataSplitContainer.SplitterDistance = dataSplitContainer.Panel1MinSize;
             propertyBoxToolStripMenuItem.Checked = !dataSplitContainer.Panel1Collapsed;
         }
@@ -1745,7 +1821,7 @@ namespace BeamOn_2K
 
             this.Text = m_strSystemTitle;
 
-            this.Text += " " + bm.UserDefinedName;
+            //this.Text += " " + bm.UserDefinedName;
             //if (m_sysData.linkData.Status == LinkStatus.lsClientMode)
             //    this.Text += " (Client Mode)";
 
@@ -1974,7 +2050,7 @@ namespace BeamOn_2K
 
         void m_tUpdateSnapshot_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (m_sysData.SnapshotView == true) bm_OnImageReceved(sender, new BeamOnCL.MeasureCamera.NewDataRecevedEventArgs(m_snapshot, 0));
+            if (m_sysData.SnapshotView == true) bm_OnImageReceved(sender, new BeamOnCL.MeasureCamera.NewDataRecevedEventArgs(m_snapshot, false));
         }
 
         void StopSnapshot()
@@ -1983,7 +2059,7 @@ namespace BeamOn_2K
 
             if (m_tUpdateSnapshot != null) m_tUpdateSnapshot.Stop();
 
-            m_SystemMessage = (Byte)(m_SystemMessage & (~(int)SystemStatus.M_SS_SNAPSHOT));
+            m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_SNAPSHOT));
 
             AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
             asyncSM.BeginInvoke(null, null);
@@ -2015,7 +2091,7 @@ namespace BeamOn_2K
                 if (m_tUpdateSnapshot == null) StartUpdateSnapshotTimer();
                 m_tUpdateSnapshot.Start();
 
-                m_SystemMessage |= (Byte)SystemStatus.M_SS_SNAPSHOT;
+                m_SystemMessage |= (UInt16)SystemStatus.M_SS_SNAPSHOT;
 
                 AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
                 asyncSM.BeginInvoke(null, null);
@@ -2177,6 +2253,141 @@ namespace BeamOn_2K
         private void freezeToolStripButton_Click(object sender, EventArgs e)
         {
             m_bFreezePicture = freezeToolStripButton.Checked;
+        }
+
+        private void imageSplitContainer_Panel2_Scroll(object sender, ScrollEventArgs e)
+        {
+            pictureBoxData.Invalidate();
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            pictureBoxData.Invalidate();
+            base.OnMouseWheel(e);
+        }
+
+        private void runningToolStripButton_Click(object sender, EventArgs e)
+        {
+            if ((m_sysData.fastModeData.strFileName == null) || (m_sysData.fastModeData.strFileName.Equals("") == true))
+            {
+                CustomMessageBox.Show("Not specified the name and path for the Fast Mode data file.",
+                                                        "Save Fast Mode data File",
+                                                        MessageBoxButtons.OK,
+                                                        MessageBoxIcon.Error);
+                return;
+            }
+
+            FileInfo fi = new FileInfo(m_sysData.fastModeData.strFileName);
+
+            if (sender.ToString().Contains("Start") == true)
+            {
+                if (File.Exists(m_sysData.fastModeData.strFileName))
+                {
+                    if (CustomMessageBox.Show("This file '" + fi.Name + "' already exists. \nDo you want to replace it?",
+                                        "Save Fast Mode data File",
+                                        MessageBoxButtons.YesNo,
+                                        MessageBoxIcon.Question) == DialogResult.No)
+                        return;
+                    else
+                        File.Delete(m_sysData.fastModeData.strFileName);
+                }
+
+            }
+
+            EnableFastModeData(sender.ToString().Contains("Start"));
+       }
+
+        private void EnableFastModeData(Boolean bEnable)
+        {
+            bm.FastMode = bEnable;
+
+            if (bm.FastMode == true)
+            {
+                mnuFileStartRunningMode.Checked = true;
+//                mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Hand;
+                mnuFileStartRunningMode.Text = "Stop &Running Mode";
+                mnuFileStartRunningMode.ToolTipText = "Stop Running Mode";
+                runningToolStripButton.Text = "Stop Running";
+
+                m_ffmddLog = new FileFastModeData();
+                m_ffmddLog.OnStopFastMode += new FileFastModeData.StopFastMode(m_ffmddLog_OnStopFastMode);
+
+                m_arraySapshot = null;
+
+                m_SystemMessage |= (UInt16)SystemStatus.M_SS_FAST_MODE;
+            }
+            else
+            {
+                mnuFileStartRunningMode.Checked = false;
+//                mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Start;
+                mnuFileStartRunningMode.Text = "Start &Running Mode";
+                mnuFileStartRunningMode.ToolTipText = "Start Running Mode";
+                runningToolStripButton.Text = "Start Running";
+
+                m_ffmddLog.CreateFastModeDataFile();
+
+                m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_FAST_MODE));
+            }
+
+            AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
+            asyncSM.BeginInvoke(null, null);
+
+            runningToolStripButton.ToolTipText = mnuFileStartRunningMode.ToolTipText;
+//            runningToolStripButton.Image = mnuFileStartRunningMode.Image;
+            runningToolStripButton.Checked = mnuFileStartRunningMode.Checked;
+
+
+            mnuFileSetupDataCollection.Enabled = !mnuFileStartRunningMode.Checked;
+            runningToolStripButton.Enabled = mnuFileStartRunningMode.Enabled;
+        }
+
+        private void CloseFastModeData()
+        {
+            try
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    bm.FastMode = false;
+
+                    this.mnuFileStartRunningMode.Checked = false;
+//                    this.mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Start;
+                    this.mnuFileStartRunningMode.Text = "Start &Running Mode";
+                    this.mnuFileStartRunningMode.ToolTipText = "Start Running Mode";
+
+                    this.runningToolStripButton.ToolTipText = this.mnuFileStartRunningMode.ToolTipText;
+                    //this.runningToolStripButton.Image = this.mnuFileStartRunningMode.Image;
+                    this.runningToolStripButton.Text = "Start Running";
+                    this.runningToolStripButton.Checked = this.mnuFileStartRunningMode.Checked;
+
+                    this.mnuFileSetupRunningMode.Enabled = !this.mnuFileStartRunningMode.Checked;
+                    this.runningSetupToolStripButton.Enabled = this.mnuFileSetupRunningMode.Enabled;
+
+                    m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_FAST_MODE));
+
+                    AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
+                    asyncSM.BeginInvoke(null, null);
+                });
+            }
+            catch
+            {
+            }
+        }
+
+        void m_ffmddLog_OnStopFastMode(object sender, EventArgs e)
+        {
+            CloseLogAsyncDelegate asyncCloseLog = new CloseLogAsyncDelegate(CloseFastModeData);
+            asyncCloseLog.BeginInvoke(null, null);
+        }
+
+        private void runningSetupToolStripItem_Click(object sender, EventArgs e)
+        {
+            FormSetupFastMode formSetupFastMode = new FormSetupFastMode();
+
+            if (formSetupFastMode.ShowDialog() == DialogResult.OK)
+            {
+                mnuFileStartRunningMode.Enabled = true;
+                runningToolStripButton.Enabled = mnuFileStartRunningMode.Enabled;
+            }
         }
     }
 }

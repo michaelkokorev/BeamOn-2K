@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     public partial class FormPowerCalibration : Form
     {
@@ -61,7 +61,11 @@ namespace BeamOn_2K
 
         private void textBoxPowerValue_TextChanged(object sender, EventArgs e)
         {
-            buttonOk.Enabled = (Convert.ToSingle(textBoxPowerValue.Text) != 0);
+            try
+            {
+                buttonOk.Enabled = (Convert.ToSingle(textBoxPowerValue.Text) != 0);
+            }
+            catch { }
         }
 
         private void buttonOk_Click(object sender, EventArgs e)

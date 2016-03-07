@@ -1,4 +1,4 @@
-﻿namespace BeamOn_2K
+﻿namespace BeamOn_U3
 {
     partial class Form3DProjection
     {
@@ -86,9 +86,10 @@
             this.splitContainer3D.Panel2.Controls.Add(this.gbTilt);
             this.splitContainer3D.Panel2.Controls.Add(this.gbRotation);
             this.splitContainer3D.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer3D_Panel2_Paint);
+            this.splitContainer3D.Panel2Collapsed = true;
             this.splitContainer3D.Panel2MinSize = 165;
             this.splitContainer3D.Size = new System.Drawing.Size(605, 422);
-            this.splitContainer3D.SplitterDistance = 422;
+            this.splitContainer3D.SplitterDistance = 424;
             this.splitContainer3D.SplitterWidth = 2;
             this.splitContainer3D.TabIndex = 1;
             // 
@@ -100,7 +101,7 @@
             this.buttonProperty.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonProperty.Image = global::BeamOn_U3.Properties.Resources.PropertyS11;
             this.buttonProperty.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.buttonProperty.Location = new System.Drawing.Point(387, 0);
+            this.buttonProperty.Location = new System.Drawing.Point(570, 0);
             this.buttonProperty.Name = "buttonProperty";
             this.buttonProperty.Size = new System.Drawing.Size(33, 88);
             this.buttonProperty.TabIndex = 3;
@@ -128,7 +129,7 @@
             this.image3D.Projection = OpenGLControl.TypeProjection.NoneProjection;
             this.image3D.Resolution = OpenGLControl.TypeGrid.Low;
             this.image3D.SensorCenterPosition = new System.Drawing.Point(0, 0);
-            this.image3D.Size = new System.Drawing.Size(420, 420);
+            this.image3D.Size = new System.Drawing.Size(603, 420);
             this.image3D.StepAutoRotateX = 5F;
             this.image3D.StepAutoRotateY = 5F;
             this.image3D.StepAutoRotateZ = 5F;
@@ -348,9 +349,13 @@
             this.ClientSize = new System.Drawing.Size(605, 422);
             this.Controls.Add(this.splitContainer3D);
             this.DoubleBuffered = true;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
+            this.HelpButton = true;
+            this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(600, 420);
             this.Name = "Form3DProjection";
+            this.ShowIcon = false;
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "3D Projection";
             this.Load += new System.EventHandler(this.Form3DProjection_Load);
             this.splitContainer3D.Panel1.ResumeLayout(false);

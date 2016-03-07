@@ -63,6 +63,16 @@ namespace BeamOn_U3.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Animals_Running_Rabbit_icon {
+            get {
+                object obj = ResourceManager.GetObject("Animals-Running-Rabbit-icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap black_12bit_mode {
             get {
                 object obj = ResourceManager.GetObject("black_12bit_mode", resourceCulture);
@@ -236,6 +246,26 @@ namespace BeamOn_U3.Properties {
         internal static System.Drawing.Bitmap PropertyS11 {
             get {
                 object obj = ResourceManager.GetObject("PropertyS11", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Setting_Running_Rabbit_icon {
+            get {
+                object obj = ResourceManager.GetObject("Setting-Running-Rabbit-icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Setting_Running_Rabbit_icon1 {
+            get {
+                object obj = ResourceManager.GetObject("Setting-Running-Rabbit-icon1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
 
-namespace BeamOn_2K
+namespace BeamOn_U3
 {
     public class MyToolStripLabel : System.Windows.Forms.ToolStripLabel
     {
@@ -249,6 +249,12 @@ namespace BeamOn_2K
                 {
                     if (strText != "") strText += "&& ";
                     strText += "Saving Data ";
+                }
+
+                if ((m_esSystemMessage & (UInt16)(SystemStatus.M_SS_FAST_MODE)) > 0)
+                {
+                    if (strText != "") strText += "&& ";
+                    strText += "Running Mode ";
                 }
 
                 strText += "in progress";

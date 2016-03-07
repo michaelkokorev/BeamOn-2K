@@ -1,4 +1,4 @@
-﻿namespace BeamOn_2K
+﻿namespace BeamOn_U3
 {
     partial class FormWellcome
     {

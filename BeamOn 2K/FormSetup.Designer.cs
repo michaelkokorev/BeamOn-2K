@@ -1,4 +1,4 @@
-﻿namespace BeamOn_2K
+﻿namespace BeamOn_U3
 {
     partial class FormSetup
     {
@@ -32,6 +32,22 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.gbVew = new System.Windows.Forms.GroupBox();
+            this.checkGaussian = new System.Windows.Forms.CheckBox();
+            this.checkAutoscale = new System.Windows.Forms.CheckBox();
+            this.gbClipLevels = new System.Windows.Forms.GroupBox();
+            this.lblLevel0 = new System.Windows.Forms.Label();
+            this.lblLevel1 = new System.Windows.Forms.Label();
+            this.lblLevel2 = new System.Windows.Forms.Label();
+            this.Level0UpDown = new System.Windows.Forms.NumericUpDown();
+            this.Level1UpDown = new System.Windows.Forms.NumericUpDown();
+            this.Level2UpDown = new System.Windows.Forms.NumericUpDown();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.rbUnitskW = new System.Windows.Forms.RadioButton();
+            this.rbUnitsW = new System.Windows.Forms.RadioButton();
+            this.rbUnitsdB = new System.Windows.Forms.RadioButton();
+            this.rbUnitsuW = new System.Windows.Forms.RadioButton();
+            this.rbUnitsmW = new System.Windows.Forms.RadioButton();
             this.groupBoxPixelFormat = new System.Windows.Forms.GroupBox();
             this.radioButton8bpp = new System.Windows.Forms.RadioButton();
             this.radioButton12bpp = new System.Windows.Forms.RadioButton();
@@ -103,24 +119,14 @@
             this.MinUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.lblName1 = new System.Windows.Forms.Label();
             this.checkName1 = new System.Windows.Forms.CheckBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.rbUnitskW = new System.Windows.Forms.RadioButton();
-            this.rbUnitsW = new System.Windows.Forms.RadioButton();
-            this.rbUnitsdB = new System.Windows.Forms.RadioButton();
-            this.rbUnitsuW = new System.Windows.Forms.RadioButton();
-            this.rbUnitsmW = new System.Windows.Forms.RadioButton();
-            this.gbClipLevels = new System.Windows.Forms.GroupBox();
-            this.lblLevel0 = new System.Windows.Forms.Label();
-            this.lblLevel1 = new System.Windows.Forms.Label();
-            this.lblLevel2 = new System.Windows.Forms.Label();
-            this.Level0UpDown = new System.Windows.Forms.NumericUpDown();
-            this.Level1UpDown = new System.Windows.Forms.NumericUpDown();
-            this.Level2UpDown = new System.Windows.Forms.NumericUpDown();
-            this.gbVew = new System.Windows.Forms.GroupBox();
-            this.checkGaussian = new System.Windows.Forms.CheckBox();
-            this.checkAutoscale = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.gbVew.SuspendLayout();
+            this.gbClipLevels.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Level0UpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Level1UpDown)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Level2UpDown)).BeginInit();
+            this.groupBox1.SuspendLayout();
             this.groupBoxPixelFormat.SuspendLayout();
             this.groupBoxBinning.SuspendLayout();
             this.gbFlip.SuspendLayout();
@@ -151,12 +157,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MaxUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown1)).BeginInit();
-            this.groupBox1.SuspendLayout();
-            this.gbClipLevels.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Level0UpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Level1UpDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Level2UpDown)).BeginInit();
-            this.gbVew.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnOK
@@ -211,6 +211,190 @@
             this.tabPage1.Size = new System.Drawing.Size(396, 306);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Settings";
+            // 
+            // gbVew
+            // 
+            this.gbVew.Controls.Add(this.checkGaussian);
+            this.gbVew.Controls.Add(this.checkAutoscale);
+            this.gbVew.Location = new System.Drawing.Point(250, 193);
+            this.gbVew.Name = "gbVew";
+            this.gbVew.Size = new System.Drawing.Size(142, 106);
+            this.gbVew.TabIndex = 17;
+            this.gbVew.TabStop = false;
+            this.gbVew.Text = "Profile View";
+            // 
+            // checkGaussian
+            // 
+            this.checkGaussian.AutoSize = true;
+            this.checkGaussian.Location = new System.Drawing.Point(30, 60);
+            this.checkGaussian.Name = "checkGaussian";
+            this.checkGaussian.Size = new System.Drawing.Size(70, 17);
+            this.checkGaussian.TabIndex = 3;
+            this.checkGaussian.Text = "Gaussian";
+            this.checkGaussian.UseVisualStyleBackColor = true;
+            // 
+            // checkAutoscale
+            // 
+            this.checkAutoscale.AutoSize = true;
+            this.checkAutoscale.Location = new System.Drawing.Point(30, 27);
+            this.checkAutoscale.Name = "checkAutoscale";
+            this.checkAutoscale.Size = new System.Drawing.Size(75, 17);
+            this.checkAutoscale.TabIndex = 0;
+            this.checkAutoscale.Text = "AutoScale";
+            this.checkAutoscale.UseVisualStyleBackColor = true;
+            // 
+            // gbClipLevels
+            // 
+            this.gbClipLevels.Controls.Add(this.lblLevel0);
+            this.gbClipLevels.Controls.Add(this.lblLevel1);
+            this.gbClipLevels.Controls.Add(this.lblLevel2);
+            this.gbClipLevels.Controls.Add(this.Level0UpDown);
+            this.gbClipLevels.Controls.Add(this.Level1UpDown);
+            this.gbClipLevels.Controls.Add(this.Level2UpDown);
+            this.gbClipLevels.Location = new System.Drawing.Point(108, 190);
+            this.gbClipLevels.Name = "gbClipLevels";
+            this.gbClipLevels.Size = new System.Drawing.Size(136, 109);
+            this.gbClipLevels.TabIndex = 16;
+            this.gbClipLevels.TabStop = false;
+            this.gbClipLevels.Text = "Profile Clip Levels (%)";
+            // 
+            // lblLevel0
+            // 
+            this.lblLevel0.AutoSize = true;
+            this.lblLevel0.Location = new System.Drawing.Point(29, 30);
+            this.lblLevel0.Name = "lblLevel0";
+            this.lblLevel0.Size = new System.Drawing.Size(10, 13);
+            this.lblLevel0.TabIndex = 5;
+            this.lblLevel0.Text = "I";
+            // 
+            // lblLevel1
+            // 
+            this.lblLevel1.AutoSize = true;
+            this.lblLevel1.Location = new System.Drawing.Point(28, 57);
+            this.lblLevel1.Name = "lblLevel1";
+            this.lblLevel1.Size = new System.Drawing.Size(13, 13);
+            this.lblLevel1.TabIndex = 4;
+            this.lblLevel1.Text = "II";
+            // 
+            // lblLevel2
+            // 
+            this.lblLevel2.AutoSize = true;
+            this.lblLevel2.Location = new System.Drawing.Point(27, 83);
+            this.lblLevel2.Name = "lblLevel2";
+            this.lblLevel2.Size = new System.Drawing.Size(16, 13);
+            this.lblLevel2.TabIndex = 3;
+            this.lblLevel2.Text = "III";
+            // 
+            // Level0UpDown
+            // 
+            this.Level0UpDown.DecimalPlaces = 1;
+            this.Level0UpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.Level0UpDown.Location = new System.Drawing.Point(57, 27);
+            this.Level0UpDown.Name = "Level0UpDown";
+            this.Level0UpDown.Size = new System.Drawing.Size(63, 20);
+            this.Level0UpDown.TabIndex = 2;
+            this.Level0UpDown.ValueChanged += new System.EventHandler(this.Level0UpDown_ValueChanged);
+            // 
+            // Level1UpDown
+            // 
+            this.Level1UpDown.DecimalPlaces = 1;
+            this.Level1UpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.Level1UpDown.Location = new System.Drawing.Point(57, 53);
+            this.Level1UpDown.Name = "Level1UpDown";
+            this.Level1UpDown.Size = new System.Drawing.Size(63, 20);
+            this.Level1UpDown.TabIndex = 1;
+            this.Level1UpDown.ValueChanged += new System.EventHandler(this.Level1UpDown_ValueChanged);
+            // 
+            // Level2UpDown
+            // 
+            this.Level2UpDown.DecimalPlaces = 1;
+            this.Level2UpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.Level2UpDown.Location = new System.Drawing.Point(57, 79);
+            this.Level2UpDown.Name = "Level2UpDown";
+            this.Level2UpDown.Size = new System.Drawing.Size(63, 20);
+            this.Level2UpDown.TabIndex = 0;
+            this.Level2UpDown.ValueChanged += new System.EventHandler(this.Level2UpDown_ValueChanged);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.rbUnitskW);
+            this.groupBox1.Controls.Add(this.rbUnitsW);
+            this.groupBox1.Controls.Add(this.rbUnitsdB);
+            this.groupBox1.Controls.Add(this.rbUnitsuW);
+            this.groupBox1.Controls.Add(this.rbUnitsmW);
+            this.groupBox1.Location = new System.Drawing.Point(3, 118);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(99, 181);
+            this.groupBox1.TabIndex = 15;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Power Units";
+            // 
+            // rbUnitskW
+            // 
+            this.rbUnitskW.AutoSize = true;
+            this.rbUnitskW.Location = new System.Drawing.Point(30, 37);
+            this.rbUnitskW.Name = "rbUnitskW";
+            this.rbUnitskW.Size = new System.Drawing.Size(42, 17);
+            this.rbUnitskW.TabIndex = 4;
+            this.rbUnitskW.TabStop = true;
+            this.rbUnitskW.Text = "kW";
+            this.rbUnitskW.UseVisualStyleBackColor = true;
+            // 
+            // rbUnitsW
+            // 
+            this.rbUnitsW.AutoSize = true;
+            this.rbUnitsW.Location = new System.Drawing.Point(30, 62);
+            this.rbUnitsW.Name = "rbUnitsW";
+            this.rbUnitsW.Size = new System.Drawing.Size(36, 17);
+            this.rbUnitsW.TabIndex = 3;
+            this.rbUnitsW.TabStop = true;
+            this.rbUnitsW.Text = "W";
+            this.rbUnitsW.UseVisualStyleBackColor = true;
+            // 
+            // rbUnitsdB
+            // 
+            this.rbUnitsdB.AutoSize = true;
+            this.rbUnitsdB.Location = new System.Drawing.Point(30, 137);
+            this.rbUnitsdB.Name = "rbUnitsdB";
+            this.rbUnitsdB.Size = new System.Drawing.Size(46, 17);
+            this.rbUnitsdB.TabIndex = 2;
+            this.rbUnitsdB.TabStop = true;
+            this.rbUnitsdB.Text = "dBm";
+            this.rbUnitsdB.UseVisualStyleBackColor = true;
+            // 
+            // rbUnitsuW
+            // 
+            this.rbUnitsuW.AutoSize = true;
+            this.rbUnitsuW.Location = new System.Drawing.Point(30, 112);
+            this.rbUnitsuW.Name = "rbUnitsuW";
+            this.rbUnitsuW.Size = new System.Drawing.Size(42, 17);
+            this.rbUnitsuW.TabIndex = 1;
+            this.rbUnitsuW.TabStop = true;
+            this.rbUnitsuW.Text = "µW";
+            this.rbUnitsuW.UseVisualStyleBackColor = true;
+            // 
+            // rbUnitsmW
+            // 
+            this.rbUnitsmW.AutoSize = true;
+            this.rbUnitsmW.Location = new System.Drawing.Point(30, 87);
+            this.rbUnitsmW.Name = "rbUnitsmW";
+            this.rbUnitsmW.Size = new System.Drawing.Size(44, 17);
+            this.rbUnitsmW.TabIndex = 0;
+            this.rbUnitsmW.TabStop = true;
+            this.rbUnitsmW.Text = "mW";
+            this.rbUnitsmW.UseVisualStyleBackColor = true;
             // 
             // groupBoxPixelFormat
             // 
@@ -514,6 +698,7 @@
             this.checkAverage.TabIndex = 1;
             this.checkAverage.Text = "On/Off";
             this.checkAverage.UseVisualStyleBackColor = true;
+            this.checkAverage.Click += new System.EventHandler(this.checkAverage_Click);
             // 
             // AverageUpDown
             // 
@@ -619,7 +804,7 @@
             this.tabPage6.Location = new System.Drawing.Point(4, 22);
             this.tabPage6.Name = "tabPage6";
             this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage6.Size = new System.Drawing.Size(398, 344);
+            this.tabPage6.Size = new System.Drawing.Size(396, 306);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "Test";
             // 
@@ -1076,190 +1261,6 @@
             this.checkName1.Text = "Power";
             this.checkName1.UseVisualStyleBackColor = true;
             // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.rbUnitskW);
-            this.groupBox1.Controls.Add(this.rbUnitsW);
-            this.groupBox1.Controls.Add(this.rbUnitsdB);
-            this.groupBox1.Controls.Add(this.rbUnitsuW);
-            this.groupBox1.Controls.Add(this.rbUnitsmW);
-            this.groupBox1.Location = new System.Drawing.Point(3, 118);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(99, 181);
-            this.groupBox1.TabIndex = 15;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Power Units";
-            // 
-            // rbUnitskW
-            // 
-            this.rbUnitskW.AutoSize = true;
-            this.rbUnitskW.Location = new System.Drawing.Point(30, 37);
-            this.rbUnitskW.Name = "rbUnitskW";
-            this.rbUnitskW.Size = new System.Drawing.Size(42, 17);
-            this.rbUnitskW.TabIndex = 4;
-            this.rbUnitskW.TabStop = true;
-            this.rbUnitskW.Text = "kW";
-            this.rbUnitskW.UseVisualStyleBackColor = true;
-            // 
-            // rbUnitsW
-            // 
-            this.rbUnitsW.AutoSize = true;
-            this.rbUnitsW.Location = new System.Drawing.Point(30, 62);
-            this.rbUnitsW.Name = "rbUnitsW";
-            this.rbUnitsW.Size = new System.Drawing.Size(36, 17);
-            this.rbUnitsW.TabIndex = 3;
-            this.rbUnitsW.TabStop = true;
-            this.rbUnitsW.Text = "W";
-            this.rbUnitsW.UseVisualStyleBackColor = true;
-            // 
-            // rbUnitsdB
-            // 
-            this.rbUnitsdB.AutoSize = true;
-            this.rbUnitsdB.Location = new System.Drawing.Point(30, 137);
-            this.rbUnitsdB.Name = "rbUnitsdB";
-            this.rbUnitsdB.Size = new System.Drawing.Size(46, 17);
-            this.rbUnitsdB.TabIndex = 2;
-            this.rbUnitsdB.TabStop = true;
-            this.rbUnitsdB.Text = "dBm";
-            this.rbUnitsdB.UseVisualStyleBackColor = true;
-            // 
-            // rbUnitsuW
-            // 
-            this.rbUnitsuW.AutoSize = true;
-            this.rbUnitsuW.Location = new System.Drawing.Point(30, 112);
-            this.rbUnitsuW.Name = "rbUnitsuW";
-            this.rbUnitsuW.Size = new System.Drawing.Size(42, 17);
-            this.rbUnitsuW.TabIndex = 1;
-            this.rbUnitsuW.TabStop = true;
-            this.rbUnitsuW.Text = "µW";
-            this.rbUnitsuW.UseVisualStyleBackColor = true;
-            // 
-            // rbUnitsmW
-            // 
-            this.rbUnitsmW.AutoSize = true;
-            this.rbUnitsmW.Location = new System.Drawing.Point(30, 87);
-            this.rbUnitsmW.Name = "rbUnitsmW";
-            this.rbUnitsmW.Size = new System.Drawing.Size(44, 17);
-            this.rbUnitsmW.TabIndex = 0;
-            this.rbUnitsmW.TabStop = true;
-            this.rbUnitsmW.Text = "mW";
-            this.rbUnitsmW.UseVisualStyleBackColor = true;
-            // 
-            // gbClipLevels
-            // 
-            this.gbClipLevels.Controls.Add(this.lblLevel0);
-            this.gbClipLevels.Controls.Add(this.lblLevel1);
-            this.gbClipLevels.Controls.Add(this.lblLevel2);
-            this.gbClipLevels.Controls.Add(this.Level0UpDown);
-            this.gbClipLevels.Controls.Add(this.Level1UpDown);
-            this.gbClipLevels.Controls.Add(this.Level2UpDown);
-            this.gbClipLevels.Location = new System.Drawing.Point(108, 190);
-            this.gbClipLevels.Name = "gbClipLevels";
-            this.gbClipLevels.Size = new System.Drawing.Size(136, 109);
-            this.gbClipLevels.TabIndex = 16;
-            this.gbClipLevels.TabStop = false;
-            this.gbClipLevels.Text = "Profile Clip Levels (%)";
-            // 
-            // lblLevel0
-            // 
-            this.lblLevel0.AutoSize = true;
-            this.lblLevel0.Location = new System.Drawing.Point(29, 30);
-            this.lblLevel0.Name = "lblLevel0";
-            this.lblLevel0.Size = new System.Drawing.Size(10, 13);
-            this.lblLevel0.TabIndex = 5;
-            this.lblLevel0.Text = "I";
-            // 
-            // lblLevel1
-            // 
-            this.lblLevel1.AutoSize = true;
-            this.lblLevel1.Location = new System.Drawing.Point(28, 57);
-            this.lblLevel1.Name = "lblLevel1";
-            this.lblLevel1.Size = new System.Drawing.Size(13, 13);
-            this.lblLevel1.TabIndex = 4;
-            this.lblLevel1.Text = "II";
-            // 
-            // lblLevel2
-            // 
-            this.lblLevel2.AutoSize = true;
-            this.lblLevel2.Location = new System.Drawing.Point(27, 83);
-            this.lblLevel2.Name = "lblLevel2";
-            this.lblLevel2.Size = new System.Drawing.Size(16, 13);
-            this.lblLevel2.TabIndex = 3;
-            this.lblLevel2.Text = "III";
-            // 
-            // Level0UpDown
-            // 
-            this.Level0UpDown.DecimalPlaces = 1;
-            this.Level0UpDown.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.Level0UpDown.Location = new System.Drawing.Point(57, 27);
-            this.Level0UpDown.Name = "Level0UpDown";
-            this.Level0UpDown.Size = new System.Drawing.Size(63, 20);
-            this.Level0UpDown.TabIndex = 2;
-            this.Level0UpDown.ValueChanged += new System.EventHandler(this.Level0UpDown_ValueChanged);
-            // 
-            // Level1UpDown
-            // 
-            this.Level1UpDown.DecimalPlaces = 1;
-            this.Level1UpDown.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.Level1UpDown.Location = new System.Drawing.Point(57, 53);
-            this.Level1UpDown.Name = "Level1UpDown";
-            this.Level1UpDown.Size = new System.Drawing.Size(63, 20);
-            this.Level1UpDown.TabIndex = 1;
-            this.Level1UpDown.ValueChanged += new System.EventHandler(this.Level1UpDown_ValueChanged);
-            // 
-            // Level2UpDown
-            // 
-            this.Level2UpDown.DecimalPlaces = 1;
-            this.Level2UpDown.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.Level2UpDown.Location = new System.Drawing.Point(57, 79);
-            this.Level2UpDown.Name = "Level2UpDown";
-            this.Level2UpDown.Size = new System.Drawing.Size(63, 20);
-            this.Level2UpDown.TabIndex = 0;
-            this.Level2UpDown.ValueChanged += new System.EventHandler(this.Level2UpDown_ValueChanged);
-            // 
-            // gbVew
-            // 
-            this.gbVew.Controls.Add(this.checkGaussian);
-            this.gbVew.Controls.Add(this.checkAutoscale);
-            this.gbVew.Location = new System.Drawing.Point(250, 193);
-            this.gbVew.Name = "gbVew";
-            this.gbVew.Size = new System.Drawing.Size(142, 106);
-            this.gbVew.TabIndex = 17;
-            this.gbVew.TabStop = false;
-            this.gbVew.Text = "Profile View";
-            // 
-            // checkGaussian
-            // 
-            this.checkGaussian.AutoSize = true;
-            this.checkGaussian.Location = new System.Drawing.Point(30, 60);
-            this.checkGaussian.Name = "checkGaussian";
-            this.checkGaussian.Size = new System.Drawing.Size(70, 17);
-            this.checkGaussian.TabIndex = 3;
-            this.checkGaussian.Text = "Gaussian";
-            this.checkGaussian.UseVisualStyleBackColor = true;
-            // 
-            // checkAutoscale
-            // 
-            this.checkAutoscale.AutoSize = true;
-            this.checkAutoscale.Location = new System.Drawing.Point(30, 27);
-            this.checkAutoscale.Name = "checkAutoscale";
-            this.checkAutoscale.Size = new System.Drawing.Size(75, 17);
-            this.checkAutoscale.TabIndex = 0;
-            this.checkAutoscale.Text = "AutoScale";
-            this.checkAutoscale.UseVisualStyleBackColor = true;
-            // 
             // FormSetup
             // 
             this.AcceptButton = this.btnOK;
@@ -1282,6 +1283,15 @@
             this.Load += new System.EventHandler(this.FormSetup_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.gbVew.ResumeLayout(false);
+            this.gbVew.PerformLayout();
+            this.gbClipLevels.ResumeLayout(false);
+            this.gbClipLevels.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Level0UpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Level1UpDown)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Level2UpDown)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.groupBoxPixelFormat.ResumeLayout(false);
             this.groupBoxPixelFormat.PerformLayout();
             this.groupBoxBinning.ResumeLayout(false);
@@ -1319,15 +1329,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.MaxUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinUpDown1)).EndInit();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.gbClipLevels.ResumeLayout(false);
-            this.gbClipLevels.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Level0UpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Level1UpDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Level2UpDown)).EndInit();
-            this.gbVew.ResumeLayout(false);
-            this.gbVew.PerformLayout();
             this.ResumeLayout(false);
 
         }
