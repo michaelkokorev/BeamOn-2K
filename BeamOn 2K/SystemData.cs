@@ -403,6 +403,9 @@ namespace BeamOn_U3
         [DataMember(Name = "ControlPanel")]
         public bool bViewControlPanel;
 
+        [DataMember(Name = "ImagePanel")]
+        public bool bViewImagePanel;
+
         public String m_strMyDataDir;
         public String m_strMySADataDir;
         public String m_strMyCurrentDir;

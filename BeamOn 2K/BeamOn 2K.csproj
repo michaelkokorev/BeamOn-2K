@@ -199,6 +199,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\Data_small.png" />
+    <None Include="Resources\View_small.png" />
     <None Include="Resources\Setting-Running-Rabbit-icon1.png" />
     <None Include="Resources\Setting-Running-Rabbit-icon.png" />
     <None Include="Resources\Animals-Running-Rabbit-icon.png" />

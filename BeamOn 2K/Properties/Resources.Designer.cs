@@ -103,6 +103,16 @@ namespace BeamOn_U3.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Data_small {
+            get {
+                object obj = ResourceManager.GetObject("Data_small", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Faq_icon {
             get {
                 object obj = ResourceManager.GetObject("Faq-icon", resourceCulture);
@@ -326,6 +336,16 @@ namespace BeamOn_U3.Properties {
         internal static System.Drawing.Bitmap View {
             get {
                 object obj = ResourceManager.GetObject("View", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap View_small {
+            get {
+                object obj = ResourceManager.GetObject("View_small", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

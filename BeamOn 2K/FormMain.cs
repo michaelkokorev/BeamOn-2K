@@ -178,32 +178,32 @@ namespace BeamOn_U3
 
             if (m_bFreezePicture == false)
             {
-                    m_snapshot = e.Snapshot.Clone();
+                m_snapshot = e.Snapshot.Clone();
 
-                    if (m_bmp != null)
+                if (m_bmp != null)
+                {
+                    lock (m_lLockBMP)
                     {
-                        lock (m_lLockBMP)
+                        try
                         {
-                            try
-                            {
-                                BitmapData bmpData = m_bmp.LockBits(
-                                                                    new Rectangle(new Point(0, 0), m_snapshot.ImageRectangle.Size),
-                                                                    System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                                                                    m_bmp.PixelFormat
-                                                                    );
+                            BitmapData bmpData = m_bmp.LockBits(
+                                                                new Rectangle(new Point(0, 0), m_snapshot.ImageRectangle.Size),
+                                                                System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                                                m_bmp.PixelFormat
+                                                                );
 
-                                e.Snapshot.SetImageDataArray(bmpData.Scan0, m_colorArray);
+                            e.Snapshot.SetImageDataArray(bmpData.Scan0, m_colorArray);
 
-                                m_bmp.UnlockBits(bmpData);
-                            }
-                            catch { }
-                            finally
-                            {
-                                // Dispose the DataReceved result if needed for returning it to the grab loop.
-                                e.DisposeDataRecevedIfClone();
-                            }
+                            m_bmp.UnlockBits(bmpData);
+                        }
+                        catch { }
+                        finally
+                        {
+                            // Dispose the DataReceved result if needed for returning it to the grab loop.
+                            e.DisposeDataRecevedIfClone();
                         }
                     }
+                }
             }
 
             if (m_snapshot != null)
@@ -334,6 +334,33 @@ namespace BeamOn_U3
                 try
                 {
                     lock (m_lLockBMP) grfx.DrawImage(m_bmp, 0, 0, m_bmp.Width, m_bmp.Height);
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private void pictureBoxImageSmall_Paint(object sender, PaintEventArgs e)
+        {
+            Graphics grfx = e.Graphics;
+
+            if (m_bmp != null)
+            {
+                try
+                {
+                    lock (m_lLockBMP) grfx.DrawImage(m_bmp, 0, 0, pictureBoxImageSmall.Width, pictureBoxImageSmall.Height);
+                    //Rectungle
+
+                    Rectangle rect = new Rectangle(
+                            new Point(
+                            (int)Math.Floor(-imageSplitContainer.Panel2.AutoScrollPosition.X * pictureBoxImageSmall.Height / (float)Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height)),
+                            (int)Math.Floor(-imageSplitContainer.Panel2.AutoScrollPosition.Y * pictureBoxImageSmall.Width / (float)Math.Min(pictureBoxData.Width, imageSplitContainer.Panel2.Width))),
+                            new System.Drawing.Size(
+                            (int)Math.Floor(pictureBoxImageSmall.Width * Math.Min(pictureBoxData.Width, imageSplitContainer.Panel2.Width) / (float)pictureBoxData.Width),
+                            (int)Math.Floor(pictureBoxImageSmall.Height * Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height) / (float)pictureBoxData.Height)));
+
+                    grfx.DrawRectangle(m_PenCentroid, rect);
                 }
                 catch
                 {
@@ -488,6 +515,8 @@ namespace BeamOn_U3
                 }
 
                 pictureBoxImage.Size = bm.ImageRectangle.Size;
+
+                pictureBoxImageSmall.Size = new System.Drawing.Size(pictureBoxImageSmall.Width, (int)Math.Floor(pictureBoxImageSmall.Width * (pictureBoxImage.Height / (float)pictureBoxImage.Width)));
 
                 m_bmp = new Bitmap(pictureBoxImage.Width, pictureBoxImage.Height, picturePaletteImage.Format);
 
@@ -711,6 +740,7 @@ namespace BeamOn_U3
                     dataSplitContainer.Panel2.Invalidate();
                     //            pictureBoxImage.Invalidate();
                     pictureBoxData.Invalidate();
+                    pictureBoxImageSmall.Invalidate();
                     toolStripStatusLabelTimeStamp.Text = (1000f / (double)Timestamp).ToString("#.000") + " fps";
                     toolStripStatuslblDate.Text = DateTime.Now.ToString();
                     toolStripStatuslblWave.Text = "Wavelength: " + m_sysData.powerData.uiWavelenght + "nm";
@@ -806,6 +836,8 @@ namespace BeamOn_U3
 
                 pictureBoxImage.Size = bm.ImageRectangle.Size;
 
+                pictureBoxImageSmall.Size = new System.Drawing.Size(pictureBoxImageSmall.Width, (int)Math.Floor(pictureBoxImageSmall.Width * (pictureBoxImage.Height / (float)pictureBoxImage.Width)));
+
                 m_bmp = new Bitmap(bm.ImageRectangle.Width, bm.ImageRectangle.Height, picturePaletteImage.Format);
 
                 if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed)
@@ -845,6 +877,8 @@ namespace BeamOn_U3
                     if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
 
                     pictureBoxImage.Size = bm.ImageRectangle.Size;
+
+                    pictureBoxImageSmall.Size = new System.Drawing.Size(pictureBoxImageSmall.Width, (int)Math.Floor(pictureBoxImageSmall.Width * (pictureBoxImage.Height / (float)pictureBoxImage.Width)));
                 }
 
                 trackBarGain.Maximum = bm.MaxGain;
@@ -877,20 +911,11 @@ namespace BeamOn_U3
 
                 pointSensorCenter = new Point((int)(bm.MaxImageRectangle.Width / 2) - bm.ImageRectangle.X, (int)(bm.MaxImageRectangle.Height / 2) - (int)bm.ImageRectangle.Y);
 
-                dataPanelToolStripMenuItem.Checked = m_sysData.applicationData.bViewDataPanel;
-                dataViewToolStripButton.Checked = dataPanelToolStripMenuItem.Checked;
+                dataCheckBox.Checked = m_sysData.applicationData.bViewDataPanel;
+                propertyCheckBox.Checked = m_sysData.applicationData.bViewControlPanel;
+                viewCheckBox.Checked = m_sysData.applicationData.bViewImagePanel;
 
-                if (m_sysData.applicationData.bViewDataPanel)
-                {
-                    dataSplitContainer.Panel1Collapsed = !m_sysData.applicationData.bViewControlPanel;
-                    dataSplitContainer.SplitterDistance = dataSplitContainer.Panel1MinSize;
-                    propertyBoxToolStripMenuItem.Checked = !dataSplitContainer.Panel1Collapsed;
-                }
-
-                mainSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
-                propertyBoxToolStripMenuItem.Enabled = m_sysData.applicationData.bViewDataPanel;
-
-                dataSplitContainer.Panel1Collapsed = !propertyBoxToolStripMenuItem.Checked;
+                ChangeViewPanels();
 
                 mnuOptionsSaveSettingsOnExit.Checked = m_sysData.applicationData.bSaveExit;
                 ViewToolStrip(m_sysData.applicationData.bViewToolbar);
@@ -1657,6 +1682,8 @@ namespace BeamOn_U3
                         if (m_bmp.PixelFormat == PixelFormat.Format8bppIndexed) m_bmp.Palette = picturePaletteImage.Palette;
 
                         pictureBoxImage.Size = bm.ImageRectangle.Size;
+
+                        pictureBoxImageSmall.Size = new System.Drawing.Size(pictureBoxImageSmall.Width, pictureBoxImageSmall.Width * (pictureBoxImage.Height / pictureBoxImage.Width));
                     }
                 }
 
@@ -2157,6 +2184,9 @@ namespace BeamOn_U3
                 int iTop = br.ReadUInt16();//Top
 
                 pictureBoxImage.Size = new Size(br.ReadUInt16(), br.ReadUInt16());
+
+                pictureBoxImageSmall.Size = new System.Drawing.Size(pictureBoxImageSmall.Width, pictureBoxImageSmall.Width * (pictureBoxImage.Height / pictureBoxImage.Width));
+
                 pointSensorCenter = new Point((int)(br.ReadUInt16() / 2) - iLeft, (int)(br.ReadUInt16() / 2) - iTop);
 
                 m_bmp = new Bitmap(pictureBoxImage.Width, pictureBoxImage.Height, picturePaletteImage.Format);
@@ -2209,7 +2239,12 @@ namespace BeamOn_U3
                 dataViewToolStripButton.Checked = dataPanelToolStripMenuItem.Checked;
 
             m_sysData.applicationData.bViewDataPanel = dataPanelToolStripMenuItem.Checked;
-            mainSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
+            controlSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
+
+            mainSplitContainer.Panel2MinSize = ((controlSplitContainer.Panel2Collapsed == false) ? /*controlSplitContainer.Panel2MinSize*/321 : 0) + /*controlSplitContainer.Panel1MinSize*/ 37 + controlSplitContainer.SplitterWidth;
+            mainSplitContainer.SplitterDistance = mainSplitContainer.Width - mainSplitContainer.SplitterWidth - mainSplitContainer.Panel2MinSize;
+
+            //            mainSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
             propertyBoxToolStripMenuItem.Enabled = m_sysData.applicationData.bViewDataPanel;
         }
 
@@ -2295,7 +2330,7 @@ namespace BeamOn_U3
             }
 
             EnableFastModeData(sender.ToString().Contains("Start"));
-       }
+        }
 
         private void EnableFastModeData(Boolean bEnable)
         {
@@ -2304,7 +2339,7 @@ namespace BeamOn_U3
             if (bm.FastMode == true)
             {
                 mnuFileStartRunningMode.Checked = true;
-//                mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Hand;
+                //                mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Hand;
                 mnuFileStartRunningMode.Text = "Stop &Running Mode";
                 mnuFileStartRunningMode.ToolTipText = "Stop Running Mode";
                 runningToolStripButton.Text = "Stop Running";
@@ -2319,7 +2354,7 @@ namespace BeamOn_U3
             else
             {
                 mnuFileStartRunningMode.Checked = false;
-//                mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Start;
+                //                mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Start;
                 mnuFileStartRunningMode.Text = "Start &Running Mode";
                 mnuFileStartRunningMode.ToolTipText = "Start Running Mode";
                 runningToolStripButton.Text = "Start Running";
@@ -2333,7 +2368,7 @@ namespace BeamOn_U3
             asyncSM.BeginInvoke(null, null);
 
             runningToolStripButton.ToolTipText = mnuFileStartRunningMode.ToolTipText;
-//            runningToolStripButton.Image = mnuFileStartRunningMode.Image;
+            //            runningToolStripButton.Image = mnuFileStartRunningMode.Image;
             runningToolStripButton.Checked = mnuFileStartRunningMode.Checked;
 
 
@@ -2350,7 +2385,7 @@ namespace BeamOn_U3
                     bm.FastMode = false;
 
                     this.mnuFileStartRunningMode.Checked = false;
-//                    this.mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Start;
+                    //                    this.mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Start;
                     this.mnuFileStartRunningMode.Text = "Start &Running Mode";
                     this.mnuFileStartRunningMode.ToolTipText = "Start Running Mode";
 
@@ -2388,6 +2423,35 @@ namespace BeamOn_U3
                 mnuFileStartRunningMode.Enabled = true;
                 runningToolStripButton.Enabled = mnuFileStartRunningMode.Enabled;
             }
+        }
+
+        private void ChangeViewPanels()
+        {
+            controlSplitContainer.Panel2Collapsed = ((m_sysData.applicationData.bViewControlPanel == false) && (m_sysData.applicationData.bViewDataPanel == false) && (m_sysData.applicationData.bViewImagePanel == false));
+            dataSplitContainer.Panel1Collapsed = ((m_sysData.applicationData.bViewControlPanel == false) && (m_sysData.applicationData.bViewImagePanel == false));
+            dataSplitContainer.Panel2Collapsed = (m_sysData.applicationData.bViewDataPanel == false);
+            viewSplitContainer.Panel1Collapsed = (m_sysData.applicationData.bViewImagePanel == false);
+            viewSplitContainer.Panel2Collapsed = (m_sysData.applicationData.bViewControlPanel == false);
+
+            mainSplitContainer.Panel2MinSize = ((controlSplitContainer.Panel2Collapsed == false) ? /*controlSplitContainer.Panel2MinSize*/321 : 0) + /*controlSplitContainer.Panel1MinSize*/ 37 + controlSplitContainer.SplitterWidth;
+            mainSplitContainer.SplitterDistance = mainSplitContainer.Width - mainSplitContainer.SplitterWidth - mainSplitContainer.Panel2MinSize;
+
+            dataPanelToolStripMenuItem.Checked = m_sysData.applicationData.bViewDataPanel;
+            dataViewToolStripButton.Checked = dataPanelToolStripMenuItem.Checked;
+            propertyBoxToolStripMenuItem.Checked = m_sysData.applicationData.bViewControlPanel;
+
+            if (m_sysData.applicationData.bViewDataPanel) dataSplitContainer.SplitterDistance = dataSplitContainer.Panel1MinSize;
+
+            //mainSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
+        }
+
+        private void checkBox_Click(object sender, EventArgs e)
+        {
+            m_sysData.applicationData.bViewDataPanel = dataCheckBox.Checked;
+            m_sysData.applicationData.bViewControlPanel = propertyCheckBox.Checked;
+            m_sysData.applicationData.bViewImagePanel = viewCheckBox.Checked;
+
+            ChangeViewPanels();
         }
     }
 }
