@@ -82,6 +82,8 @@ namespace BeamOn_U3
         Image printImage = null;
         Font printFont = new Font("Arial", 10);
 
+        Rectangle m_rectSmall;
+
         public enum ePrinterType { ePrintText, ePrintImage };
         public struct PrinterData
         {
@@ -122,6 +124,8 @@ namespace BeamOn_U3
         private bool m_bFreezePicture = false;
 
         ArrayList m_arraySapshot = null;
+        private Point m_startLocation;
+        private bool m_bRectMove;
 
         public FormMain(String strArgument)
         {
@@ -157,7 +161,7 @@ namespace BeamOn_U3
             m_strFilterName[3] = "ND1000";
         }
 
-        void bm_OnImageReceved(object sender, BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e)
+        void bm_OnImageReceved(object sender, BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs e)
         {
             if (e.FastMode == true)
             {
@@ -171,10 +175,10 @@ namespace BeamOn_U3
             //{
             //    // If called from a different thread, we must use the Invoke method to marshal the call to the proper GUI thread.
             //    // The grab result will be disposed after the event call. Clone the event arguments for marshaling to the GUI thread. 
-            //    BeginInvoke(new EventHandler<BeamOnCL.MeasureCamera.NewDataRecevedEventArgs>(bm_OnImageReceved), sender, e.Clone());
+            //    BeginInvoke(new EventHandler<BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs>(bm_OnImageReceved), sender, e.Clone());
             //    return;
             //}
-            //BeamOnCL.MeasureCamera.NewDataRecevedEventArgs e = ee.Clone();
+            //BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs e = ee.Clone();
 
             if (m_bFreezePicture == false)
             {
@@ -352,15 +356,8 @@ namespace BeamOn_U3
                     lock (m_lLockBMP) grfx.DrawImage(m_bmp, 0, 0, pictureBoxImageSmall.Width, pictureBoxImageSmall.Height);
                     //Rectungle
 
-                    Rectangle rect = new Rectangle(
-                            new Point(
-                            (int)Math.Floor(-imageSplitContainer.Panel2.AutoScrollPosition.X * pictureBoxImageSmall.Height / (float)Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height)),
-                            (int)Math.Floor(-imageSplitContainer.Panel2.AutoScrollPosition.Y * pictureBoxImageSmall.Width / (float)Math.Min(pictureBoxData.Width, imageSplitContainer.Panel2.Width))),
-                            new System.Drawing.Size(
-                            (int)Math.Floor(pictureBoxImageSmall.Width * Math.Min(pictureBoxData.Width, imageSplitContainer.Panel2.Width) / (float)pictureBoxData.Width),
-                            (int)Math.Floor(pictureBoxImageSmall.Height * Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height) / (float)pictureBoxData.Height)));
 
-                    grfx.DrawRectangle(m_PenCentroid, rect);
+                    grfx.DrawRectangle(m_PenCentroid, m_rectSmall);
                 }
                 catch
                 {
@@ -379,14 +376,8 @@ namespace BeamOn_U3
             int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
             int iHeightProfile = (int)(iHeight / 4f);
 
-            int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
-            int iShiftY = 0;
-
-            if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
-            {
-                iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
-                if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
-            }
+            int iShiftX = pictureBoxImage.Left;
+            int iShiftY = pictureBoxImage.Top;
 
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
@@ -507,6 +498,9 @@ namespace BeamOn_U3
                     int iOffsetX = (int)bm.PixelCentroid.X - (int)(iSizeX / 2);
                     int iOffsetY = (int)bm.PixelCentroid.Y - (int)(iSizeY / 2);
 
+                    if (iOffsetX < 0) iOffsetX = 0;
+                    if (iOffsetY < 0) iOffsetY = 0;
+
                     bm.ImageRectangle = new Rectangle(iOffsetX, iOffsetY, iSizeX, iSizeY);
                 }
                 else
@@ -562,14 +556,13 @@ namespace BeamOn_U3
                 int iiShiftY = 0;
                 if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
                 {
-                    iiShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
-                    if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iiShiftY += 20;
+                    iiShiftY += pictureBoxImage.Top;
                 }
 
                 int iiShiftX = 0;
                 if (imageSplitContainer.Panel2.Width < pictureBoxData.Width)
                 {
-                    iiShiftX += -imageSplitContainer.Panel2.AutoScrollPosition.X;
+                    iiShiftX += -pictureBoxImage.Left;
                 }
 
                 grfx.DrawString("0" + ((m_sysData.UnitMeasure == MeasureUnits.muMicro) ? "(µm)" : "(mrad)"), myFont, CentroidSensorBrush, new PointF(iiShiftX + 5, pointSensorCenter.Y), m_strfrm);
@@ -595,14 +588,9 @@ namespace BeamOn_U3
                 {
                     int iHeight = Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height);
 
-                    int iShiftY = 0;
-                    if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
-                    {
-                        iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
-                        if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
-                    }
+                    int iShiftY = pictureBoxImage.Top;
 
-                    int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
+                    int iShiftX = pictureBoxImage.Left;
 
                     grfx.DrawString("Horizontal Profile", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 100 - iShiftY), m_strfrm);
                     grfx.DrawString("ClipLevel: " + String.Format("{0:F1}", Decimal.ToSingle(m_sysData.ClipLevels.Level(2))) + "%" + " Width: " + m_sysData.HorizontalProfile.strWidth[2] + "(µm)", myFont, PaletteBrush, new PointF(20 - iShiftX, iHeight - 80 - iShiftY), m_strfrm);
@@ -641,12 +629,7 @@ namespace BeamOn_U3
                 {
                     fCoeffStep = pictureBoxData.Width / (float)dataProfile.DataProfile.Length;
 
-                    int iShiftY = 0;
-                    if (imageSplitContainer.Panel2.Height < pictureBoxData.Height)
-                    {
-                        iShiftY += imageSplitContainer.Panel2.AutoScrollPosition.Y;
-                        if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftY += 20;
-                    }
+                    int iShiftY = pictureBoxImage.Top;
 
                     OldPoint = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftY);
                     if (m_sysData.ViewGaussian == true) OldPointGaussian = new Point((int)0, iHeight - (int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftY);
@@ -666,7 +649,7 @@ namespace BeamOn_U3
                     }
 
                     int iShiftX = imageSplitContainer.Panel2.Width - 60;
-                    if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftX += -imageSplitContainer.Panel2.AutoScrollPosition.X;
+                    if (imageSplitContainer.Panel2.Width < pictureBoxData.Width) iShiftX += -pictureBoxImage.Left;
 
                     if (m_sysData.ScaleProfile == true)
                     {
@@ -690,7 +673,7 @@ namespace BeamOn_U3
                 {
                     fCoeffStep = pictureBoxData.Height / (float)dataProfile.DataProfile.Length;
 
-                    int iShiftX = imageSplitContainer.Panel2.AutoScrollPosition.X;
+                    int iShiftX = pictureBoxImage.Left;
 
                     OldPoint = new Point((int)Math.Ceiling(dataProfile.DataProfile[0] * fCoeffAmpl) - iShiftX, 0);
                     if (m_sysData.ViewGaussian == true) OldPointGaussian = new Point((int)Math.Ceiling(dataProfile.GaussianData.GaussianData[0] * fCoeffAmpl) - iShiftX, 0);
@@ -888,7 +871,7 @@ namespace BeamOn_U3
                 labelGainMax.Text = trackBarGain.Maximum.ToString();
                 labelGainValue.Text = trackBarGain.Value + " dB";
 
-                trackBarExposure.Maximum = bm.MaxExposure / 1000;
+                trackBarExposure.Maximum = bm.MaxExposure;// / 1000;
                 trackBarExposure.Minimum = bm.MinExposure;
                 trackBarExposure.Value = bm.Exposure;
                 labelExposureMin.Text = trackBarExposure.Minimum.ToString();
@@ -2077,7 +2060,7 @@ namespace BeamOn_U3
 
         void m_tUpdateSnapshot_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (m_sysData.SnapshotView == true) bm_OnImageReceved(sender, new BeamOnCL.MeasureCamera.NewDataRecevedEventArgs(m_snapshot, false));
+            if (m_sysData.SnapshotView == true) bm_OnImageReceved(sender, new BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs(m_snapshot, false));
         }
 
         void StopSnapshot()
@@ -2452,6 +2435,79 @@ namespace BeamOn_U3
             m_sysData.applicationData.bViewImagePanel = viewCheckBox.Checked;
 
             ChangeViewPanels();
+        }
+
+        private void pictureBoxImageSmall_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
+                if (m_bRectMove)
+                {
+                    m_rectSmall.Offset(e.X - m_startLocation.X, e.Y - m_startLocation.Y);
+                    if (m_rectSmall.X < 0) m_rectSmall.X = 0;
+                    if (m_rectSmall.Y < 0) m_rectSmall.Y = 0;
+                    if ((m_rectSmall.X + m_rectSmall.Width) > pictureBoxImageSmall.Width) m_rectSmall.X = pictureBoxImageSmall.Width - m_rectSmall.Width;
+                    if ((m_rectSmall.Y + m_rectSmall.Height) > pictureBoxImageSmall.Height) m_rectSmall.Y = pictureBoxImageSmall.Height - m_rectSmall.Height;
+
+                    m_startLocation = e.Location;
+
+                    pictureBoxImage.Left = -(int)Math.Floor(m_rectSmall.X * Math.Max(pictureBoxImage.Width, imageSplitContainer.Panel2.Width) / (float)pictureBoxImageSmall.Width);
+                    pictureBoxImage.Top = -(int)Math.Floor(m_rectSmall.Y * Math.Max(pictureBoxImage.Height, imageSplitContainer.Panel2.Height) / (float)pictureBoxImageSmall.Height);
+                }
+
+                pictureBoxImageSmall.Invalidate();
+            }
+        }
+
+        private void pictureBoxData_Resize(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBoxImageSmall_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
+                if (m_rectSmall.Contains(e.Location))
+                {
+                    m_startLocation = e.Location;
+                    m_bRectMove = true;
+                }
+            }
+        }
+
+        private void pictureBoxImageSmall_MouseUp(object sender, MouseEventArgs e)
+        {
+            m_bRectMove = false;
+        }
+
+        private void imageSplitContainer_Panel2_Resize(object sender, EventArgs e)
+        {
+            m_rectSmall = new Rectangle(
+                                    new Point(0, 0),
+                                    new System.Drawing.Size(
+                                        (int)Math.Floor(pictureBoxImageSmall.Width * Math.Min(pictureBoxData.Width, imageSplitContainer.Panel2.Width) / (float)pictureBoxData.Width),
+                                        (int)Math.Floor(pictureBoxImageSmall.Height * Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height) / (float)pictureBoxData.Height)));
+
+            pictureBoxImage.Left = 0;
+            pictureBoxImage.Top = 0;
+        }
+
+        private void pictureBoxImage_Resize(object sender, EventArgs e)
+        {
+            m_rectSmall = new Rectangle(
+                                    new Point(0, 0),
+                                    new System.Drawing.Size(
+                                        (int)Math.Floor(pictureBoxImageSmall.Width * Math.Min(pictureBoxData.Width, imageSplitContainer.Panel2.Width) / (float)pictureBoxData.Width),
+                                        (int)Math.Floor(pictureBoxImageSmall.Height * Math.Min(pictureBoxData.Height, imageSplitContainer.Panel2.Height) / (float)pictureBoxData.Height)));
+
+            pictureBoxImage.Left = 0;
+            pictureBoxImage.Top = 0;
+        }
+
+        private void videoControl_OnChangePosition(object sender, VideoControl.PositionEventArgs e)
+        {
+
         }
     }
 }

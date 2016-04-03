@@ -10,85 +10,11 @@ using System.Collections;
 
 namespace BeamOnCL
 {
-    public class MeasureCamera
+    public class MeasureCameraBSLR : MeasureCameraBase
     {
         Camera m_camera = null;
         List<ICameraInfo> cameraList = null;
         IGrabResult m_grabResult = null;
-
-
-        public delegate void ChangeStatusCamera(object sender, EventArgs e);
-        public event ChangeStatusCamera OnChangeStatusCamera;
-
-        public class NewDataRecevedEventArgs : EventArgs, ICloneable
-        {
-            private SnapshotBase m_snapshot = null;
-            private Boolean m_bFastMode = false;
-            private bool m_bClone = false;
-
-            public NewDataRecevedEventArgs(SnapshotBase snapshot, Boolean bFastMode)
-            {
-                m_snapshot = snapshot;
-                m_bFastMode = bFastMode;
-            }
-
-            public SnapshotBase Snapshot
-            {
-                get { return m_snapshot; }
-            }
-
-            object ICloneable.Clone()
-            {
-                return this.Clone();
-            }
-
-            public Boolean FastMode
-            {
-                get { return m_bFastMode; }
-                set { m_bFastMode = value; }
-            }
-            //
-            // Summary:
-            //     Indicates if the event arguments have been created by calling NewDataRecevedEventArgs.Clone().
-            public bool IsClone { get { return m_bClone; } }
-
-            // Summary:
-            //     Clones the event arguments including the Snapshot & Timestamp result.
-            //
-            // Returns:
-            //     Returns a copy of the event arguments with a clone of the contained Snapshot & Timestamp
-            //     result. The cloned Snapshot & Timestamp result must be disposed.
-            //
-            // Remarks:
-            //     The Snapshot & Timestamp result or the cloned event must be disposed.
-            public NewDataRecevedEventArgs Clone()
-            {
-                NewDataRecevedEventArgs ret = this.MemberwiseClone() as NewDataRecevedEventArgs; ;
-
-                ret.m_snapshot = this.m_snapshot.Clone();
-
-                return ret;
-            }
-            //
-            // Summary:
-            //     Disposes the grab result held if the event arguments have been created by
-            //     calling NewDataRecevedEventArgs.Clone().
-            public void DisposeDataRecevedIfClone()
-            {
-                if (m_bClone == true) m_snapshot = null;
-            }
-        }
-
-        public delegate void NewDataReceved(object sender, NewDataRecevedEventArgs e);
-        public event NewDataReceved OnNewDataReceved;
-
-        SnapshotBase m_snapshot = null;
-        Rectangle m_rImageRectangle = new Rectangle();
-        UInt16 m_iCameraFilter = 0;
-        private string m_strSerialNumber;
-        private string m_strUserDefinedName;
-        private UInt16 m_uiAverageNum = 1;
-        private Boolean m_bFastMode = false;
 
 #if WATCHDOG
         static EventWaitHandle evHardwareFailure = new AutoResetEvent(false);
@@ -105,7 +31,7 @@ namespace BeamOnCL
             }
         }
 #endif
-        public MeasureCamera()
+        public MeasureCameraBSLR() : base()
         {
             cameraList = CameraFinder.Enumerate(DeviceType.Usb);
 
@@ -121,43 +47,7 @@ namespace BeamOnCL
             }
         }
 
-        public Boolean FastMode
-        {
-            get { return m_bFastMode; }
-            set { m_bFastMode = value; }
-        }
-
-        public String SerialNumber
-        {
-            get { return m_strSerialNumber; }
-        }
-
-        public String UserDefinedName
-        {
-            get { return m_strUserDefinedName; }
-        }
-
-        public SnapshotBase Snapshot
-        {
-            get { return m_snapshot; }
-        }
-
-        public void AverageReset()
-        {
-            m_snapshot.AverageReset();
-        }
-
-        public UInt16 AverageNum
-        {
-            get { return m_uiAverageNum; }
-            set
-            {
-                m_uiAverageNum = value;
-                if (m_snapshot != null) m_snapshot.AverageNum = m_uiAverageNum;
-            }
-        }
-
-        public Boolean Start(PixelFormat pixelFormat)
+        public override Boolean Start(PixelFormat pixelFormat)
         {
             Boolean bRet = false;
 
@@ -211,7 +101,7 @@ namespace BeamOnCL
             return bRet;
         }
 
-        public void Stop()
+        public override void Stop()
         {
 #if WATCHDOG
             if ((ThreadWatchDog != null) && (ThreadWatchDog.IsAlive == true))
@@ -306,7 +196,7 @@ namespace BeamOnCL
             //           System.Windows.Form.MessageBox.Show("Exception caught:\n" + exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        public void StartGrabber()
+        public override void StartGrabber()
         {
             if ((m_camera != null) && (m_camera.StreamGrabber.IsGrabbing == false))
             {
@@ -316,24 +206,9 @@ namespace BeamOnCL
             }
         }
 
-        public void StopGrabber()
+        public override void StopGrabber()
         {
             if (m_camera != null) m_camera.StreamGrabber.Stop();
-        }
-
-        void m_camera_ConnectionLost(object sender, EventArgs e)
-        {
-            OnChangeStatusCamera(sender, e);
-        }
-
-        void m_camera_CameraClosing(object sender, EventArgs e)
-        {
-            OnChangeStatusCamera(sender, e);
-        }
-
-        void m_camera_CameraOpened(object sender, EventArgs e)
-        {
-            OnChangeStatusCamera(sender, e);
         }
 
         void StreamGrabber_ImageGrabbed(object sender, ImageGrabbedEventArgs e)
@@ -345,7 +220,7 @@ namespace BeamOnCL
                 if (m_snapshot != null)
                 {
                     if (m_snapshot.GetData(grabResult.PixelData as byte[], grabResult.Timestamp) == true)
-                        OnNewDataReceved(this, new NewDataRecevedEventArgs(m_snapshot, m_bFastMode));
+                        m_camera_CameraOpened(this, new NewDataRecevedEventArgs(m_snapshot, m_bFastMode));
                 }
             }
             else
@@ -355,12 +230,7 @@ namespace BeamOnCL
             }
         }
 
-        public void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
-        {
-            if (m_snapshot != null) m_snapshot.SetImageDataArray(Data, colorArray);
-        }
-
-        public Rectangle MaxImageRectangle
+        public override Rectangle MaxImageRectangle
         {
             get
             {
@@ -377,7 +247,7 @@ namespace BeamOnCL
             }
         }
 
-        public Rectangle ImageRectangle
+        public override  Rectangle ImageRectangle
         {
             get { return m_rImageRectangle; }
 
@@ -427,7 +297,7 @@ namespace BeamOnCL
             }
         }
 
-        public PixelFormat pixelFormat
+        public override PixelFormat pixelFormat
         {
             get { return (m_camera != null) ? ((m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8) ? PixelFormat.Format8bppIndexed : PixelFormat.Format24bppRgb) : PixelFormat.DontCare; }
 
@@ -442,17 +312,17 @@ namespace BeamOnCL
             }
         }
 
-        public int MaxBinning
+        public override int MaxBinning
         {
             get { return ((m_camera != null) && (m_camera.Parameters[PLCamera.BinningHorizontal].IsReadable)) ? (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMaximum() : 0; }
         }
 
-        public int MinBinning
+        public override int MinBinning
         {
             get { return ((m_camera != null) && (m_camera.Parameters[PLCamera.BinningHorizontal].IsReadable)) ? (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetMinimum() : 0; }
         }
 
-        public int Binning
+        public override int Binning
         {
             get { return ((m_camera != null) && (m_camera.Parameters[PLCamera.BinningHorizontal].IsReadable)) ? (int)m_camera.Parameters[PLCamera.BinningHorizontal].GetValue() : 0; }
 
@@ -473,7 +343,7 @@ namespace BeamOnCL
             }
         }
 
-        private void CreateSnapshot()
+        protected override void CreateSnapshot()
         {
             if (m_camera.Parameters[PLCamera.PixelFormat].GetValue() == PLCamera.PixelFormat.Mono8)
                 m_snapshot = new Snapshot<byte>(new Rectangle(0, 0, (int)m_camera.Parameters[PLCamera.Width].GetValue(), (int)m_camera.Parameters[PLCamera.Height].GetValue()));
@@ -483,17 +353,17 @@ namespace BeamOnCL
             m_snapshot.AverageNum = m_uiAverageNum;
         }
 
-        public int MaxGain
+        public override int MaxGain
         {
             get { return (m_camera != null) ? (int)m_camera.Parameters[PLCamera.Gain].GetMaximum() : 0; }
         }
 
-        public int MinGain
+        public override int MinGain
         {
             get { return (m_camera != null) ? (int)m_camera.Parameters[PLCamera.Gain].GetMinimum() : 0; }
         }
 
-        public int Gain
+        public override int Gain
         {
             get { return (m_camera != null) ? (int)m_camera.Parameters[PLCamera.Gain].GetValue() : 0; }
 
@@ -509,17 +379,17 @@ namespace BeamOnCL
             }
         }
 
-        public int MaxExposure
+        public override int MaxExposure
         {
             get { return (m_camera != null) ? (int)m_camera.Parameters[PLCamera.ExposureTime].GetMaximum() : 0; }
         }
 
-        public int MinExposure
+        public override int MinExposure
         {
             get { return (m_camera != null) ? (int)m_camera.Parameters[PLCamera.ExposureTime].GetMinimum() : 0; }
         }
 
-        public int Exposure
+        public override int Exposure
         {
             get { return (m_camera != null) ? (int)m_camera.Parameters[PLCamera.ExposureTime].GetValue() : 0; }
 
@@ -535,7 +405,7 @@ namespace BeamOnCL
             }
         }
 
-        public UInt16 CameraFilter
+        public override UInt16 CameraFilter
         {
             get { return m_iCameraFilter; }
             set

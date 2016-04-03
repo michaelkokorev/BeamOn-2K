@@ -187,6 +187,10 @@
       <Project>{550D144B-6BDE-4EF9-988A-0E816E9DC005}</Project>
       <Name>PaletteImage</Name>
     </ProjectReference>
+    <ProjectReference Include="..\VideoControl\VideoControl.csproj">
+      <Project>{71410C63-A3E0-4662-96C7-663D78342902}</Project>
+      <Name>VideoControl</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\black_12bit_mode.png" />
@@ -199,6 +203,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\black-repeat-32.png" />
+    <None Include="Resources\black-end-32.png" />
+    <None Include="Resources\black-fast-forward-32.png" />
+    <None Include="Resources\black-play-32.png" />
+    <None Include="Resources\black-stop-32.png" />
+    <None Include="Resources\black-rewind-32.png" />
+    <None Include="Resources\black-skip-to-start-32.png" />
     <None Include="Resources\Data_small.png" />
     <None Include="Resources\View_small.png" />
     <None Include="Resources\Setting-Running-Rabbit-icon1.png" />

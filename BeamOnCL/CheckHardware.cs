@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Basler.Pylon;
 using System.Diagnostics;
+using System.Threading;
 
 namespace BeamOnCL
 {
@@ -13,6 +14,7 @@ namespace BeamOnCL
         public enum CheckStatus { csHardware = 0, csHead = 1, csTypeHead = 2, csOk = 3 };
 
         CheckStatus chStatus = CheckStatus.csHardware;
+        UInt16 nCount = 0;
 
         public class NewCheckLevelEventArgs : EventArgs
         {
@@ -42,25 +44,25 @@ namespace BeamOnCL
         public delegate void GetCheckLevel(object sender, NewCheckLevelEventArgs e);
         public event GetCheckLevel OnGetCheckLevel;
 
-        Camera m_camera = null;
-        List<ICameraInfo> cameraList = null;
-
         const int cTimeOutMs = 2000;
         private string m_strSerialNumber;
         private string m_strUserDefinedName;
 
         public String UserDefinedName
         {
-            get { return m_strUserDefinedName;}
+            get { return m_strUserDefinedName; }
         }
 
+#if BSLR
         public Boolean StartCheck()
         {
             Boolean bRet = false;
-            UInt16 nCount = 0;
 
             chStatus = CheckStatus.csHardware;
             OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csHardware, m_strUserDefinedName));
+
+            Camera m_camera = null;
+            List<ICameraInfo> cameraList = null;
 
             cameraList = CameraFinder.Enumerate(DeviceType.Usb);
 
@@ -140,7 +142,82 @@ namespace BeamOnCL
 
             return bRet;
         }
+#elif IDS
+        void cam_EventFrame(object sender, EventArgs e)
+        {
+            uEye.Camera camera = sender as uEye.Camera;
 
+            if (camera.IsOpened) nCount++;
+        }
+
+        public Boolean StartCheck()
+        {
+            Boolean bRet = false;
+
+            chStatus = CheckStatus.csHardware;
+            OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csHardware, m_strUserDefinedName));
+
+            uEye.Types.CameraInformation[] cameraList = null;
+            uEye.Info.Camera.GetCameraList(out cameraList);
+
+            uEye.Camera m_camera = null;
+
+            if ((cameraList != null) && (cameraList.Length > 0))
+            {
+                m_camera = new uEye.Camera();
+
+                if ((m_camera != null) && (m_camera.Init(1) == uEye.Defines.Status.SUCCESS))
+                {
+                    uEye.Types.CameraInfo cameraInfo;
+                    m_camera.Information.GetCameraInfo(out cameraInfo);
+
+                    m_strSerialNumber = cameraInfo.SerialNumber;
+
+                    chStatus = CheckStatus.csHead;
+                    OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csHead, m_strUserDefinedName));
+
+                    if (m_camera.Memory.Allocate() == uEye.Defines.Status.SUCCESS)
+                    {
+                        m_camera.EventFrame += new EventHandler(cam_EventFrame);
+
+                        if (m_camera.Acquisition.Capture() == uEye.Defines.Status.SUCCESS)
+                        {
+                            Stopwatch stopWatch = new Stopwatch();
+                            stopWatch.Start();
+
+                            Thread.Sleep(300);
+                            if (nCount > 0) OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csTypeHead, m_strUserDefinedName));
+
+                            Thread.Sleep(3000);
+
+                            //// Grab and display images until timeout.
+                            //while (m_camera.IsOpened && stopWatch.ElapsedMilliseconds < cTimeOutMs)
+                            //{
+                            //    if (nCount > 50) break;
+                            //}
+
+                            if (nCount > 50)
+                                OnGetCheckLevel(this, new NewCheckLevelEventArgs(CheckStatus.csOk, m_strUserDefinedName));
+                            else
+                                OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus, m_strUserDefinedName));
+                        }
+                        else
+                            OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus, m_strUserDefinedName));
+                    }
+                    else
+                        OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus, m_strUserDefinedName));
+                }
+                else
+                    OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus, m_strUserDefinedName));
+            }
+            else
+                OnGetCheckError(this, new NewCheckLevelEventArgs(chStatus, m_strUserDefinedName));
+
+            if (m_camera != null) m_camera.Exit();
+
+            return bRet;
+        }
+#endif
         // Event handler for connection loss, is shown here for demonstration purposes only.
         // Note: This event is always called on a separate thread.
         public void OnConnectionLost(Object sender, EventArgs e)

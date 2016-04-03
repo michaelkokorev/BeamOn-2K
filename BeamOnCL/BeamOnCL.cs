@@ -10,7 +10,7 @@ namespace BeamOnCL
 {
     public class BeamOnCL
     {
-        MeasureCamera mc = null;
+        MeasureCameraBase mc = null;
 
         const UInt16 NUM_POINTS = 64;
 
@@ -29,15 +29,18 @@ namespace BeamOnCL
         TypeProfile m_tpProfile = TypeProfile.tpLIne;
         TypeLineProfile m_tlpLine = TypeLineProfile.tpLineCentroid;
 
-        public delegate void ImageReceved(object sender, MeasureCamera.NewDataRecevedEventArgs e);
+        public delegate void ImageReceved(object sender, MeasureCameraBase.NewDataRecevedEventArgs e);
         public event ImageReceved OnImageReceved;
 
         public BeamOnCL()
         {
-            mc = new MeasureCamera();
-
-            mc.OnNewDataReceved += new MeasureCamera.NewDataReceved(mc_OnNewDataReceved);
-            mc.OnChangeStatusCamera += new MeasureCamera.ChangeStatusCamera(mc_OnChangeStatusCamera);
+#if BSLR
+            mc = new MeasureCameraBSLR();
+#elif IDS
+            mc = new MeasureCameraIDS();
+#endif
+            mc.OnNewDataReceved += new MeasureCameraBase.NewDataReceved(mc_OnNewDataReceved);
+            mc.OnChangeStatusCamera += new MeasureCameraBase.ChangeStatusCamera(mc_OnChangeStatusCamera);
 
             double dStep = Math.PI / (NUM_POINTS / 2f);
 
@@ -201,7 +204,7 @@ namespace BeamOnCL
             m_lpVertical.Create(snapshot);
         }
 
-        void mc_OnNewDataReceved(object sender, MeasureCamera.NewDataRecevedEventArgs e)
+        void mc_OnNewDataReceved(object sender, MeasureCameraBase.NewDataRecevedEventArgs e)
         {
             OnImageReceved(sender, e);
         }

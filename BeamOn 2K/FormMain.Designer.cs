@@ -120,8 +120,11 @@
             this.dataViewToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
             this.tbHelpActiveWindow = new System.Windows.Forms.ToolStripButton();
+            this.toolStripStatuslblError = new BeamOn_U3.MyToolStripLabel();
             this.mainSplitContainer = new System.Windows.Forms.SplitContainer();
             this.imageSplitContainer = new System.Windows.Forms.SplitContainer();
+            this.picturePaletteImage = new PaletteImage.PaletteImage();
+            this.formErrorMessage = new BeamOn_U3.FormErrorMessage();
             this.pictureBoxImage = new System.Windows.Forms.PictureBox();
             this.pictureBoxData = new System.Windows.Forms.PictureBox();
             this.controlSplitContainer = new System.Windows.Forms.SplitContainer();
@@ -131,6 +134,7 @@
             this.dataSplitContainer = new System.Windows.Forms.SplitContainer();
             this.viewSplitContainer = new System.Windows.Forms.SplitContainer();
             this.viewGroupBox = new System.Windows.Forms.GroupBox();
+            this.videoControl = new VideoControl.VideoControl();
             this.pictureBoxImageSmall = new System.Windows.Forms.PictureBox();
             this.propertyGroupBox = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -190,9 +194,6 @@
             this.printPreviewDialog = new System.Windows.Forms.PrintPreviewDialog();
             this.pageSetupDialog = new System.Windows.Forms.PageSetupDialog();
             this.numericUpDownAngle = new System.Windows.Forms.NumericUpDown();
-            this.picturePaletteImage = new PaletteImage.PaletteImage();
-            this.formErrorMessage = new BeamOn_U3.FormErrorMessage();
-            this.toolStripStatuslblError = new BeamOn_U3.MyToolStripLabel();
             this.mainMenuStrip.SuspendLayout();
             this.mainStatusStrip.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
@@ -204,6 +205,7 @@
             this.imageSplitContainer.Panel1.SuspendLayout();
             this.imageSplitContainer.Panel2.SuspendLayout();
             this.imageSplitContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).BeginInit();
             this.pictureBoxImage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).BeginInit();
@@ -236,7 +238,6 @@
             this.ProfileGroupBox.SuspendLayout();
             this.groupBoxPosition.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAngle)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).BeginInit();
             this.SuspendLayout();
             // 
             // mainMenuStrip
@@ -1078,6 +1079,22 @@
             this.tbHelpActiveWindow.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
             this.tbHelpActiveWindow.Click += new System.EventHandler(this.tbHelpActiveWindow_Click);
             // 
+            // toolStripStatuslblError
+            // 
+            this.toolStripStatuslblError.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripStatuslblError.AutoSize = false;
+            this.toolStripStatuslblError.BackColor = System.Drawing.Color.Black;
+            this.toolStripStatuslblError.DemoVersion = false;
+            this.toolStripStatuslblError.ErrorMessage = BeamOn_U3.ErrorStatus.BA_OK;
+            this.toolStripStatuslblError.ErrorMessageBeep = false;
+            this.toolStripStatuslblError.ForeColor = System.Drawing.Color.Black;
+            this.toolStripStatuslblError.LogTypeMessage = ((byte)(0));
+            this.toolStripStatuslblError.Margin = new System.Windows.Forms.Padding(0, 1, 2, 2);
+            this.toolStripStatuslblError.Name = "toolStripStatuslblError";
+            this.toolStripStatuslblError.PortName = "";
+            this.toolStripStatuslblError.Size = new System.Drawing.Size(220, 30);
+            this.toolStripStatuslblError.SystemMessage = ((ushort)(0));
+            // 
             // mainSplitContainer
             // 
             this.mainSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -1113,15 +1130,42 @@
             // 
             // imageSplitContainer.Panel2
             // 
-            this.imageSplitContainer.Panel2.AutoScroll = true;
             this.imageSplitContainer.Panel2.Controls.Add(this.formErrorMessage);
             this.imageSplitContainer.Panel2.Controls.Add(this.pictureBoxImage);
             this.imageSplitContainer.Panel2.Scroll += new System.Windows.Forms.ScrollEventHandler(this.imageSplitContainer_Panel2_Scroll);
+            this.imageSplitContainer.Panel2.Resize += new System.EventHandler(this.imageSplitContainer_Panel2_Resize);
             this.imageSplitContainer.Panel2MinSize = 480;
             this.imageSplitContainer.Size = new System.Drawing.Size(1016, 633);
             this.imageSplitContainer.SplitterDistance = 25;
             this.imageSplitContainer.TabIndex = 0;
             this.imageSplitContainer.TabStop = false;
+            // 
+            // picturePaletteImage
+            // 
+            this.picturePaletteImage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picturePaletteImage.Format = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
+            this.picturePaletteImage.Location = new System.Drawing.Point(0, 0);
+            this.picturePaletteImage.Name = "picturePaletteImage";
+            this.picturePaletteImage.PaletteLevelUp = 100F;
+            this.picturePaletteImage.Size = new System.Drawing.Size(25, 633);
+            this.picturePaletteImage.TabIndex = 0;
+            this.picturePaletteImage.TabStop = false;
+            this.picturePaletteImage.OnChangePalette += new PaletteImage.PaletteImage.ChangePalette(this.picturePaletteImage_OnChangePalette);
+            // 
+            // formErrorMessage
+            // 
+            this.formErrorMessage.BackColor = System.Drawing.SystemColors.Control;
+            this.formErrorMessage.DemoVersion = false;
+            this.formErrorMessage.ErrorMessage = BeamOn_U3.ErrorStatus.BA_OK;
+            this.formErrorMessage.ErrorMessageBeep = false;
+            this.formErrorMessage.Location = new System.Drawing.Point(3, 3);
+            this.formErrorMessage.LogTypeMessage = ((byte)(0));
+            this.formErrorMessage.Name = "formErrorMessage";
+            this.formErrorMessage.PortName = "";
+            this.formErrorMessage.Size = new System.Drawing.Size(197, 29);
+            this.formErrorMessage.SystemMessage = ((ushort)(0));
+            this.formErrorMessage.TabIndex = 5;
+            this.formErrorMessage.Visible = false;
             // 
             // pictureBoxImage
             // 
@@ -1132,6 +1176,7 @@
             this.pictureBoxImage.TabIndex = 4;
             this.pictureBoxImage.TabStop = false;
             this.pictureBoxImage.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxImage_Paint);
+            this.pictureBoxImage.Resize += new System.EventHandler(this.pictureBoxImage_Resize);
             // 
             // pictureBoxData
             // 
@@ -1146,6 +1191,7 @@
             this.pictureBoxData.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBoxData_MouseDown);
             this.pictureBoxData.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBoxData_MouseMove);
             this.pictureBoxData.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBoxData_MouseUp);
+            this.pictureBoxData.Resize += new System.EventHandler(this.pictureBoxData_Resize);
             // 
             // controlSplitContainer
             // 
@@ -1265,6 +1311,7 @@
             // 
             // viewGroupBox
             // 
+            this.viewGroupBox.Controls.Add(this.videoControl);
             this.viewGroupBox.Controls.Add(this.pictureBoxImageSmall);
             this.viewGroupBox.Dock = System.Windows.Forms.DockStyle.Top;
             this.viewGroupBox.Font = new System.Drawing.Font("Arial Rounded MT Bold", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1275,6 +1322,18 @@
             this.viewGroupBox.TabStop = false;
             this.viewGroupBox.Text = "View";
             // 
+            // videoControl
+            // 
+            this.videoControl.AutoSize = true;
+            this.videoControl.CurrentPosition = ((uint)(0u));
+            this.videoControl.Location = new System.Drawing.Point(26, 204);
+            this.videoControl.MaxPosition = ((uint)(100u));
+            this.videoControl.MinPosition = ((uint)(0u));
+            this.videoControl.Name = "videoControl";
+            this.videoControl.Size = new System.Drawing.Size(284, 54);
+            this.videoControl.TabIndex = 1;
+            this.videoControl.OnChangePosition += new VideoControl.VideoControl.ChangePosition(this.videoControl_OnChangePosition);
+            // 
             // pictureBoxImageSmall
             // 
             this.pictureBoxImageSmall.Location = new System.Drawing.Point(58, 31);
@@ -1283,6 +1342,9 @@
             this.pictureBoxImageSmall.TabIndex = 0;
             this.pictureBoxImageSmall.TabStop = false;
             this.pictureBoxImageSmall.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBoxImageSmall_Paint);
+            this.pictureBoxImageSmall.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBoxImageSmall_MouseDown);
+            this.pictureBoxImageSmall.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBoxImageSmall_MouseMove);
+            this.pictureBoxImageSmall.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBoxImageSmall_MouseUp);
             // 
             // propertyGroupBox
             // 
@@ -1394,7 +1456,7 @@
             this.trackBarGain.LargeChange = 1;
             this.trackBarGain.Location = new System.Drawing.Point(3, 19);
             this.trackBarGain.Name = "trackBarGain";
-            this.trackBarGain.Size = new System.Drawing.Size(293, 45);
+            this.trackBarGain.Size = new System.Drawing.Size(293, 43);
             this.trackBarGain.TabIndex = 3;
             this.trackBarGain.Scroll += new System.EventHandler(this.trackBarGain_Scroll);
             // 
@@ -1448,7 +1510,7 @@
             this.trackBarExposure.LargeChange = 500;
             this.trackBarExposure.Location = new System.Drawing.Point(3, 19);
             this.trackBarExposure.Name = "trackBarExposure";
-            this.trackBarExposure.Size = new System.Drawing.Size(293, 45);
+            this.trackBarExposure.Size = new System.Drawing.Size(293, 43);
             this.trackBarExposure.SmallChange = 10;
             this.trackBarExposure.TabIndex = 6;
             this.trackBarExposure.TickFrequency = 1000000;
@@ -1931,49 +1993,6 @@
             this.numericUpDownAngle.TabIndex = 7;
             this.numericUpDownAngle.ValueChanged += new System.EventHandler(this.numericUpDownAngle_ValueChanged);
             // 
-            // picturePaletteImage
-            // 
-            this.picturePaletteImage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.picturePaletteImage.Format = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
-            this.picturePaletteImage.Location = new System.Drawing.Point(0, 0);
-            this.picturePaletteImage.Name = "picturePaletteImage";
-            this.picturePaletteImage.PaletteLevelUp = 100F;
-            this.picturePaletteImage.Size = new System.Drawing.Size(25, 633);
-            this.picturePaletteImage.TabIndex = 0;
-            this.picturePaletteImage.TabStop = false;
-            this.picturePaletteImage.OnChangePalette += new PaletteImage.PaletteImage.ChangePalette(this.picturePaletteImage_OnChangePalette);
-            // 
-            // formErrorMessage
-            // 
-            this.formErrorMessage.BackColor = System.Drawing.SystemColors.Control;
-            this.formErrorMessage.DemoVersion = false;
-            this.formErrorMessage.ErrorMessage = BeamOn_U3.ErrorStatus.BA_OK;
-            this.formErrorMessage.ErrorMessageBeep = false;
-            this.formErrorMessage.Location = new System.Drawing.Point(3, 3);
-            this.formErrorMessage.LogTypeMessage = ((byte)(0));
-            this.formErrorMessage.Name = "formErrorMessage";
-            this.formErrorMessage.PortName = "";
-            this.formErrorMessage.Size = new System.Drawing.Size(197, 29);
-            this.formErrorMessage.SystemMessage = ((ushort)(0));
-            this.formErrorMessage.TabIndex = 5;
-            this.formErrorMessage.Visible = false;
-            // 
-            // toolStripStatuslblError
-            // 
-            this.toolStripStatuslblError.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripStatuslblError.AutoSize = false;
-            this.toolStripStatuslblError.BackColor = System.Drawing.Color.Black;
-            this.toolStripStatuslblError.DemoVersion = false;
-            this.toolStripStatuslblError.ErrorMessage = BeamOn_U3.ErrorStatus.BA_OK;
-            this.toolStripStatuslblError.ErrorMessageBeep = false;
-            this.toolStripStatuslblError.ForeColor = System.Drawing.Color.Black;
-            this.toolStripStatuslblError.LogTypeMessage = ((byte)(0));
-            this.toolStripStatuslblError.Margin = new System.Windows.Forms.Padding(0, 1, 2, 2);
-            this.toolStripStatuslblError.Name = "toolStripStatuslblError";
-            this.toolStripStatuslblError.PortName = "";
-            this.toolStripStatuslblError.Size = new System.Drawing.Size(220, 30);
-            this.toolStripStatuslblError.SystemMessage = ((ushort)(0));
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2007,6 +2026,7 @@
             this.imageSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.imageSplitContainer)).EndInit();
             this.imageSplitContainer.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImage)).EndInit();
             this.pictureBoxImage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxData)).EndInit();
@@ -2023,6 +2043,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.viewSplitContainer)).EndInit();
             this.viewSplitContainer.ResumeLayout(false);
             this.viewGroupBox.ResumeLayout(false);
+            this.viewGroupBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImageSmall)).EndInit();
             this.propertyGroupBox.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
@@ -2045,7 +2066,6 @@
             this.groupBoxPosition.ResumeLayout(false);
             this.groupBoxPosition.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownAngle)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picturePaletteImage)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2217,6 +2237,7 @@
         private System.Windows.Forms.SplitContainer viewSplitContainer;
         private System.Windows.Forms.GroupBox viewGroupBox;
         private System.Windows.Forms.PictureBox pictureBoxImageSmall;
+        private VideoControl.VideoControl videoControl;
     }
 }
 

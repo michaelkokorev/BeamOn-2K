@@ -29,6 +29,7 @@ namespace BeamOnCL
         protected int m_iCentroid = 0;
 
         double[] delta = new double[4];
+        protected UInt16 m_lineProfWidth = 2;
 
         public Gaussian GaussianData
         {
@@ -54,6 +55,12 @@ namespace BeamOnCL
         {
             m_rArea = rArea;
             Angle = 0;
+        }
+
+        public UInt16 LineProfWidth
+        {
+            get { return m_lineProfWidth; }
+            set { m_lineProfWidth = value; }
         }
 
         public Point CrossPoint
@@ -117,10 +124,10 @@ namespace BeamOnCL
             for (iLeft = 0; ((iLeft < m_sDataProfile.Length) && (m_sDataProfile[iLeft] < f_Board)); iLeft++) ;
             for (iRight = m_sDataProfile.Length - 1; ((iRight > 0) && (m_sDataProfile[iRight] < f_Board)); iRight--) ;
 
-            if ((iLeft == 0) || (m_sDataProfile[iLeft - 1] >= m_sDataProfile[iLeft])) return (0);
+            if ((iLeft == 0) || (iLeft >= m_sDataProfile.Length) || (m_sDataProfile[iLeft - 1] >= m_sDataProfile[iLeft])) return (0);
             f_Left = iLeft - (m_sDataProfile[iLeft] - f_Board) / (m_sDataProfile[iLeft] - m_sDataProfile[iLeft - 1]);
 
-            if ((iRight == m_sDataProfile.Length - 1) || (m_sDataProfile[iRight + 1] >= m_sDataProfile[iRight])) return (0);
+            if ((iRight == m_sDataProfile.Length - 1) || (iRight < 0) || (m_sDataProfile[iRight + 1] >= m_sDataProfile[iRight])) return (0);
             f_Right = iRight + (m_sDataProfile[iRight] - f_Board) / (m_sDataProfile[iRight] - m_sDataProfile[iRight + 1]);
             //}
 
@@ -151,40 +158,33 @@ namespace BeamOnCL
                     {
                         if (m_rArea.Contains(dot))
                         {
+                            nCount = 1;
                             m_sDataProfile[i] = GetPixelColor(snapshot, dot);
 
                             if (this.GetType() == typeof(SumProfile))
                             {
                                 if (true)
                                 {
-                                    nCount = 1;
-
                                     PointF pp = dot + sfp;
-                                    Int32 iAdress = (Int32)pp.X + (Int32)pp.Y * (Int32)m_rArea.Width;
 
                                     while (m_rArea.Contains(pp))
                                     {
-                                        m_sDataProfile[i] += snapshot.GetPixelColor(iAdress);
+                                        m_sDataProfile[i] += snapshot.GetPixelColor((Int32)pp.X + (Int32)pp.Y * (Int32)m_rArea.Width);
                                         pp += sfp;
-                                        iAdress = (Int32)pp.X + (Int32)pp.Y * (Int32)m_rArea.Width;
                                         nCount++;
                                     }
 
                                     pp = dot + sfp1;
-                                    iAdress = (Int32)pp.X + (Int32)pp.Y * (Int32)m_rArea.Width;
 
                                     while (m_rArea.Contains(pp))
                                     {
-                                        m_sDataProfile[i] += snapshot.GetPixelColor(iAdress);
+                                        m_sDataProfile[i] += snapshot.GetPixelColor((Int32)pp.X + (Int32)pp.Y * (Int32)m_rArea.Width);
                                         pp += sfp1;
-                                        iAdress = (Int32)pp.X + (Int32)pp.Y * (Int32)m_rArea.Width;
                                         nCount++;
                                     }
                                 }
                                 else
                                 {
-                                    nCount = 1;
-
                                     PointF pp = dot + sfp;
 
                                     while (m_rArea.Contains(pp))
@@ -200,6 +200,28 @@ namespace BeamOnCL
                                     {
                                         m_sDataProfile[i] += GetPixelColor(snapshot, pp);
                                         pp += sfp1;
+                                        nCount++;
+                                    }
+                                }
+
+                                m_sDataProfile[i] /= (float)nCount;
+                            }
+                            else if ((this.GetType() == typeof(LineProfile)) && (m_lineProfWidth > 0))
+                            {
+                                PointF pp = dot + sfp;
+                                PointF pp1 = dot + sfp1;
+
+                                for (int ii = 0; ii < m_lineProfWidth; ii++, pp += sfp, pp1 += sfp1)
+                                {
+                                    if (m_rArea.Contains(pp))
+                                    {
+                                        m_sDataProfile[i] += snapshot.GetPixelColor((Int32)pp.X + (Int32)pp.Y * (Int32)m_rArea.Width);
+                                        nCount++;
+                                    }
+
+                                    if (m_rArea.Contains(pp1))
+                                    {
+                                        m_sDataProfile[i] += snapshot.GetPixelColor((Int32)pp1.X + (Int32)pp1.Y * (Int32)m_rArea.Width);
                                         nCount++;
                                     }
                                 }

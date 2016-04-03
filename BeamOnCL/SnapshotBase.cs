@@ -63,6 +63,13 @@ namespace BeamOnCL
             return true;
         }
 
+        public virtual Boolean GetData(IntPtr bData, long timeStamp)
+        {
+            m_lTimeStamp = timeStamp;
+
+            return true;
+        }
+
         public virtual void SetData(IntPtr Data)
         {
         }

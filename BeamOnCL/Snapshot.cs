@@ -76,48 +76,28 @@ namespace BeamOnCL
                 return (UInt16)(object)m_tMatrixArray[point.X + point.Y * (int)m_rArea.Width];
         }
 
-        public override unsafe Boolean GetData(byte[] bData, long timeStamp)
+        public override Boolean GetData(IntPtr bData, long timeStamp)
         {
             m_lTimeStamp = timeStamp;
 
-            fixed (byte* pSource = bData)
+            try
             {
                 if (typeof(T) == typeof(byte))
-                    Marshal.Copy((IntPtr)pSource, m_tMatrixArray as byte[], 0, m_tMatrixArray.Length);
+                    Marshal.Copy(bData, m_tMatrixArray as byte[], 0, m_tMatrixArray.Length);
                 else
-                {
-                    Marshal.Copy((IntPtr)pSource, m_tMatrixArray as short[], 0, m_tMatrixArray.Length);
-/*
-                    fixed (ushort* uMatrix = m_tMatrixArray as ushort[])
-                    {
-                        byte* ps = pSource;
-
-                        //for (int i = 0, j = 0; i < bData.Length; i += 3, j += 2)
-                        //{
-                        //    //UInt32 ui = (UInt32)(bData[i + 2] << 16) + (UInt32)(bData[i + 1] << 8) + bData[i];
-                        //    //uMatrix[j] = (UInt16)(ui & 0x0fff);
-                        //    //uMatrix[j + 1] = (UInt16)(ui >> 12);
-
-                        //    //uMatrix[j] = (UInt16)(((UInt16)(bData[i + 1] << 8) + bData[i]) & 0x0fff);
-                        //    //uMatrix[j + 1] = (UInt16)(((UInt16)(bData[i + 2] << 8) + bData[i + 1]) >> 4);
-
-                        //    uMatrix[j] = (UInt16)((UInt16)(bData[i]));
-                        //    uMatrix[j + 1] = (UInt16)((UInt16)(bData[i + 2]));
-                        //}
-
-                        for (int j = 0; j < m_tMatrixArray.Length; j += 2)
-                        {
-                            uMatrix[j] = (UInt16)((*(ushort*)ps) & 0x0fff);
-                            ps++;
-                            uMatrix[j + 1] = (UInt16)(((*(ushort*)ps) >> 4) & 0x0fff);
-                            ps += 2;
-                        }
-                    }
- */ 
-                }
+                    Marshal.Copy(bData, m_tMatrixArray as short[], 0, m_tMatrixArray.Length);
             }
+            catch { }
 
             return Average();
+        }
+
+        public override unsafe Boolean GetData(byte[] bData, long timeStamp)
+        {
+            fixed (byte* pSource = bData)
+            {
+                return GetData((IntPtr)pSource, timeStamp);
+            }
         }
 
         public override unsafe SnapshotBase Clone()
@@ -168,6 +148,5 @@ namespace BeamOnCL
 
             return (m_uiCounter == 0);
         }
-
     }
 }

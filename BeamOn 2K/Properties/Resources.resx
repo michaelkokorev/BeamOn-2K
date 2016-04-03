@@ -133,6 +133,9 @@
   <data name="printer-icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\printer-icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="black-rewind-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\black-rewind-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Hand" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Hand.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -190,6 +193,15 @@
   <data name="Start" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Start.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="black-stop-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\black-stop-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="black-play-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\black-play-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Data_small" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Data_small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="View" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\View.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -199,13 +211,22 @@
   <data name="Step" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Step.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="black-end-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\black-end-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="black-fast-forward-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\black-fast-forward-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="PropertyS" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\PropertyS.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="black-skip-to-start-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\black-skip-to-start-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Data_new" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Data_new.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Data_small" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Data_small.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="black-repeat-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\black-repeat-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

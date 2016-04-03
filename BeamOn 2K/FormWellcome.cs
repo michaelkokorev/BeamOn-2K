@@ -9,6 +9,8 @@ namespace BeamOn_U3
     public partial class FormWellcome : Form
     {
         float m_fStep = 0.01f;
+        BeamOnCL.CheckHardware.CheckStatus m_checkStatus = BeamOnCL.CheckHardware.CheckStatus.csHardware;
+        String m_strUserDefinedName;
 
         public FormWellcome()
         {
@@ -140,32 +142,11 @@ namespace BeamOn_U3
 
         void beamOnCheck_OnGetCheckLevel(object sender, BeamOnCL.CheckHardware.NewCheckLevelEventArgs e)
         {
-            switch (e.Status)
-            {
-                case BeamOnCL.CheckHardware.CheckStatus.csHardware:
-                    this.labelSerialNumber.Text = "Serial Number: "+ e.UserDefinedName;
-                    lblCheckLevel.Text = "Checking hardware ...";
-                    checkProgress.Value = 25;
-                    break;
-                case BeamOnCL.CheckHardware.CheckStatus.csHead:
-                    this.labelSerialNumber.Text = "Serial Number: " + e.UserDefinedName;
-                    lblCheckLevel.Text = "Checking head ...";
-                    checkProgress.Value = 50;
-                    break;
-                case BeamOnCL.CheckHardware.CheckStatus.csTypeHead:
-                    this.labelSerialNumber.Text = "Serial Number: " + e.UserDefinedName;
-                    lblCheckLevel.Text = "Checking head type ...";
-                    checkProgress.Value = 75;
-                    break;
-                case BeamOnCL.CheckHardware.CheckStatus.csOk:
-                    this.labelSerialNumber.Text = "Serial Number: " + e.UserDefinedName;
-                    lblCheckLevel.Text = "Complete hardware test ...";
-                    checkProgress.Value = 100;
-                    timerSplash.Enabled = true;
-                    break;
-            }
+            m_checkStatus = e.Status;
+            m_strUserDefinedName = e.UserDefinedName;
 
             Application.DoEvents();
+            this.Invalidate();
         }
 
         void beamOnCheck_OnGetCheckError(object sender, BeamOnCL.CheckHardware.NewCheckLevelEventArgs e)
@@ -199,6 +180,34 @@ namespace BeamOn_U3
         private void FormWellcome_Load(object sender, EventArgs e)
         {
             timerSplash.Enabled = true;
+        }
+
+        private void FormWellcome_Paint(object sender, PaintEventArgs e)
+        {
+            switch (m_checkStatus)
+            {
+                case BeamOnCL.CheckHardware.CheckStatus.csHardware:
+                    this.labelSerialNumber.Text = "Serial Number: " + m_strUserDefinedName;
+                    lblCheckLevel.Text = "Checking hardware ...";
+                    checkProgress.Value = 25;
+                    break;
+                case BeamOnCL.CheckHardware.CheckStatus.csHead:
+                    this.labelSerialNumber.Text = "Serial Number: " + m_strUserDefinedName;
+                    lblCheckLevel.Text = "Checking head ...";
+                    checkProgress.Value = 50;
+                    break;
+                case BeamOnCL.CheckHardware.CheckStatus.csTypeHead:
+                    this.labelSerialNumber.Text = "Serial Number: " + m_strUserDefinedName;
+                    lblCheckLevel.Text = "Checking head type ...";
+                    checkProgress.Value = 75;
+                    break;
+                case BeamOnCL.CheckHardware.CheckStatus.csOk:
+                    this.labelSerialNumber.Text = "Serial Number: " + m_strUserDefinedName;
+                    lblCheckLevel.Text = "Complete hardware test ...";
+                    checkProgress.Value = 100;
+                    timerSplash.Enabled = true;
+                    break;
+            }
         }
     }
 }
