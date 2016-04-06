@@ -180,6 +180,13 @@ namespace BeamOnCL
                     {
                         m_camera.EventFrame += new EventHandler(cam_EventFrame);
 
+                        uEye.Defines.Status statusRet;
+                        uEye.Types.Range<Double> range;
+
+                        statusRet = m_camera.Timing.Framerate.GetFrameRateRange(out range);
+                        // set framerate
+                        statusRet = m_camera.Timing.Framerate.Set(range.Maximum);
+
                         if (m_camera.Acquisition.Capture() == uEye.Defines.Status.SUCCESS)
                         {
                             Stopwatch stopWatch = new Stopwatch();

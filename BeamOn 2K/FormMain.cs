@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Collections;
+using BeamOnCL;
 
 namespace BeamOn_U3
 {
@@ -43,6 +44,7 @@ namespace BeamOn_U3
         private delegate void AsyncTimeStamp(Int64 iValue);
         private delegate void AddItemAsyncDelegate();
         private delegate void CloseLogAsyncDelegate();
+        private delegate void UpdateButtonsAsyncDelegate();
 
         private delegate void SetEndLogCallback();
 
@@ -74,8 +76,8 @@ namespace BeamOn_U3
         private int iLevelSelected = -1;
         private int iLevelCurrent = -1;
 
-        BeamOnCL.Profile m_profileHorizontal = null;
-        BeamOnCL.Profile m_profileVertical = null;
+        Profile m_profileHorizontal = null;
+        Profile m_profileVertical = null;
         Point[] plArea = null;
         Point pointSensorCenter = new Point();
 
@@ -120,10 +122,9 @@ namespace BeamOn_U3
         private double m_dAveragePowerDataSum;
 
         public String m_strSystemTitle;
-        private BeamOnCL.SnapshotBase m_snapshot = null;
+        private SnapshotBase m_snapshot = null;
         private bool m_bFreezePicture = false;
 
-        ArrayList m_arraySapshot = null;
         private Point m_startLocation;
         private bool m_bRectMove;
 
@@ -161,25 +162,8 @@ namespace BeamOn_U3
             m_strFilterName[3] = "ND1000";
         }
 
-        void bm_OnImageReceved(object sender, BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs e)
+        private void GetSnapshotData(MeasureCameraBase.NewDataRecevedEventArgs e)
         {
-            if (e.FastMode == true)
-            {
-                if (m_ffmddLog != null) m_ffmddLog.AddData(e.Snapshot.TimeStamp);
-                if (m_arraySapshot == null) m_arraySapshot = new ArrayList();
-                m_arraySapshot.Add(e.Snapshot.Clone());
-                return;
-            }
-
-            //if (InvokeRequired)
-            //{
-            //    // If called from a different thread, we must use the Invoke method to marshal the call to the proper GUI thread.
-            //    // The grab result will be disposed after the event call. Clone the event arguments for marshaling to the GUI thread. 
-            //    BeginInvoke(new EventHandler<BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs>(bm_OnImageReceved), sender, e.Clone());
-            //    return;
-            //}
-            //BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs e = ee.Clone();
-
             if (m_bFreezePicture == false)
             {
                 m_snapshot = e.Snapshot.Clone();
@@ -281,21 +265,30 @@ namespace BeamOn_U3
                 }
             }
 
-            //m_sw.Stop();
-
             AsyncTimeStamp asyncTimeStamp = new AsyncTimeStamp(UpdateVisibleAsync);
             asyncTimeStamp.BeginInvoke(m_sw.ElapsedMilliseconds, null, null);
+        }
 
-            //System.Threading.Thread.Sleep(10);
+        void bm_OnImageReceved(object sender, MeasureCameraBase.NewDataRecevedEventArgs e)
+        {
+            if ((e.FastMode == true) && (videoControl.Mode == VideoControl.VideoControl.VideoMode.vmRecord))
+            {
+                if (m_ffmddLog != null) m_ffmddLog.AddData(e.Snapshot.TimeStamp);
+                videoControl.AddData(e.Snapshot.Clone());
+            }
 
-            //m_sw = Stopwatch.StartNew();
-            //m_sw.Start();
-            /*
-                        this.Invalidate();
-                        dataSplitContainer.Panel2.Invalidate();
-                        //            pictureBoxImage.Invalidate();
-                        pictureBoxData.Invalidate();
-            */
+            if (videoControl.Mode != VideoControl.VideoControl.VideoMode.vmNone) return;
+
+            //if (InvokeRequired)
+            //{
+            //    // If called from a different thread, we must use the Invoke method to marshal the call to the proper GUI thread.
+            //    // The grab result will be disposed after the event call. Clone the event arguments for marshaling to the GUI thread. 
+            //    BeginInvoke(new EventHandler<BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs>(bm_OnImageReceved), sender, e.Clone());
+            //    return;
+            //}
+            //BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs e = ee.Clone();
+
+            GetSnapshotData(e);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2330,7 +2323,7 @@ namespace BeamOn_U3
                 m_ffmddLog = new FileFastModeData();
                 m_ffmddLog.OnStopFastMode += new FileFastModeData.StopFastMode(m_ffmddLog_OnStopFastMode);
 
-                m_arraySapshot = null;
+                videoControl.StartRecordData();
 
                 m_SystemMessage |= (UInt16)SystemStatus.M_SS_FAST_MODE;
             }
@@ -2344,11 +2337,16 @@ namespace BeamOn_U3
 
                 m_ffmddLog.CreateFastModeDataFile();
 
+                videoControl.StartPlayData();
+
                 m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_FAST_MODE));
             }
 
             AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
             asyncSM.BeginInvoke(null, null);
+
+            //UpdateButtonsAsyncDelegate asyncUpdateBtn = new UpdateButtonsAsyncDelegate(UpdateButtonsState);
+            //asyncUpdateBtn.BeginInvoke(null, null);
 
             runningToolStripButton.ToolTipText = mnuFileStartRunningMode.ToolTipText;
             //            runningToolStripButton.Image = mnuFileStartRunningMode.Image;
@@ -2380,7 +2378,11 @@ namespace BeamOn_U3
                     this.mnuFileSetupRunningMode.Enabled = !this.mnuFileStartRunningMode.Checked;
                     this.runningSetupToolStripButton.Enabled = this.mnuFileSetupRunningMode.Enabled;
 
+                    m_ffmddLog.CreateFastModeDataFile();
+
                     m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_FAST_MODE));
+
+                    videoControl.StartPlayData();
 
                     AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
                     asyncSM.BeginInvoke(null, null);
@@ -2393,6 +2395,8 @@ namespace BeamOn_U3
 
         void m_ffmddLog_OnStopFastMode(object sender, EventArgs e)
         {
+            videoControl.StopRecordData();
+
             CloseLogAsyncDelegate asyncCloseLog = new CloseLogAsyncDelegate(CloseFastModeData);
             asyncCloseLog.BeginInvoke(null, null);
         }
@@ -2505,9 +2509,14 @@ namespace BeamOn_U3
             pictureBoxImage.Top = 0;
         }
 
-        private void videoControl_OnChangePosition(object sender, VideoControl.PositionEventArgs e)
+        private void videoControl_OnChangePosition(object sender, BeamOnCL.MeasureCameraBase.NewDataRecevedEventArgs e)
         {
+            GetSnapshotData(e);
+        }
 
+        private void videoControl_OnCloseFastModeData(object sender, EventArgs e)
+        {
+            CloseFastModeData();
         }
     }
 }

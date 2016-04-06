@@ -82,6 +82,7 @@ namespace BeamOnCL
         protected string m_strUserDefinedName;
         protected UInt16 m_uiAverageNum = 1;
         protected Boolean m_bFastMode = false;
+        protected long m_lTimeStamp = 0;
 
         protected void m_camera_ConnectionLost(object sender, EventArgs e)
         {
@@ -106,7 +107,11 @@ namespace BeamOnCL
         public virtual Boolean FastMode
         {
             get { return m_bFastMode; }
-            set { m_bFastMode = value; }
+            set
+            {
+                m_bFastMode = value;
+                m_lTimeStamp = 0;
+            }
         }
 
         public virtual String SerialNumber

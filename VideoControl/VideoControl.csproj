@@ -71,7 +71,12 @@
       <DependentUpon>VideoControl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\BeamOnCL\BeamOnCL.csproj">
+      <Project>{1CFF4952-DBC7-4C41-B34D-D99DB9429EBA}</Project>
+      <Name>BeamOnCL</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\black-end-32.png" />
     <Content Include="Resources\black-fast-forward-32.png" />

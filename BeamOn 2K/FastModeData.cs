@@ -314,7 +314,8 @@ namespace BeamOn_U3
                 m_dStartTime = Timestamp;
             }
 
-            dDuration = (Timestamp - m_dStartTime) / 1000000000f;
+//            dDuration = (Timestamp - m_dStartTime) / 1000000000f;
+            dDuration = (Timestamp - m_dStartTime) / 1000f;
 
             m_arrayFastData.Add(dDuration);
 

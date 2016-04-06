@@ -1330,9 +1330,10 @@
             this.videoControl.MaxPosition = ((uint)(100u));
             this.videoControl.MinPosition = ((uint)(0u));
             this.videoControl.Name = "videoControl";
-            this.videoControl.Size = new System.Drawing.Size(284, 54);
+            this.videoControl.Size = new System.Drawing.Size(284, 76);
             this.videoControl.TabIndex = 1;
-            this.videoControl.OnChangePosition += new VideoControl.VideoControl.ChangePosition(this.videoControl_OnChangePosition);
+            this.videoControl.OnChangePosition += new VideoControl.VideoControl.ChangePosition(videoControl_OnChangePosition);
+            this.videoControl.OnCloseFastModeData += new VideoControl.VideoControl.CloseFastModeData(this.videoControl_OnCloseFastModeData);
             // 
             // pictureBoxImageSmall
             // 

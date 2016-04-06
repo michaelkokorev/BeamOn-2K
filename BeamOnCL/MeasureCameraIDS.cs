@@ -56,7 +56,9 @@ namespace BeamOnCL
 
                         stopWatch.Stop();
 
-                        if (m_snapshot.GetData(ptrImage, stopWatch.ElapsedMilliseconds) == true)
+                        if(m_bFastMode) m_lTimeStamp += stopWatch.ElapsedMilliseconds;
+
+                        if (m_snapshot.GetData(ptrImage, m_lTimeStamp) == true)
                             m_camera_CameraOpened(this, new NewDataRecevedEventArgs(m_snapshot, m_bFastMode));
 
                         stopWatch = Stopwatch.StartNew();
@@ -81,6 +83,14 @@ namespace BeamOnCL
                     m_camera.Information.GetCameraInfo(out cameraInfo);
 
                     m_strSerialNumber = cameraInfo.SerialNumber;
+
+                    uEye.Defines.Status statusRet;
+                    uEye.Types.Range<Double> range;
+
+                    statusRet = m_camera.Timing.Framerate.GetFrameRateRange(out range);
+                    // set framerate
+                    statusRet = m_camera.Timing.Framerate.Set(range.Maximum);
+
 
                     m_camera.AutoFeatures.Software.Gain.SetEnable(false);
                     m_camera.AutoFeatures.Software.Shutter.SetEnable(false);
