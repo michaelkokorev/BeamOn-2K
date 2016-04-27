@@ -63,6 +63,26 @@ namespace VideoControl.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _1460041379_player_record {
+            get {
+                object obj = ResourceManager.GetObject("1460041379_player_record", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap _1460382430_178_Download {
+            get {
+                object obj = ResourceManager.GetObject("1460382430_178_Download", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap black_end_32 {
             get {
                 object obj = ResourceManager.GetObject("black-end-32", resourceCulture);
@@ -126,6 +146,26 @@ namespace VideoControl.Properties {
         internal static System.Drawing.Bitmap black_stop_32 {
             get {
                 object obj = ResourceManager.GetObject("black-stop-32", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap PropertyS {
+            get {
+                object obj = ResourceManager.GetObject("PropertyS", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Setting_Running_Rabbit_icon1 {
+            get {
+                object obj = ResourceManager.GetObject("Setting-Running-Rabbit-icon1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -7,31 +7,69 @@ namespace BeamOnCL
 {
     public class SumAveragePicture<T> : AveragePicture
     {
-        public SumAveragePicture(UInt64 tSize)
+        public SumAveragePicture(UInt32 tSize)
             : base(tSize)
         {
         }
 
-        public override Boolean Average(ref object[] aAverageData)
+        public unsafe override Boolean Average(IntPtr aAverageData)
         {
             if (m_uiAverageNum > 1)
             {
                 if (m_fStart == true)
                 {
                     m_fStart = false;
-                    for (int i = 0; i < m_uiAverageDataSum.Length; i++) m_uiAverageDataSum[i] = (UInt32)aAverageData[i];
+
+                    if (typeof(T) == typeof(byte))
+                    {
+                        byte* ptr = (byte*)aAverageData.ToPointer();
+
+                        for (int i = 0; i < m_uiAverageDataSum.Length; i++) m_uiAverageDataSum[i] = (UInt32)ptr[i];
+                    }
+                    else
+                    {
+                        short* ptr = (short*)aAverageData.ToPointer();
+
+                        for (int i = 0; i < m_uiAverageDataSum.Length; i++) m_uiAverageDataSum[i] = (UInt32)ptr[i];
+                    }
                 }
                 else
-                    for (int i = 0; i < m_uiAverageDataSum.Length; i++) m_uiAverageDataSum[i] += (UInt32)aAverageData[i];
+                {
+                    if (typeof(T) == typeof(byte))
+                    {
+                        byte* ptr = (byte*)aAverageData.ToPointer();
+
+                        for (int i = 0; i < m_uiAverageDataSum.Length; i++) m_uiAverageDataSum[i] += (UInt32)ptr[i];
+                    }
+                    else
+                    {
+                        short* ptr = (short*)aAverageData.ToPointer();
+
+                        for (int i = 0; i < m_uiAverageDataSum.Length; i++) m_uiAverageDataSum[i] += (UInt32)ptr[i];
+                    }
+                }
 
                 if (++m_uiCounter >= m_uiAverageNum)
                 {
                     Reset();
 
-                    for (int i = 0; i < m_uiAverageDataSum.Length; i++)
+                    if (typeof(T) == typeof(byte))
                     {
-                        aAverageData[i] = (T)(object)(m_uiAverageDataSum[i] / m_uiAverageNum);
-                        m_uiAverageDataSum[i] = 0;
+                        byte* ptr = (byte*)aAverageData.ToPointer();
+                        for (int i = 0; i < m_uiAverageDataSum.Length; i++)
+                        {
+                            ptr[i] = (byte)(m_uiAverageDataSum[i] / m_uiAverageNum);
+                            m_uiAverageDataSum[i] = 0;
+                        }
+                    }
+                    else
+                    {
+                        short* ptr = (short*)aAverageData.ToPointer();
+                        for (int i = 0; i < m_uiAverageDataSum.Length; i++)
+                        {
+                            ptr[i] = (short)(m_uiAverageDataSum[i] / m_uiAverageNum);
+                            m_uiAverageDataSum[i] = 0;
+                        }
                     }
                 }
             }

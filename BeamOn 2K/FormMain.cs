@@ -99,7 +99,6 @@ namespace BeamOn_U3
 
         SystemData m_sysData = SystemData.MyInstance;
         FileLogData m_fldLog = null;
-        FileFastModeData m_ffmddLog = null;
 
         UInt16 m_SystemMessage = 0;
         Form3DProjection m_frm3D = null;
@@ -273,7 +272,6 @@ namespace BeamOn_U3
         {
             if ((e.FastMode == true) && (videoControl.Mode == VideoControl.VideoControl.VideoMode.vmRecord))
             {
-                if (m_ffmddLog != null) m_ffmddLog.AddData(e.Snapshot.TimeStamp);
                 videoControl.AddData(e.Snapshot.Clone());
             }
 
@@ -294,11 +292,6 @@ namespace BeamOn_U3
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void propertyBoxToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
-        {
-            dataSplitContainer.Panel1Collapsed = !propertyBoxToolStripMenuItem.Checked;
         }
 
         private void toolBarToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1432,11 +1425,6 @@ namespace BeamOn_U3
             mnuFileSetupDataCollection.Enabled = measuringToolStripMenuItem.Checked;
             tbOptionsStartDataCollection.Checked = measuringToolStripMenuItem.Checked;
             mnuFileStartDataCollection.Checked = measuringToolStripMenuItem.Checked;
-
-            mnuFileSetupRunningMode.Enabled = measuringToolStripMenuItem.Checked;
-            runningSetupToolStripButton.Enabled = measuringToolStripMenuItem.Checked;
-            runningToolStripButton.Checked = measuringToolStripMenuItem.Checked;
-            mnuFileStartRunningMode.Checked = measuringToolStripMenuItem.Checked;
         }
 
         private void measuringToolStrip_CheckedChanged(object sender, EventArgs e)
@@ -1606,7 +1594,7 @@ namespace BeamOn_U3
         private void buttonCollapseProperty_Click(object sender, EventArgs e)
         {
             dataSplitContainer.Panel1Collapsed = !dataSplitContainer.Panel1Collapsed;
-            propertyBoxToolStripMenuItem.Checked = !dataSplitContainer.Panel1Collapsed;
+            controlPanelToolStripMenuItem.Checked = !dataSplitContainer.Panel1Collapsed;
         }
 
         private void tbViewProjection_Click(object sender, EventArgs e)
@@ -1791,7 +1779,7 @@ namespace BeamOn_U3
 
             dataSplitContainer.Panel1Collapsed = !m_sysData.applicationData.bViewControlPanel;
             dataSplitContainer.SplitterDistance = dataSplitContainer.Panel1MinSize;
-            propertyBoxToolStripMenuItem.Checked = !dataSplitContainer.Panel1Collapsed;
+            controlPanelToolStripMenuItem.Checked = !dataSplitContainer.Panel1Collapsed;
         }
 
         private void powerToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2207,23 +2195,6 @@ namespace BeamOn_U3
             return bRet;
         }
 
-        private void dataPanelToolStrip_Click(object sender, EventArgs e)
-        {
-            if (sender.GetType() == typeof(ToolStripButton))
-                dataPanelToolStripMenuItem.Checked = dataViewToolStripButton.Checked;
-            else if (sender.GetType() == typeof(ToolStripMenuItem))
-                dataViewToolStripButton.Checked = dataPanelToolStripMenuItem.Checked;
-
-            m_sysData.applicationData.bViewDataPanel = dataPanelToolStripMenuItem.Checked;
-            controlSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
-
-            mainSplitContainer.Panel2MinSize = ((controlSplitContainer.Panel2Collapsed == false) ? /*controlSplitContainer.Panel2MinSize*/321 : 0) + /*controlSplitContainer.Panel1MinSize*/ 37 + controlSplitContainer.SplitterWidth;
-            mainSplitContainer.SplitterDistance = mainSplitContainer.Width - mainSplitContainer.SplitterWidth - mainSplitContainer.Panel2MinSize;
-
-            //            mainSplitContainer.Panel2Collapsed = !m_sysData.applicationData.bViewDataPanel;
-            propertyBoxToolStripMenuItem.Enabled = m_sysData.applicationData.bViewDataPanel;
-        }
-
         private void numericUpDownAngle_ValueChanged(object sender, EventArgs e)
         {
             AsyncChangeAngle asyncChangeAngle = new AsyncChangeAngle(UpdateAngleProfile);
@@ -2277,141 +2248,6 @@ namespace BeamOn_U3
             base.OnMouseWheel(e);
         }
 
-        private void runningToolStripButton_Click(object sender, EventArgs e)
-        {
-            if ((m_sysData.fastModeData.strFileName == null) || (m_sysData.fastModeData.strFileName.Equals("") == true))
-            {
-                CustomMessageBox.Show("Not specified the name and path for the Fast Mode data file.",
-                                                        "Save Fast Mode data File",
-                                                        MessageBoxButtons.OK,
-                                                        MessageBoxIcon.Error);
-                return;
-            }
-
-            FileInfo fi = new FileInfo(m_sysData.fastModeData.strFileName);
-
-            if (sender.ToString().Contains("Start") == true)
-            {
-                if (File.Exists(m_sysData.fastModeData.strFileName))
-                {
-                    if (CustomMessageBox.Show("This file '" + fi.Name + "' already exists. \nDo you want to replace it?",
-                                        "Save Fast Mode data File",
-                                        MessageBoxButtons.YesNo,
-                                        MessageBoxIcon.Question) == DialogResult.No)
-                        return;
-                    else
-                        File.Delete(m_sysData.fastModeData.strFileName);
-                }
-
-            }
-
-            EnableFastModeData(sender.ToString().Contains("Start"));
-        }
-
-        private void EnableFastModeData(Boolean bEnable)
-        {
-            bm.FastMode = bEnable;
-
-            if (bm.FastMode == true)
-            {
-                mnuFileStartRunningMode.Checked = true;
-                //                mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Hand;
-                mnuFileStartRunningMode.Text = "Stop &Running Mode";
-                mnuFileStartRunningMode.ToolTipText = "Stop Running Mode";
-                runningToolStripButton.Text = "Stop Running";
-
-                m_ffmddLog = new FileFastModeData();
-                m_ffmddLog.OnStopFastMode += new FileFastModeData.StopFastMode(m_ffmddLog_OnStopFastMode);
-
-                videoControl.StartRecordData();
-
-                m_SystemMessage |= (UInt16)SystemStatus.M_SS_FAST_MODE;
-            }
-            else
-            {
-                mnuFileStartRunningMode.Checked = false;
-                //                mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Start;
-                mnuFileStartRunningMode.Text = "Start &Running Mode";
-                mnuFileStartRunningMode.ToolTipText = "Start Running Mode";
-                runningToolStripButton.Text = "Start Running";
-
-                m_ffmddLog.CreateFastModeDataFile();
-
-                videoControl.StartPlayData();
-
-                m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_FAST_MODE));
-            }
-
-            AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
-            asyncSM.BeginInvoke(null, null);
-
-            //UpdateButtonsAsyncDelegate asyncUpdateBtn = new UpdateButtonsAsyncDelegate(UpdateButtonsState);
-            //asyncUpdateBtn.BeginInvoke(null, null);
-
-            runningToolStripButton.ToolTipText = mnuFileStartRunningMode.ToolTipText;
-            //            runningToolStripButton.Image = mnuFileStartRunningMode.Image;
-            runningToolStripButton.Checked = mnuFileStartRunningMode.Checked;
-
-
-            mnuFileSetupDataCollection.Enabled = !mnuFileStartRunningMode.Checked;
-            runningToolStripButton.Enabled = mnuFileStartRunningMode.Enabled;
-        }
-
-        private void CloseFastModeData()
-        {
-            try
-            {
-                this.Invoke((MethodInvoker)delegate
-                {
-                    bm.FastMode = false;
-
-                    this.mnuFileStartRunningMode.Checked = false;
-                    //                    this.mnuFileStartRunningMode.Image = global::BeamOn_U3.Properties.Resources.Start;
-                    this.mnuFileStartRunningMode.Text = "Start &Running Mode";
-                    this.mnuFileStartRunningMode.ToolTipText = "Start Running Mode";
-
-                    this.runningToolStripButton.ToolTipText = this.mnuFileStartRunningMode.ToolTipText;
-                    //this.runningToolStripButton.Image = this.mnuFileStartRunningMode.Image;
-                    this.runningToolStripButton.Text = "Start Running";
-                    this.runningToolStripButton.Checked = this.mnuFileStartRunningMode.Checked;
-
-                    this.mnuFileSetupRunningMode.Enabled = !this.mnuFileStartRunningMode.Checked;
-                    this.runningSetupToolStripButton.Enabled = this.mnuFileSetupRunningMode.Enabled;
-
-                    m_ffmddLog.CreateFastModeDataFile();
-
-                    m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_FAST_MODE));
-
-                    videoControl.StartPlayData();
-
-                    AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
-                    asyncSM.BeginInvoke(null, null);
-                });
-            }
-            catch
-            {
-            }
-        }
-
-        void m_ffmddLog_OnStopFastMode(object sender, EventArgs e)
-        {
-            videoControl.StopRecordData();
-
-            CloseLogAsyncDelegate asyncCloseLog = new CloseLogAsyncDelegate(CloseFastModeData);
-            asyncCloseLog.BeginInvoke(null, null);
-        }
-
-        private void runningSetupToolStripItem_Click(object sender, EventArgs e)
-        {
-            FormSetupFastMode formSetupFastMode = new FormSetupFastMode();
-
-            if (formSetupFastMode.ShowDialog() == DialogResult.OK)
-            {
-                mnuFileStartRunningMode.Enabled = true;
-                runningToolStripButton.Enabled = mnuFileStartRunningMode.Enabled;
-            }
-        }
-
         private void ChangeViewPanels()
         {
             controlSplitContainer.Panel2Collapsed = ((m_sysData.applicationData.bViewControlPanel == false) && (m_sysData.applicationData.bViewDataPanel == false) && (m_sysData.applicationData.bViewImagePanel == false));
@@ -2424,8 +2260,12 @@ namespace BeamOn_U3
             mainSplitContainer.SplitterDistance = mainSplitContainer.Width - mainSplitContainer.SplitterWidth - mainSplitContainer.Panel2MinSize;
 
             dataPanelToolStripMenuItem.Checked = m_sysData.applicationData.bViewDataPanel;
-            dataViewToolStripButton.Checked = dataPanelToolStripMenuItem.Checked;
-            propertyBoxToolStripMenuItem.Checked = m_sysData.applicationData.bViewControlPanel;
+            controlPanelToolStripMenuItem.Checked = m_sysData.applicationData.bViewControlPanel;
+            viewPanelToolStripMenuItem.Checked = m_sysData.applicationData.bViewImagePanel;
+
+            dataCheckBox.Checked = dataPanelToolStripMenuItem.Checked;
+            propertyCheckBox.Checked = controlPanelToolStripMenuItem.Checked;
+            viewCheckBox.Checked = viewPanelToolStripMenuItem.Checked;
 
             if (m_sysData.applicationData.bViewDataPanel) dataSplitContainer.SplitterDistance = dataSplitContainer.Panel1MinSize;
 
@@ -2437,6 +2277,15 @@ namespace BeamOn_U3
             m_sysData.applicationData.bViewDataPanel = dataCheckBox.Checked;
             m_sysData.applicationData.bViewControlPanel = propertyCheckBox.Checked;
             m_sysData.applicationData.bViewImagePanel = viewCheckBox.Checked;
+
+            ChangeViewPanels();
+        }
+
+        private void PanelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_sysData.applicationData.bViewDataPanel = dataPanelToolStripMenuItem.Checked;
+            m_sysData.applicationData.bViewControlPanel = controlPanelToolStripMenuItem.Checked;
+            m_sysData.applicationData.bViewImagePanel = viewPanelToolStripMenuItem.Checked;
 
             ChangeViewPanels();
         }
@@ -2517,6 +2366,44 @@ namespace BeamOn_U3
         private void videoControl_OnCloseFastModeData(object sender, EventArgs e)
         {
             CloseFastModeData();
+        }
+
+        private void videoControl_OnChangeVideoMode(object sender, VideoControl.VideoControl.NewVideoModeEventArgs e)
+        {
+            EnableFastModeData(e.Mode == VideoControl.VideoControl.VideoMode.vmRecord);
+        }
+
+        private void EnableFastModeData(Boolean bEnable)
+        {
+            bm.FastMode = bEnable;
+
+            if (bm.FastMode == true)
+                m_SystemMessage |= (UInt16)SystemStatus.M_SS_FAST_MODE;
+            else
+                m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_FAST_MODE));
+
+            AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
+            asyncSM.BeginInvoke(null, null);
+        }
+
+        private void CloseFastModeData()
+        {
+            try
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    bm.FastMode = false;
+                    m_SystemMessage = (UInt16)(m_SystemMessage & (~(int)SystemStatus.M_SS_FAST_MODE));
+
+                    videoControl.StartPlayData();
+
+                    AddItemAsyncDelegate asyncSM = new AddItemAsyncDelegate(UpdateSystemMessage);
+                    asyncSM.BeginInvoke(null, null);
+                });
+            }
+            catch
+            {
+            }
         }
     }
 }

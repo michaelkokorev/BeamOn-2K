@@ -107,6 +107,35 @@ namespace BeamOnCL
             m_dCoef_C = m_dMajorRadius * m_dMinorRadius;
         }
 
+        public void GetMaxX(ref float pfX1, ref float pfX2)
+        {
+            double dDelta;
+            float fTmp;
+
+            switch (Type)
+            {
+                case Figure.enRectangle:
+                    {
+                        dDelta = Math.Abs(m_dMinorRadius * m_dCos) + Math.Abs(m_dMajorRadius * m_dSin);
+                        pfX1 = (float)(Centroid.X - dDelta);
+                        pfX2 = (float)(Centroid.X + dDelta);
+                        if (pfX1 > pfX2)
+                        {
+                            fTmp = pfX1;
+                            pfX1 = pfX2;
+                            pfX2 = fTmp;
+                        }
+                    }
+                    break;
+                case Figure.enCircle:
+                case Figure.enEllipse:
+                    pfX1 = (float)(Centroid.X - Math.Sqrt(m_dCoef_AX));
+                    pfX2 = (float)(Centroid.X + Math.Sqrt(m_dCoef_AX));
+                    break;
+            }
+        }
+
+
         public void GetMaxY(ref float pfY1, ref float pfY2)
         {
             double dDelta;
@@ -136,6 +165,83 @@ namespace BeamOnCL
                     pfY2 = (float)(Centroid.Y + Math.Sqrt(m_dCoef_AY));
                     break;
             }
+        }
+        public Boolean GetCrossY(float fX, ref float pfY1, ref float pfY2)
+        {
+            Boolean bRet = false;
+            double newX;
+            double newXSq;
+            double dDelta;
+            float fTmp;
+
+            newX = fX - Centroid.X;
+            newXSq = newX * newX;
+
+            switch (Type)
+            {
+                case Figure.enRectangle:
+
+                    dDelta = Math.Abs(m_dMinorRadius * m_dSin) + Math.Abs(m_dMajorRadius * m_dCos);
+
+                    if (Math.Abs(newX) <= dDelta)
+                    {
+                        dDelta = Math.Abs(m_dMajorRadius * m_dSin) + Math.Abs(m_dMinorRadius * m_dCos);
+                        bRet = true;
+
+                        if ((Math.Abs(m_dCos) > 0.0001) && (Math.Abs(m_dSin) > 0.0001))
+                        {
+                            if (dDelta >= Math.Abs((newX * m_dCos - m_dMajorRadius) / m_dSin))
+                                pfY1 = (float)(Centroid.Y - (newX * m_dCos - m_dMajorRadius) / m_dSin);
+                            else if ((dDelta >= Math.Abs((newX * m_dCos + m_dMajorRadius) / m_dSin)))
+                                pfY1 = (float)(Centroid.Y - (newX * m_dCos + m_dMajorRadius) / m_dSin);
+                            else if (dDelta >= Math.Abs((newX * m_dSin - m_dMinorRadius) / m_dCos))
+                                pfY1 = (float)(Centroid.Y + (newX * m_dSin - m_dMinorRadius) / m_dCos);
+                            else if (dDelta >= Math.Abs((newX * m_dSin + m_dMinorRadius) / m_dCos))
+                                pfY1 = (float)(Centroid.Y + (newX * m_dSin + m_dMinorRadius) / m_dCos);
+
+                            if (dDelta >= Math.Abs((newX * m_dCos - m_dMajorRadius) / m_dSin))
+                                pfY2 = (float)(Centroid.Y - (newX * m_dCos - m_dMajorRadius) / m_dSin);
+                            if ((dDelta >= Math.Abs((newX * m_dCos + m_dMajorRadius) / m_dSin)))
+                                pfY2 = (float)(Centroid.Y - (newX * m_dCos + m_dMajorRadius) / m_dSin);
+                            if (dDelta >= Math.Abs((newX * m_dSin - m_dMinorRadius) / m_dCos))
+                                pfY2 = (float)(Centroid.Y + (newX * m_dSin - m_dMinorRadius) / m_dCos);
+                            if (dDelta >= Math.Abs((newX * m_dSin + m_dMinorRadius) / m_dCos))
+                                pfY2 = (float)(Centroid.Y + (newX * m_dSin + m_dMinorRadius) / m_dCos);
+                        }
+                        else if (Math.Abs(m_dSin) > 0.0001)
+                        {
+                            pfY1 = (float)(Centroid.Y - m_dMajorRadius);
+                            pfY2 = (float)(Centroid.Y + m_dMajorRadius);
+                        }
+                        else
+                        {
+                            pfY1 = (float)(Centroid.Y - m_dMinorRadius);
+                            pfY2 = (float)(Centroid.Y + m_dMinorRadius);
+                        }
+
+                        if (pfY1 > pfY2)
+                        {
+                            fTmp = pfY1;
+                            pfY1 = pfY2;
+                            pfY2 = fTmp;
+                        }
+                    }
+                    break;
+                case Figure.enCircle:
+                    break;
+                case Figure.enEllipse:
+                    dDelta = m_dCoef_AX - newXSq;
+
+                    if (dDelta >= 0)
+                    {
+                        bRet = true;
+                        pfY1 = (float)(Centroid.Y + (m_dCoef_BY * newX - m_dCoef_C * Math.Sqrt(dDelta)) / m_dCoef_AX);
+                        pfY2 = (float)(Centroid.Y + (m_dCoef_BY * newX + m_dCoef_C * Math.Sqrt(dDelta)) / m_dCoef_AX);
+                    }
+                    break;
+            }
+
+            return bRet;
         }
 
         public Boolean GetCrossX(float fY, ref float pfX1, ref float pfX2)

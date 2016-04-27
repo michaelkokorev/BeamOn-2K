@@ -11,29 +11,46 @@ namespace BeamOnCL
         protected Rectangle m_rArea;
         protected bool m_fStart = true;
         protected UInt16 m_uiCounter = 0;
-        protected ushort m_uiAverageNum = 0;
-        protected uint[] m_uiAverageDataSum = null;
+        //protected ushort m_uiAverageNum = 0;
+        //protected uint[] m_uiAverageDataSum = null;
+        protected AveragePicture m_apAverage = null;
         protected long m_lTimeStamp = 0;
+
+        //public void AverageReset()
+        //{
+        //    m_fStart = true;
+        //    m_uiCounter = 0;
+        //}
+
+        //public UInt16 AverageNum
+        //{
+        //    get { return m_uiAverageNum; }
+        //    set
+        //    {
+        //        AverageReset();
+        //        m_uiAverageNum = value;
+        //    }
+        //}
 
         public void AverageReset()
         {
-            m_fStart = true;
-            m_uiCounter = 0;
+            if (m_apAverage != null) m_apAverage.Reset();
         }
 
-        public UInt16 AverageNum
+        public virtual UInt16 AverageNum
         {
-            get { return m_uiAverageNum; }
+            get { return (m_apAverage != null) ? m_apAverage.AverageNum : (UInt16)0; }
             set
             {
-                AverageReset();
-                m_uiAverageNum = value;
+                if (m_apAverage != null) m_apAverage.AverageNum = value;
             }
         }
 
         public long TimeStamp
         {
             get { return m_lTimeStamp; }
+
+            set { m_lTimeStamp = value; }
         }
 
         public UInt16 Width
@@ -108,8 +125,21 @@ namespace BeamOnCL
             return (UInt16)0;
         }
 
+        public virtual void SetPixelColor(Int32 Adress, UInt16 uiColor)
+        {
+        }
+
+        public virtual void SetPixelColor(Point point, UInt16 uiColor)
+        {
+        }
+
         public virtual void SetImageDataArray(IntPtr Data, Color[] colorArray = null)
         {
+        }
+
+        public virtual UInt16 MaxColor
+        {
+            get { return (UInt16)0; }
         }
     }
 }

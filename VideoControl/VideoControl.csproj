@@ -42,6 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FormSetupRecord.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSetupRecord.Designer.cs">
+      <DependentUpon>FormSetupRecord.cs</DependentUpon>
+    </Compile>
     <Compile Include="PositionEventArgs.cs" />
     <Compile Include="Properties\Resource.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -59,6 +65,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="FormSetupRecord.resx">
+      <DependentUpon>FormSetupRecord.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
@@ -78,6 +87,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Setting-Running-Rabbit-icon1.png" />
+    <None Include="Resources\PropertyS.png" />
+    <None Include="Resources\1460041379_player_record.png" />
+    <None Include="Resources\1460382430_178_Download.png" />
     <Content Include="Resources\black-end-32.png" />
     <Content Include="Resources\black-fast-forward-32.png" />
     <Content Include="Resources\black-play-32.png" />

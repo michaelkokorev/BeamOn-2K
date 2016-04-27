@@ -30,6 +30,7 @@ namespace BeamOnCL
 
         double[] delta = new double[4];
         protected UInt16 m_lineProfWidth = 2;
+        protected UInt16 m_smoothProfPoints = 5;
 
         public Gaussian GaussianData
         {
@@ -61,6 +62,12 @@ namespace BeamOnCL
         {
             get { return m_lineProfWidth; }
             set { m_lineProfWidth = value; }
+        }
+
+        public UInt16 SmoothProfPoints
+        {
+            get { return m_smoothProfPoints; }
+            set { m_smoothProfPoints = value; }
         }
 
         public Point CrossPoint
@@ -236,6 +243,8 @@ namespace BeamOnCL
                         dot += sf;
                     }
 
+                    SmoothingProfile();
+
                     float f_Threshold = (float)((m_sMaxProfile - m_sMinProfile) * 0.2);
 
                     for (int i = 0; i < m_sDataProfile.Length; i++)
@@ -261,11 +270,29 @@ namespace BeamOnCL
             catch { }
         }
 
+        private void SmoothingProfile()
+        {
+            Double l_dSmoothData = 0;
+            Double l_dTmpData;
+
+            if ((m_smoothProfPoints > 1) && (m_smoothProfPoints < m_sDataProfile.Length))
+            {
+                for (int i = 0; i < m_smoothProfPoints; i++) l_dSmoothData += m_sDataProfile[i];
+
+                for (int i = 0; i < (m_sDataProfile.Length - m_smoothProfPoints); i++)
+                {
+                    l_dTmpData = m_sDataProfile[i];
+                    m_sDataProfile[i] = l_dSmoothData / (float)m_smoothProfPoints;
+                    l_dSmoothData += m_sDataProfile[i + m_smoothProfPoints] - l_dTmpData;
+                }
+            }
+        }
+
         protected Double GetPixelColor(SnapshotBase snapshot, PointF point)
         {
             return snapshot.GetPixelColor((int)Math.Floor(point.X) + (int)Math.Floor(point.Y) * (Int32)m_rArea.Width);
 
-//
+            //
             Double dColor = 0;
             Int32 iAdress = (int)Math.Floor(point.X) + (int)Math.Floor(point.Y) * (Int32)m_rArea.Width;
             double deltaSum = 0;

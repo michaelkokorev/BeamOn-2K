@@ -124,6 +124,9 @@
   <data name="black-stop-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\black-stop-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Setting-Running-Rabbit-icon1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Setting-Running-Rabbit-icon1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="black-rewind-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\black-rewind-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -133,10 +136,19 @@
   <data name="black-end-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\black-end-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="black-skip-to-start-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\black-skip-to-start-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="PropertyS" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PropertyS.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="1460041379_player_record" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\1460041379_player_record.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="black-repeat-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\black-repeat-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="black-skip-to-start-32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\black-skip-to-start-32.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="1460382430_178_Download" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\1460382430_178_Download.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

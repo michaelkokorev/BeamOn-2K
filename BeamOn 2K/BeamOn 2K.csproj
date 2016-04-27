@@ -203,6 +203,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CCDPositioning.ico" />
+    <None Include="Resources\%24this.Icon.ico" />
+    <None Include="Resources\printPreviewDialog.Icon.ico" />
     <None Include="Resources\black-repeat-32.png" />
     <None Include="Resources\black-end-32.png" />
     <None Include="Resources\black-fast-forward-32.png" />

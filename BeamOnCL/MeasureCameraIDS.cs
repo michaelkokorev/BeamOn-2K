@@ -5,6 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Drawing;
+using System.Threading;
 
 namespace BeamOnCL
 {
@@ -91,6 +92,7 @@ namespace BeamOnCL
                     // set framerate
                     statusRet = m_camera.Timing.Framerate.Set(range.Maximum);
 
+                    statusRet = m_camera.Timing.Exposure.Long.SetEnable(true);
 
                     m_camera.AutoFeatures.Software.Gain.SetEnable(false);
                     m_camera.AutoFeatures.Software.Shutter.SetEnable(false);
@@ -100,6 +102,9 @@ namespace BeamOnCL
 
                     this.ImageRectangle = MaxImageRectangle;
                     this.pixelFormat = pixelFormat;
+
+                    m_camera.IO.Gpio.SetConfiguration(uEye.Defines.IO.GPIO.One, uEye.Defines.IO.GPIOConfiguration.Output, uEye.Defines.IO.State.High);
+                    m_camera.IO.Gpio.SetConfiguration(uEye.Defines.IO.GPIO.Two, uEye.Defines.IO.GPIOConfiguration.Output, uEye.Defines.IO.State.High);
 
                     bRet = true;
                 }
@@ -484,39 +489,43 @@ namespace BeamOnCL
             set
             {
                 //if ((value < 4) && (m_iCameraFilter != value))
-                //if (value < 4)
-                //{
-                m_iCameraFilter = value;
-                //    if (m_camera.Parameters[PLCamera.LineSelector].IsWritable == true)
-                //    {
-                //        m_camera.Parameters[PLCamera.LineSelector].SetValue(PLCamera.LineSelector.Line3);
-                //        m_camera.Parameters[PLCamera.LineMode].SetValue(PLCamera.LineMode.Output);
-                //        m_camera.Parameters[PLCamera.LineSource].SetValue(PLCamera.LineSource.UserOutput2);
-                //        m_camera.Parameters[PLCamera.UserOutputSelector].SetValue(PLCamera.UserOutputSelector.UserOutput2);
-                //        m_camera.Parameters[PLCamera.LineInverter].SetValue(true);
-                //        m_camera.Parameters[PLCamera.UserOutputValue].SetValue(true);
+                if (value < 4)
+                {
+                    m_iCameraFilter = value;
+                    //if (m_camera.Parameters[PLCamera.LineSelector].IsWritable == true)
+                    //{
+                    //    m_camera.Parameters[PLCamera.LineSelector].SetValue(PLCamera.LineSelector.Line3);
+                    //    m_camera.Parameters[PLCamera.LineMode].SetValue(PLCamera.LineMode.Output);
+                    //    m_camera.Parameters[PLCamera.LineSource].SetValue(PLCamera.LineSource.UserOutput2);
+                    //    m_camera.Parameters[PLCamera.UserOutputSelector].SetValue(PLCamera.UserOutputSelector.UserOutput2);
+                    //    m_camera.Parameters[PLCamera.LineInverter].SetValue(true);
+                    //    m_camera.Parameters[PLCamera.UserOutputValue].SetValue(true);
 
-                //        m_camera.Parameters[PLCamera.LineSelector].SetValue(PLCamera.LineSelector.Line4);
-                //        m_camera.Parameters[PLCamera.LineMode].SetValue(PLCamera.LineMode.Output);
-                //        m_camera.Parameters[PLCamera.LineSource].SetValue(PLCamera.LineSource.UserOutput3);
-                //        m_camera.Parameters[PLCamera.UserOutputSelector].SetValue(PLCamera.UserOutputSelector.UserOutput3);
+                    //    m_camera.Parameters[PLCamera.LineSelector].SetValue(PLCamera.LineSelector.Line4);
+                    //    m_camera.Parameters[PLCamera.LineMode].SetValue(PLCamera.LineMode.Output);
+                    //    m_camera.Parameters[PLCamera.LineSource].SetValue(PLCamera.LineSource.UserOutput3);
+                    //    m_camera.Parameters[PLCamera.UserOutputSelector].SetValue(PLCamera.UserOutputSelector.UserOutput3);
 
-                //        Thread.Sleep(100);
-                //        for (int i = 0; i < m_iCameraFilter;/* + 1;*/ i++)
-                //        {
-                //            m_camera.Parameters[PLCamera.UserOutputValue].SetValue(true);
-                //            Thread.Sleep(50);
-                //            m_camera.Parameters[PLCamera.UserOutputValue].SetValue(false);
-                //            Thread.Sleep(100);
-                //        }
+                        m_camera.IO.Gpio.SetState(uEye.Defines.IO.GPIO.One, uEye.Defines.IO.State.Low);
 
-                //        m_camera.Parameters[PLCamera.LineSelector].SetValue(PLCamera.LineSelector.Line3);
-                //        m_camera.Parameters[PLCamera.LineMode].SetValue(PLCamera.LineMode.Output);
-                //        m_camera.Parameters[PLCamera.LineSource].SetValue(PLCamera.LineSource.UserOutput2);
-                //        m_camera.Parameters[PLCamera.UserOutputSelector].SetValue(PLCamera.UserOutputSelector.UserOutput2);
-                //        m_camera.Parameters[PLCamera.UserOutputValue].SetValue(false);
-                //    }
-                //}
+                        Thread.Sleep(100);
+                        for (int i = 0; i < m_iCameraFilter;/* + 1;*/ i++)
+                        {
+                            m_camera.IO.Gpio.SetState(uEye.Defines.IO.GPIO.Two, uEye.Defines.IO.State.Low);
+                            Thread.Sleep(50);
+                            m_camera.IO.Gpio.SetState(uEye.Defines.IO.GPIO.Two, uEye.Defines.IO.State.High);
+                            Thread.Sleep(100);
+                        }
+
+                        m_camera.IO.Gpio.SetState(uEye.Defines.IO.GPIO.One, uEye.Defines.IO.State.High);
+
+                        //m_camera.Parameters[PLCamera.LineSelector].SetValue(PLCamera.LineSelector.Line3);
+                        //m_camera.Parameters[PLCamera.LineMode].SetValue(PLCamera.LineMode.Output);
+                        //m_camera.Parameters[PLCamera.LineSource].SetValue(PLCamera.LineSource.UserOutput2);
+                        //m_camera.Parameters[PLCamera.UserOutputSelector].SetValue(PLCamera.UserOutputSelector.UserOutput2);
+                        //m_camera.Parameters[PLCamera.UserOutputValue].SetValue(false);
+                    //}
+                }
             }
         }
     }

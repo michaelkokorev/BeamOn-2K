@@ -13,79 +13,39 @@ namespace BeamOn_U3
     public partial class FormSetupFastMode : Form
     {
         SystemData m_sysData = SystemData.MyInstance;
+        VideoControl.VideoControl m_vc = null;
 
-        public FormSetupFastMode()
+        public FormSetupFastMode(VideoControl.VideoControl vc)
         {
             InitializeComponent();
+
+            m_vc = vc;
         }
 
         private void FormSetupFastMode_Load(object sender, EventArgs e)
         {
-            //File
-            if (DataExcel.CheckExcelInst() == true)
-            {
-                if (m_sysData.fastModeData.ftFile == FileType.ftLog)
-                    rbFileLog.Checked = true;
-                else if (m_sysData.fastModeData.ftFile == FileType.ftExcel)
-                    rbFileExcel.Checked = true;
-                else
-                    rbFileHtml.Checked = true;
-            }
-            else
-            {
-                rbFileExcel.Enabled = false;
-                if (m_sysData.fastModeData.ftFile == FileType.ftLog)
-                    rbFileLog.Checked = true;
-                else
-                    rbFileHtml.Checked = true;
-            }
-
-            txtFileName.Text = SetExtension(m_sysData.fastModeData.strFileName);
+            txtFileName.Text = m_vc.strFileName;
 
             //Settings
-            rbTime.Checked = (m_sysData.fastModeData.ltMode == LogType.ltTime);
-            rbPoints.Checked = (m_sysData.logData.ltMode == LogType.ltPoints);
+            rbTime.Checked = (m_vc.Type == VideoControl.VideoControl.RecordType.rtTime);
+            rbPoints.Checked = (m_vc.Type == VideoControl.VideoControl.RecordType.rtPoints);
 
             UpDateLogMode();
 
-            DurationHoursUpDown.Value = (UInt32)(m_sysData.fastModeData.LogDuration / 3600);
-            DurationMinutesUpDown.Value = (UInt32)((m_sysData.fastModeData.LogDuration - DurationHoursUpDown.Value * 3600) / 60);
-            DurationSecondsUpDown.Value = (UInt32)(m_sysData.fastModeData.LogDuration - DurationHoursUpDown.Value * 3600 - DurationMinutesUpDown.Value * 60);
+            DurationHoursUpDown.Value = (UInt32)(m_vc.RecordDuration / 3600);
+            DurationMinutesUpDown.Value = (UInt32)((m_vc.RecordDuration - DurationHoursUpDown.Value * 3600) / 60);
+            DurationSecondsUpDown.Value = (UInt32)(m_vc.RecordDuration - DurationHoursUpDown.Value * 3600 - DurationMinutesUpDown.Value * 60);
 
-            NumPointsUpDown.Value = m_sysData.logData.LogNumPoints;
+            NumPointsUpDown.Value = m_vc.RecordNumPoints;
         }
 
         private void btnBrowse_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveConfig = new SaveFileDialog();
 
-            if (rbFileLog.Checked == true)
-            {
-                saveConfig.Filter = "Fast Log files (*.fst)|*.fst";
-                saveConfig.FileName = "*.fst";
-                saveConfig.DefaultExt = "fst";
-            }
-            else if (rbFileExcel.Checked == true)
-            {
-                if (DataExcel.Version < 12)
-                {
-                    saveConfig.Filter = "Excel files (*.xls)|*.xls";
-                    saveConfig.FileName = "*.xls";
-                    saveConfig.DefaultExt = "xls";
-                }
-                else
-                {
-                    saveConfig.Filter = "Excel files (*.xlsx)|*.xlsx";
-                    saveConfig.FileName = "*.xlsx";
-                    saveConfig.DefaultExt = "xlsx";
-                }
-            }
-            else
-            {
-                saveConfig.Filter = "XML files (*.xml)|*.xml";
-                saveConfig.FileName = "*.xml";
-                saveConfig.DefaultExt = "xml";
-            }
+            saveConfig.Filter = "Fast Mode Data files (*.fst)|*.fst";
+            saveConfig.FileName = "*.fst";
+            saveConfig.DefaultExt = "fst";
 
             saveConfig.FilterIndex = 1;
 
@@ -94,7 +54,7 @@ namespace BeamOn_U3
             saveConfig.CheckFileExists = false;
             saveConfig.InitialDirectory = m_sysData.applicationData.m_strMyDataDir;
             saveConfig.RestoreDirectory = true;
-            saveConfig.Title = "Save Fast Mode Log File";
+            saveConfig.Title = "Save Fast Mode Data File";
             saveConfig.FileOk += new CancelEventHandler(saveConfig_FileOk);
 
             if (saveConfig.ShowDialog() == DialogResult.OK)
@@ -107,42 +67,12 @@ namespace BeamOn_U3
         {
             SaveFileDialog saveConfig = (SaveFileDialog)sender;
 
-            if (rbFileLog.Checked == true)
+            if (Path.GetExtension(saveConfig.FileName).CompareTo(".fst") != 0)
             {
-                if (Path.GetExtension(saveConfig.FileName).CompareTo(".fst") != 0)
-                {
-                    CustomMessageBox.Show("Extension of the Log File should be 'FST'",
-                                    "Save Fast Mode Log File", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CustomMessageBox.Show("Extension of the Fast Mode Data File should be 'FST'",
+                                "Save Fast Mode Data File", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
-                    e.Cancel = true;
-                }
-            }
-            else if (rbFileExcel.Checked == true)
-            {
-                if ((DataExcel.Version < 12) && (Path.GetExtension(saveConfig.FileName).CompareTo(".xls") != 0))
-                {
-                    CustomMessageBox.Show("Extension of the Fast Mode Log File should be 'XLS'",
-                                    "Save Fast Mode Log File", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-
-                    e.Cancel = true;
-                }
-                else if ((DataExcel.Version >= 12) && (Path.GetExtension(saveConfig.FileName).CompareTo(".xlsx") != 0))
-                {
-                    CustomMessageBox.Show("Extension of the Fast Mode Log File should be 'XLSX'",
-                                    "Save Fast Mode Log File", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-
-                    e.Cancel = true;
-                }
-            }
-            else
-            {
-                if (Path.GetExtension(saveConfig.FileName).CompareTo(".xml") != 0)
-                {
-                    CustomMessageBox.Show("Extension of the Fast Mode Log File should be 'XML'",
-                                    "Save Fast Mode Log File", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-
-                    e.Cancel = true;
-                }
+                e.Cancel = true;
             }
         }
 
@@ -157,18 +87,6 @@ namespace BeamOn_U3
             String strExt = "fst";
 
             if ((strFileName == null) && (strFileName == "")) return strFileName;
-
-            if (rbFileExcel.Checked == true)
-            {
-                if (DataExcel.Version < 12)
-                    strExt = "xls";
-                else if (DataExcel.Version >= 12)
-                    strExt = "xlsx";
-            }
-            else if (rbFileHtml.Checked == true)
-            {
-                strExt = "xml";
-            }
 
             return Path.ChangeExtension(strFileName, strExt);
         }
@@ -188,8 +106,8 @@ namespace BeamOn_U3
             btnOK.DialogResult = DialogResult.None;
             if (txtFileName.Text == "")
             {
-                CustomMessageBox.Show("Path on the Log file not defined",
-                                "Setup Log Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CustomMessageBox.Show("Path on the Fast Mode Data file not defined",
+                                "Setup Fast Mode Data Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
                 return;
             }
@@ -212,7 +130,7 @@ namespace BeamOn_U3
                     else
                     {
                         CustomMessageBox.Show("The file name is invalid",
-                                        "Setup Fast Mode Log Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                                        "Setup Fast Mode Data Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
                         return;
                     }
@@ -220,7 +138,7 @@ namespace BeamOn_U3
                 else
                 {
                     CustomMessageBox.Show("The file name is invalid",
-                                    "Setup Fast Mode Log Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                                    "Setup Fast Mode Data Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
                     return;
                 }
@@ -239,7 +157,7 @@ namespace BeamOn_U3
                 catch //(DirectoryNotFoundException ex)
                 {
                     CustomMessageBox.Show("The specified path is invalid",
-                                    "Setup Fast Mode Log Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                                    "Setup Fast Mode Data Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
                     return;
                 }
@@ -248,27 +166,19 @@ namespace BeamOn_U3
             if ((rbTime.Checked == true) && ((Decimal.ToUInt32(DurationHoursUpDown.Value) * 3600 + Decimal.ToUInt32(DurationMinutesUpDown.Value) * 60 + Decimal.ToUInt32(DurationSecondsUpDown.Value)) == 0))
             {
                 CustomMessageBox.Show("Duration time must be bigger than '0'",
-                                "Setup Fast Mode Log Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                                "Setup Fast Mode Data Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
                 return;
             }
 
-            //File
-            if (rbFileLog.Checked == true)
-                m_sysData.fastModeData.ftFile = FileType.ftLog;
-            else if (rbFileExcel.Checked == true)
-                m_sysData.fastModeData.ftFile = FileType.ftExcel;
-            else
-                m_sysData.fastModeData.ftFile = FileType.ftXML;
-
-            m_sysData.fastModeData.strFileName = txtFileName.Text;
+            m_vc.strFileName = txtFileName.Text;
 
             //Settings
-            m_sysData.logData.ltMode = (rbTime.Checked == true) ? LogType.ltTime : LogType.ltPoints;
+            m_vc.Type = (rbTime.Checked == true) ? VideoControl.VideoControl.RecordType.rtTime : VideoControl.VideoControl.RecordType.rtPoints;
 
-            m_sysData.fastModeData.LogDuration = Decimal.ToUInt32(DurationHoursUpDown.Value) * 3600 + Decimal.ToUInt32(DurationMinutesUpDown.Value) * 60 + Decimal.ToUInt32(DurationSecondsUpDown.Value);
+            m_vc.RecordDuration = Decimal.ToUInt32(DurationHoursUpDown.Value) * 3600 + Decimal.ToUInt32(DurationMinutesUpDown.Value) * 60 + Decimal.ToUInt32(DurationSecondsUpDown.Value);
 
-            m_sysData.fastModeData.LogNumPoints = Decimal.ToUInt32(NumPointsUpDown.Value);
+            m_vc.RecordNumPoints = Decimal.ToUInt32(NumPointsUpDown.Value);
 
             this.DialogResult = DialogResult.OK;
         }

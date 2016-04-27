@@ -11,6 +11,9 @@ namespace BeamOnCL
         const float SCALE_DIV = 8f;
         const float MAX_POWER_OFFSET = 0.05f;
         const float MIN_POWER = 0.8f;
+        const UInt16 MSHIFT = 17;	//10	//15;
+
+        int m_iSmooth = 10;
 
         SumProfile m_dProfileHorizontal = null;
         SumProfile m_dProfileVertical = null;
@@ -19,11 +22,14 @@ namespace BeamOnCL
         long[] tmpMax = null;
 
         double m_dProfile45Max = double.MinValue;
+        float m_fCorrectROI = 2.5f;
 
         double m_CoefAlgoritmVert = 1.5f;
         double m_CoefAlgoritmHor = 1.5f;
 
         float m_fLevel = (float)13.5;
+
+        Boolean m_bEnableNoiseCleaning = false;
 
         Rectangle m_AreaRect;
         Area m_WorkingAreaRect;
@@ -44,6 +50,12 @@ namespace BeamOnCL
         public Rectangle WorkingArea
         {
             get { return m_WorkingAreaRect; }
+        }
+
+        public Boolean NoseCleaning
+        {
+            get { return m_bEnableNoiseCleaning; }
+            set { m_bEnableNoiseCleaning = value; }
         }
 
         public Single ClipLevel
@@ -82,6 +94,24 @@ namespace BeamOnCL
         }
 
         public void GetData(SnapshotBase snapshot)
+        {
+            if (m_bEnableNoiseCleaning)
+            {
+                GetData(snapshot, false);
+
+                CreateEllipse(snapshot);
+
+                GetData(snapshot, true);
+            }
+            else
+                GetData(snapshot, false);
+
+            CreateEllipse(snapshot);
+
+            m_fCurrentAreaIntensity = GetAreaIntensity(snapshot, ref m_lCurrentAreaPoins);
+        }
+
+        public void GetData(SnapshotBase snapshot, Boolean bEllipse)
         {
             Boolean bFlagFirst = false;
             float fLimitDeltaY;
@@ -152,9 +182,7 @@ namespace BeamOnCL
                 }
             }
 
-            Create2(snapshot);
-
-            m_fCurrentAreaIntensity = GetAreaIntensity(snapshot, ref m_lCurrentAreaPoins);
+            if (m_bEnableNoiseCleaning) ClearNoise(snapshot, bEllipse);
         }
 
         public void Create(SnapshotBase snapshot)
@@ -251,7 +279,7 @@ namespace BeamOnCL
             m_dProfileVertical.MaxProfile = l_dProfileVerticalMax;
         }
 
-        public void Create2(SnapshotBase snapshot)
+        public void CreateEllipse(SnapshotBase snapshot)
         {
             double l_dProfile45Min = double.MaxValue;
             int l_iProfile45Peak = 0;
@@ -321,8 +349,8 @@ namespace BeamOnCL
 
             if ((Math.Abs(Y) < 0.0001 * X) && (Math.Abs(Z) < 0.0001 * X))
             {
-                //		m_ElipseArea.SetMajorRadius(fWidthV45 / 2.0);
-                //		m_ElipseArea.SetMinorRadius(m_Area.GetMajorRadius());
+                //		m_EllipseArea.SetMajorRadius(fWidthV45 / 2.0);
+                //		m_EllipseArea.SetMinorRadius(m_Area.GetMajorRadius());
                 Co = 1;
                 Si = 0;
             }
@@ -622,6 +650,194 @@ namespace BeamOnCL
             //}
 
             return (f_Right - f_Left);
+        }
+
+        void ClearNoise(SnapshotBase snapshot, Boolean bEllipse)
+        {
+            Rectangle l_cRect = m_EllipseArea;
+            //Rectangle l_cRect = m_WorkingAreaRect;
+            long lColor, nCount, lColorSmooth;
+            UInt16 wNewColor, wCurrentColor;
+            int i, j, k;
+            int iSmoothShift = m_iSmooth * snapshot.Width;
+
+            float fLeft = 0, fRight = 0;
+            float fTop = 0, fBottom = 0;
+            int iLeft = 0, iRight = 0;
+            int iTop = 0, iBottom = 0;
+
+            if (bEllipse == true)
+            {
+                m_EllipseArea.MajorRadius = m_EllipseArea.MajorRadius * m_fCorrectROI;
+                m_EllipseArea.MinorRadius = m_EllipseArea.MinorRadius * m_fCorrectROI;
+
+                m_EllipseArea.GetMaxX(ref fLeft, ref fRight);
+                iLeft = (int)Math.Floor(fLeft);
+                iRight = (int)Math.Ceiling(fRight);
+
+                if (iLeft < MSHIFT) iLeft = MSHIFT;
+                if (iLeft > (snapshot.Width - MSHIFT)) iLeft = snapshot.Width - MSHIFT;
+                if (iRight < MSHIFT) iRight = MSHIFT;
+                if (iRight > (snapshot.Width - MSHIFT)) iRight = snapshot.Width - MSHIFT;
+                //13.07.15
+                if (iLeft < l_cRect.Left) iLeft = l_cRect.Left;
+                if (iRight > l_cRect.Right) iRight = l_cRect.Right;
+
+                //30.06.15
+                for (i = 0; i < snapshot.Width; i++)
+                //		for(i = MSHIFT; i < (snapshot.Width - MSHIFT); i++)
+                {
+                    lColor = 0;
+                    nCount = 0;
+                    wNewColor = 0;
+
+                    if ((i > iLeft) && (i < iRight))
+                    {
+                        m_EllipseArea.GetCrossY((float)i, ref fBottom, ref fTop);
+                        iBottom = (int)Math.Floor(fBottom);
+                        iTop = (int)Math.Ceiling(fTop);
+
+                        if (iBottom < MSHIFT) iBottom = MSHIFT;
+                        if (iBottom > (snapshot.Height - MSHIFT)) iBottom = snapshot.Height - MSHIFT;
+                        if (iTop < MSHIFT) iTop = MSHIFT;
+                        if (iTop > (snapshot.Height - MSHIFT)) iTop = snapshot.Height - MSHIFT;
+                        //13.07.15
+                        if (iBottom < l_cRect.Top) iBottom = l_cRect.Top;
+                        if (iTop > l_cRect.Bottom) iTop = l_cRect.Bottom;
+
+
+                        for (j = MSHIFT, k = MSHIFT * snapshot.Width + i, lColorSmooth = 0; j < (MSHIFT + m_iSmooth); j++, k += snapshot.Width)
+                            lColorSmooth += snapshot.GetPixelColor(k);
+
+                        for (j = MSHIFT, k = MSHIFT * snapshot.Width + i; (j + m_iSmooth) < iBottom; j++, k += snapshot.Width)
+                        {
+                            wCurrentColor = (UInt16)Math.Ceiling(lColorSmooth / (float)m_iSmooth);
+                            if (wNewColor < wCurrentColor) wNewColor = wCurrentColor;
+                            lColor += wCurrentColor;
+                            nCount++;
+
+                            lColorSmooth -= snapshot.GetPixelColor(k);
+                            lColorSmooth += snapshot.GetPixelColor(k + iSmoothShift);
+                        }
+
+                        for (j = iTop, k = iTop * snapshot.Width + i, lColorSmooth = 0; (j < (snapshot.Height - m_iSmooth - MSHIFT)) && (j < (iTop + m_iSmooth)); j++, k += snapshot.Width)
+                            lColorSmooth += snapshot.GetPixelColor(j * snapshot.Width + i);
+
+                        for (j = iTop, k = iTop * snapshot.Width + i; (j + m_iSmooth) < (snapshot.Height - MSHIFT); j++, k += snapshot.Width)
+                        {
+                            wCurrentColor = (UInt16)Math.Ceiling(lColorSmooth / (float)m_iSmooth);
+                            if (wNewColor < wCurrentColor) wNewColor = wCurrentColor;
+                            lColor += wCurrentColor;
+                            nCount++;
+
+                            lColorSmooth -= snapshot.GetPixelColor(k);
+                            lColorSmooth += snapshot.GetPixelColor(k + iSmoothShift);
+                        }
+                    }
+                    else
+                    {
+                        for (j = MSHIFT, lColorSmooth = 0, k = MSHIFT * snapshot.Width + i; j < (MSHIFT + m_iSmooth); j++, k += snapshot.Width) lColorSmooth += snapshot.GetPixelColor(k);
+
+                        for (j = MSHIFT, k = MSHIFT * snapshot.Width + i; (j + m_iSmooth) < (snapshot.Height - MSHIFT); j++, k += snapshot.Width)
+                        {
+                            wCurrentColor = (UInt16)Math.Floor(lColorSmooth / (float)m_iSmooth);
+                            if (wNewColor < wCurrentColor) wNewColor = wCurrentColor;
+                            lColor += wCurrentColor;
+                            nCount++;
+
+                            lColorSmooth -= snapshot.GetPixelColor(k);
+                            lColorSmooth += snapshot.GetPixelColor(k + iSmoothShift);
+                        }
+                    }
+
+                    wNewColor = (nCount > 0) ? (UInt16)(lColor / nCount) : (UInt16)0;
+
+                    for (j = 0, k = i; j < snapshot.Height; j++, k += snapshot.Width)
+                    {
+                        wCurrentColor = snapshot.GetPixelColor(k);
+                        if (wCurrentColor < snapshot.MaxColor) snapshot.SetPixelColor(k, (wCurrentColor > wNewColor) ? (UInt16)(wCurrentColor - wNewColor) : (UInt16)0);
+                    }
+                }
+            }
+            else
+            {
+                if (l_cRect.Left < MSHIFT) l_cRect.X = MSHIFT;
+                if (l_cRect.Right > (snapshot.Width - MSHIFT)) l_cRect.Width = snapshot.Width - MSHIFT - l_cRect.X;
+                if (l_cRect.Top < MSHIFT) l_cRect.Y = MSHIFT;
+                if (l_cRect.Bottom > (snapshot.Height - MSHIFT)) l_cRect.Height = snapshot.Height - MSHIFT - l_cRect.Y;
+
+                //19.06.14
+                if (l_cRect.Width < (snapshot.Width - 5 - 2 * MSHIFT))
+                {
+                    for (i = MSHIFT; i < snapshot.Width - MSHIFT; i++)
+                    {
+                        lColor = 0;
+                        nCount = 0;
+                        wNewColor = 0;
+
+                        if ((i > l_cRect.Left) && (i < l_cRect.Right))
+                        {
+                            for (j = MSHIFT, lColorSmooth = 0, k = MSHIFT * snapshot.Width + i; j < (MSHIFT + m_iSmooth); j++, k += snapshot.Width)
+                            {
+                                lColorSmooth += snapshot.GetPixelColor(k);
+                            }
+
+                            for (j = MSHIFT, k = MSHIFT * snapshot.Width + i; (j + m_iSmooth) < l_cRect.Top; j++, k += snapshot.Width)
+                            {
+                                wCurrentColor = (UInt16)Math.Ceiling(lColorSmooth / (float)m_iSmooth);
+                                if (wNewColor < wCurrentColor) wNewColor = wCurrentColor;
+                                lColor += wCurrentColor;
+                                nCount++;
+
+                                lColorSmooth -= snapshot.GetPixelColor(k);
+                                lColorSmooth += snapshot.GetPixelColor(k + iSmoothShift);
+                            }
+
+                            for (j = l_cRect.Bottom, lColorSmooth = 0, k = l_cRect.Bottom * snapshot.Width + i; (j < (snapshot.Height - m_iSmooth - MSHIFT)) && (j < (l_cRect.Bottom + m_iSmooth)); j++, k += snapshot.Width)
+                            {
+                                lColorSmooth += snapshot.GetPixelColor(k);
+                            }
+
+                            for (j = l_cRect.Bottom, k = l_cRect.Bottom * snapshot.Width + i; (j + m_iSmooth) < snapshot.Height - MSHIFT; j++, k += snapshot.Width)
+                            {
+                                wCurrentColor = (UInt16)Math.Ceiling(lColorSmooth / (float)m_iSmooth);
+                                if (wNewColor < wCurrentColor) wNewColor = wCurrentColor;
+                                lColor += wCurrentColor;
+                                nCount++;
+
+                                lColorSmooth -= snapshot.GetPixelColor(k);
+                                lColorSmooth += snapshot.GetPixelColor(k + iSmoothShift);
+                            }
+                        }
+                        else
+                        {
+                            for (j = MSHIFT, lColorSmooth = 0, k = MSHIFT * snapshot.Width + i; j < (m_iSmooth + MSHIFT); j++, k += snapshot.Width)
+                            {
+                                lColorSmooth += snapshot.GetPixelColor(k);
+                            }
+
+                            for (j = MSHIFT, k = MSHIFT * snapshot.Width + i; (j + m_iSmooth) < (snapshot.Height - MSHIFT); j++, k += snapshot.Width)
+                            {
+                                wCurrentColor = (UInt16)Math.Ceiling(lColorSmooth / (float)m_iSmooth);
+                                if (wNewColor < wCurrentColor) wNewColor = wCurrentColor;
+                                lColor += wCurrentColor;
+                                nCount++;
+
+                                lColorSmooth -= snapshot.GetPixelColor(k);
+                                lColorSmooth += snapshot.GetPixelColor(k + iSmoothShift);
+                            }
+                        }
+
+                        wNewColor = (nCount > 0) ? (UInt16)(lColor / nCount) : (UInt16)0;
+
+                        for (j = 0, k = i; j < snapshot.Height; j++, k += snapshot.Width)
+                        {
+                            wCurrentColor = snapshot.GetPixelColor(k);
+                            if (wCurrentColor < snapshot.MaxColor) snapshot.SetPixelColor(k, (wCurrentColor > wNewColor) ? (UInt16)(wCurrentColor - wNewColor) : (UInt16)0);
+                        }
+                    }
+                }
+            }
         }
 
         RectangleF SerchRectangle(SnapshotBase snapshot)

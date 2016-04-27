@@ -76,7 +76,7 @@ namespace PaletteImage
         public PaletteImage()
         {
             ResourceManager resourceManager = new ResourceManager("PaletteImage.Properties.Resources", System.Reflection.Assembly.GetExecutingAssembly());
-
+#if CLASIC_PALETTE
             Byte[] buffer = (Byte[])resourceManager.GetObject("Pallete");
 
             resColor = new Color[buffer.Length / 3];
@@ -85,7 +85,20 @@ namespace PaletteImage
             {
                 resColor[i] = Color.FromArgb(buffer[i * 3 + 2], buffer[i * 3 + 1], buffer[i * 3]);
             }
+#else
+            resColor = new Color[256];
 
+            for (int i = 0; i < 64; i++)
+            {
+                resColor[i] = Color.FromArgb(0, 0, i * 4);
+
+                resColor[i + 64] = Color.FromArgb(0, i * 4, 255);
+
+                resColor[i + 128] = Color.FromArgb(i * 4, 255, (i < 32) ? 255 - i * 8 : 0);
+
+                resColor[i + 192] = Color.FromArgb(255, (i < 32) ? 255 - i * 8 : 0, i * 4);
+            }
+#endif
             ChangePixelFormat();
         }
 
@@ -154,8 +167,11 @@ namespace PaletteImage
 
             l_dPaletteStepStep = (resColor.Length - 1) / (float)m_color.Length;
 
+#if CLASIC_PALETTE
             for (int i = 0; i < m_color.Length; i++) m_color[m_color.Length - i - 1] = resColor[(int)Math.Ceiling(i * l_dPaletteStepStep)];
-
+#else
+            for (int i = 0; i < m_color.Length; i++) m_color[i] = resColor[(int)Math.Ceiling(i * l_dPaletteStepStep)];
+#endif
             for (int i = (m_pixelFormat == PixelFormat.Format8bppIndexed) ? 252 : 4032; i < m_color.Length; i++) m_color[i] = Color.FromArgb(255, 255, 255);
 
             m_sPaletteLevelUp = 100f;
